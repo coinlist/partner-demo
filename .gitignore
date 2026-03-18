@@ -58,3 +58,5 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 .output.txt
+
+/temp
