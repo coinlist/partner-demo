@@ -1,10 +1,20 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import type { OAuthSession, ServerConfig } from "coinlist-react/server";
-import { createCoinListServer } from "coinlist-react/server";
+import type { OAuthSession } from "coinlist-react/server";
+import {
+  ClientId,
+  ClientSecret,
+  createCoinListServer,
+  RedirectUri,
+} from "coinlist-react/server";
 
 const COOKIE_NAME = "coinlist_session";
+
+function requiredEnv(name: string, value: string | undefined): string {
+  if (typeof value === "string" && value.length > 0) return value;
+  throw new Error(`Missing required env var: ${name}`);
+}
 
 function cookieOptions() {
   const isProd = process.env.NODE_ENV === "production";
@@ -67,17 +77,40 @@ const sessionStore = {
         value: session.accessToken.value,
         expiresAt: session.accessToken.expiresAt.toISOString(),
       },
-      ...(session.refreshToken ? { refreshToken: session.refreshToken as unknown as string } : {}),
+      ...(session.refreshToken
+        ? { refreshToken: session.refreshToken as unknown as string }
+        : {}),
     };
 
     cookieStore.set(COOKIE_NAME, JSON.stringify(stored), cookieOptions());
   },
 };
 
-export const coinlistServer = createCoinListServer({
-  clientId: process.env.COINLIST_CLIENT_ID! as unknown as ServerConfig["clientId"],
-  clientSecret: process.env.COINLIST_CLIENT_SECRET! as unknown as ServerConfig["clientSecret"],
-  redirectUri: process.env.COINLIST_REDIRECT_URI! as unknown as ServerConfig["redirectUri"],
-  sessionStore,
-});
+let cached: ReturnType<typeof createCoinListServer> | null = null;
 
+export function getCoinListServer() {
+  if (cached) return cached;
+
+  cached = createCoinListServer({
+    clientId: ClientId(
+      requiredEnv(
+        "COINLIST_CLIENT_ID (or NEXT_PUBLIC_COINLIST_CLIENT_ID)",
+        process.env.COINLIST_CLIENT_ID ??
+          process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
+      ),
+    ),
+    clientSecret: ClientSecret(
+      requiredEnv("COINLIST_CLIENT_SECRET", process.env.COINLIST_CLIENT_SECRET),
+    ),
+    redirectUri: RedirectUri(
+      requiredEnv(
+        "COINLIST_REDIRECT_URI (or NEXT_PUBLIC_COINLIST_REDIRECT_URI)",
+        process.env.COINLIST_REDIRECT_URI ??
+          process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
+      ),
+    ),
+    sessionStore,
+  });
+
+  return cached;
+}

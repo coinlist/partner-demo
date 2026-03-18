@@ -1,9 +1,8 @@
+import { getCoinListServer } from "@/lib/coinlist-server";
 import { NextResponse } from "next/server";
 
-import { coinlistServer } from "@/lib/coinlist-server";
-
 export async function GET() {
-  const token = await coinlistServer.accessToken();
+  const token = await getCoinListServer().accessToken();
   if (token == null) {
     return new NextResponse(null, { status: 204 });
   }
@@ -13,4 +12,3 @@ export async function GET() {
     expiresAt: token.expiresAt.toISOString(),
   });
 }
-
