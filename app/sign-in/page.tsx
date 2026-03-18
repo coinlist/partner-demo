@@ -1,3 +1,5 @@
+"use client";
+
 import { CoinListSignInCard } from "coinlist-react/client/components";
 
 export default function SignInPage() {
@@ -9,4 +11,3 @@ export default function SignInPage() {
     </div>
   );
 }
-
