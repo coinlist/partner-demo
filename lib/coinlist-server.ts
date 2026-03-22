@@ -1,11 +1,12 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import type { OAuthSession } from "coinlist-react/server";
+import type { CoinListServer, OAuthSession } from "coinlist-react/server";
 import {
   ClientId,
   ClientSecret,
   createCoinListServer,
+  OAuthRefreshToken,
   RedirectUri,
 } from "coinlist-react/server";
 
@@ -30,8 +31,6 @@ type StoredSession = {
   accessToken: { value: string; expiresAt: string };
   refreshToken?: string;
 };
-
-type OAuthRefreshToken = NonNullable<OAuthSession["refreshToken"]>;
 
 const sessionStore = {
   async getSession(): Promise<OAuthSession | null> {
@@ -60,7 +59,7 @@ const sessionStore = {
     return {
       accessToken: { value: maybe.accessToken.value, expiresAt },
       ...(typeof maybe.refreshToken === "string" && maybe.refreshToken !== ""
-        ? { refreshToken: maybe.refreshToken as unknown as OAuthRefreshToken }
+        ? { refreshToken: OAuthRefreshToken(maybe.refreshToken) }
         : {}),
     };
   },
@@ -86,12 +85,8 @@ const sessionStore = {
   },
 };
 
-let cached: ReturnType<typeof createCoinListServer> | null = null;
-
-export function getCoinListServer() {
-  if (cached) return cached;
-
-  cached = createCoinListServer({
+export function getCoinListServer(): CoinListServer {
+  return createCoinListServer({
     clientId: ClientId(
       requiredEnv(
         "COINLIST_CLIENT_ID",
@@ -109,6 +104,4 @@ export function getCoinListServer() {
     ),
     sessionStore,
   });
-
-  return cached;
 }
