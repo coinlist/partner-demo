@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { CoinListServer } from "coinlist-react/server";
+import { AuthorizationCode, CodeVerifier } from "coinlist-react/server";
 
 import { getCoinListServer } from "@/lib/coinlist-server";
 
@@ -17,8 +17,8 @@ export async function POST(req: Request) {
   }
 
   await getCoinListServer().completeOAuth(
-    code as Parameters<CoinListServer["completeOAuth"]>[0],
-    codeVerifier as Parameters<CoinListServer["completeOAuth"]>[1],
+    AuthorizationCode(code),
+    CodeVerifier(codeVerifier),
   );
 
   return NextResponse.json({ ok: true });
