@@ -93,7 +93,10 @@ export function getCoinListServer() {
 
   cached = createCoinListServer({
     clientId: ClientId(
-      requiredEnv("COINLIST_CLIENT_ID", process.env.COINLIST_CLIENT_ID),
+      requiredEnv(
+        "COINLIST_CLIENT_ID",
+        process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
+      ),
     ),
     clientSecret: ClientSecret(
       requiredEnv("COINLIST_CLIENT_SECRET", process.env.COINLIST_CLIENT_SECRET),
