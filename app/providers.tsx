@@ -10,15 +10,18 @@ function requiredPublicEnv(name: string, value: string | undefined): string {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const config: ClientConfig = {
-    clientId: ClientId(requiredPublicEnv(
-      "NEXT_PUBLIC_COINLIST_CLIENT_ID",
-      process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
-    )),
-    redirectUri:
-      RedirectUri(requiredPublicEnv(
+    clientId: ClientId(
+      requiredPublicEnv(
+        "NEXT_PUBLIC_COINLIST_CLIENT_ID",
+        process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
+      ),
+    ),
+    redirectUri: RedirectUri(
+      requiredPublicEnv(
         "NEXT_PUBLIC_COINLIST_REDIRECT_URI",
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
-      )),
+      ),
+    ),
     getAccessToken: async () => {
       const res = await fetch("/api/coinlist/access-token", {
         credentials: "include",
@@ -31,14 +34,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         expiresAt: new Date(data.expiresAt),
       };
     },
+    baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   };
 
-  return (
-    <CoinListProvider
-      config={config}
-    >
-      {children}
-    </CoinListProvider>
-  );
+  return <CoinListProvider config={config}>{children}</CoinListProvider>;
 }
-

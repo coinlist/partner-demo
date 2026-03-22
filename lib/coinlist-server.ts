@@ -103,5 +103,6 @@ export function getCoinListServer(): CoinListServer {
       ),
     ),
     sessionStore,
+    baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   });
 }
