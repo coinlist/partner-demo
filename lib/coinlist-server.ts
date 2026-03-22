@@ -93,20 +93,15 @@ export function getCoinListServer() {
 
   cached = createCoinListServer({
     clientId: ClientId(
-      requiredEnv(
-        "COINLIST_CLIENT_ID (or NEXT_PUBLIC_COINLIST_CLIENT_ID)",
-        process.env.COINLIST_CLIENT_ID ??
-          process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
-      ),
+      requiredEnv("COINLIST_CLIENT_ID", process.env.COINLIST_CLIENT_ID),
     ),
     clientSecret: ClientSecret(
       requiredEnv("COINLIST_CLIENT_SECRET", process.env.COINLIST_CLIENT_SECRET),
     ),
     redirectUri: RedirectUri(
       requiredEnv(
-        "COINLIST_REDIRECT_URI (or NEXT_PUBLIC_COINLIST_REDIRECT_URI)",
-        process.env.COINLIST_REDIRECT_URI ??
-          process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
+        "NEXT_PUBLIC_COINLIST_REDIRECT_URI",
+        process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),
     ),
     sessionStore,
