@@ -1,23 +1,19 @@
 "use client";
 
+import { requiredEnv } from "@/lib/env";
 import { ClientId, CoinListProvider, RedirectUri } from "coinlist-react";
 import type { ClientConfig } from "coinlist-react";
-
-function requiredPublicEnv(name: string, value: string | undefined): string {
-  if (typeof value === "string" && value.length > 0) return value;
-  throw new Error(`Missing required public env var: ${name}`);
-}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const config: ClientConfig = {
     clientId: ClientId(
-      requiredPublicEnv(
+      requiredEnv(
         "NEXT_PUBLIC_COINLIST_CLIENT_ID",
         process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
       ),
     ),
     redirectUri: RedirectUri(
-      requiredPublicEnv(
+      requiredEnv(
         "NEXT_PUBLIC_COINLIST_REDIRECT_URI",
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),

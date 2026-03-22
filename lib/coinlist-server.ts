@@ -1,89 +1,14 @@
 import "server-only";
 
-import { cookies } from "next/headers";
-import type { CoinListServer, OAuthSession } from "coinlist-react/server";
+import type { CoinListServer } from "coinlist-react/server";
 import {
   ClientId,
   ClientSecret,
   createCoinListServer,
-  OAuthRefreshToken,
   RedirectUri,
 } from "coinlist-react/server";
-
-const COOKIE_NAME = "coinlist_session";
-
-function requiredEnv(name: string, value: string | undefined): string {
-  if (typeof value === "string" && value.length > 0) return value;
-  throw new Error(`Missing required env var: ${name}`);
-}
-
-function cookieOptions() {
-  const isProd = process.env.NODE_ENV === "production";
-  return {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax" as const,
-    path: "/",
-  };
-}
-
-type StoredSession = {
-  accessToken: { value: string; expiresAt: string };
-  refreshToken?: string;
-};
-
-const sessionStore = {
-  async getSession(): Promise<OAuthSession | null> {
-    const raw = (await cookies()).get(COOKIE_NAME)?.value;
-    if (!raw) return null;
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      return null;
-    }
-
-    if (typeof parsed !== "object" || parsed == null) return null;
-    const maybe = parsed as Partial<StoredSession>;
-    if (
-      typeof maybe.accessToken?.value !== "string" ||
-      typeof maybe.accessToken?.expiresAt !== "string"
-    ) {
-      return null;
-    }
-
-    const expiresAt = new Date(maybe.accessToken.expiresAt);
-    if (Number.isNaN(expiresAt.getTime())) return null;
-
-    return {
-      accessToken: { value: maybe.accessToken.value, expiresAt },
-      ...(typeof maybe.refreshToken === "string" && maybe.refreshToken !== ""
-        ? { refreshToken: OAuthRefreshToken(maybe.refreshToken) }
-        : {}),
-    };
-  },
-
-  async setSession(session: OAuthSession | null): Promise<void> {
-    const cookieStore = await cookies();
-    if (session == null) {
-      cookieStore.delete(COOKIE_NAME);
-      return;
-    }
-
-    const stored: StoredSession = {
-      accessToken: {
-        value: session.accessToken.value,
-        expiresAt: session.accessToken.expiresAt.toISOString(),
-      },
-      ...(session.refreshToken
-        ? { refreshToken: session.refreshToken as unknown as string }
-        : {}),
-    };
-
-    cookieStore.set(COOKIE_NAME, JSON.stringify(stored), cookieOptions());
-  },
-};
+import { sessionCookiesStore } from "./session-store";
+import { requiredEnv } from "./env";
 
 export function getCoinListServer(): CoinListServer {
   return createCoinListServer({
@@ -102,7 +27,7 @@ export function getCoinListServer(): CoinListServer {
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),
     ),
-    sessionStore,
+    sessionStore: sessionCookiesStore,
     baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   });
 }
