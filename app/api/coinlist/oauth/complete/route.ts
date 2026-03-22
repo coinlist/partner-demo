@@ -18,8 +18,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
+  const res = NextResponse.json({ ok: true });
+
   try {
-    await getCoinListServer().completeOAuth(
+    await getCoinListServer(res).completeOAuth(
       AuthorizationCode(code),
       CodeVerifier(codeVerifier),
     );
@@ -41,5 +43,5 @@ export async function POST(req: Request) {
     throw err;
   }
 
-  return NextResponse.json({ ok: true });
+  return res;
 }

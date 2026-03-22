@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { NextResponse } from "next/server";
 import type { CoinListServer } from "coinlist-react/server";
 import {
   ClientId,
@@ -7,10 +8,10 @@ import {
   createCoinListServer,
   RedirectUri,
 } from "coinlist-react/server";
-import { sessionCookiesStore } from "./session-store";
+import { createSessionCookiesStore } from "./session-store";
 import { requiredEnv } from "./env";
 
-export function getCoinListServer(): CoinListServer {
+export function getCoinListServer(outgoingResponse?: NextResponse): CoinListServer {
   return createCoinListServer({
     clientId: ClientId(
       requiredEnv(
@@ -27,7 +28,7 @@ export function getCoinListServer(): CoinListServer {
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),
     ),
-    sessionStore: sessionCookiesStore,
+    sessionStore: createSessionCookiesStore(outgoingResponse),
     baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   });
 }
