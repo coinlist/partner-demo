@@ -2,9 +2,9 @@
 
 import { useCoinList } from "coinlist-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 
-export default function CoinListCallbackPage() {
+function CoinListCallbackContent() {
   const { coinlist } = useCoinList();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function CoinListCallbackPage() {
     if (done.current) return;
 
     if (searchParams.get("error")) {
-      router.replace("/sign-in?error=coinlist_denied");
+      router.replace("/?error=coinlist_denied");
       return;
     }
 
@@ -22,7 +22,7 @@ export default function CoinListCallbackPage() {
 
     const res = coinlist.completeOAuth();
     if (res.type === "error") {
-      router.replace("/sign-in?error=coinlist_oauth");
+      router.replace("/?error=coinlist_oauth");
       return;
     }
 
@@ -40,7 +40,7 @@ export default function CoinListCallbackPage() {
 
       if (!complete.ok) {
         done.current = false;
-        router.replace("/sign-in?error=coinlist_complete_failed");
+        router.replace("/?error=coinlist_complete_failed");
         return;
       }
 
@@ -50,5 +50,13 @@ export default function CoinListCallbackPage() {
   }, [coinlist, searchParams, router]);
 
   return <p>Completing sign-in…</p>;
+}
+
+export default function CoinListCallbackPage() {
+  return (
+    <Suspense fallback={<p>Completing sign-in…</p>}>
+      <CoinListCallbackContent />
+    </Suspense>
+  );
 }
 
