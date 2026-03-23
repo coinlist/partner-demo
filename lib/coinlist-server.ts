@@ -11,7 +11,9 @@ import {
 import { createSessionCookiesStore } from "./session-store";
 import { requiredEnv } from "./env";
 
-export function getCoinListServer(outgoingResponse?: NextResponse): CoinListServer {
+export function getCoinListServer(
+  outgoingResponse?: NextResponse,
+): CoinListServer {
   return createCoinListServer({
     clientId: ClientId(
       requiredEnv(
@@ -29,6 +31,5 @@ export function getCoinListServer(outgoingResponse?: NextResponse): CoinListServ
       ),
     ),
     sessionStore: createSessionCookiesStore(outgoingResponse),
-    baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   });
 }

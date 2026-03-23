@@ -30,7 +30,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         expiresAt: new Date(data.expiresAt),
       };
     },
-    baseUrl: "https://mobile-api.frontline.beta.coinlist.yachts",
   };
 
   return <CoinListProvider config={config}>{children}</CoinListProvider>;
