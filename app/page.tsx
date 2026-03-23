@@ -40,6 +40,7 @@ function HomeContent() {
         credentials: "include",
       });
       if (!res.ok) throw new Error("logout failed");
+      coinlist.logout();
       await coinlist.init();
     } catch {
       setLogoutError("Could not sign out. Try again.");
