@@ -4,6 +4,20 @@ import { useCoinList } from "coinlist-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 
+export default function CoinListCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p>Completing sign-in…</p>
+        </div>
+      }
+    >
+      <CoinListCallbackContent />
+    </Suspense>
+  );
+}
+
 function CoinListCallbackContent() {
   const { coinlist } = useCoinList();
   const searchParams = useSearchParams();
@@ -56,19 +70,5 @@ function CoinListCallbackContent() {
     <div className="flex min-h-screen items-center justify-center">
       <p>Completing sign-in…</p>
     </div>
-  );
-}
-
-export default function CoinListCallbackPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <p>Completing sign-in…</p>
-        </div>
-      }
-    >
-      <CoinListCallbackContent />
-    </Suspense>
   );
 }
