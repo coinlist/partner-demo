@@ -8,10 +8,11 @@ function CoinListCallbackContent() {
   const { coinlist } = useCoinList();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const done = useRef(false);
+  // Prevent duplicate OAuth completion requests if this effect runs more than once.
+  const hasStartedOAuthCompletion = useRef(false);
 
   useEffect(() => {
-    if (done.current) return;
+    if (hasStartedOAuthCompletion.current) return;
 
     if (searchParams.get("error")) {
       router.replace("/?error=coinlist_denied");
@@ -26,7 +27,7 @@ function CoinListCallbackContent() {
       return;
     }
 
-    done.current = true;
+    hasStartedOAuthCompletion.current = true;
 
     void (async () => {
       const complete = await fetch("/api/coinlist/oauth/complete", {
@@ -40,7 +41,7 @@ function CoinListCallbackContent() {
       });
 
       if (!complete.ok) {
-        done.current = false;
+        hasStartedOAuthCompletion.current = false;
         router.replace("/?error=coinlist_complete_failed");
         return;
       }
