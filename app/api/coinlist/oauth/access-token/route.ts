@@ -1,4 +1,4 @@
-import { getCoinListServer as coinListServer } from "@/lib/coinlist-server";
+import { coinListServer } from "@/lib/coinlist-server";
 import { copyCookiesFromTo } from "@/lib/session-store";
 import { NextResponse } from "next/server";
 

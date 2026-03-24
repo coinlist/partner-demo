@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { AuthorizationCode, CodeVerifier } from "coinlist-react/server";
 
-import { getCoinListServer } from "@/lib/coinlist-server";
+import { coinListServer } from "@/lib/coinlist-server";
 
 interface CompleteOAuthRequest {
   code: string;
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
   // The CoinList SDK will set the OAuth session cookie
   // via the SessionStore impl that you provided
-  await getCoinListServer(response).completeOAuth(
+  await coinListServer(response).completeOAuth(
     AuthorizationCode(code),
     CodeVerifier(codeVerifier),
   );
