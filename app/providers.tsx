@@ -22,8 +22,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/coinlist/oauth/access-token", {
         credentials: "include",
       });
-      if (res.status === 401 || res.status === 204) return null;
-      if (!res.ok) throw new Error("access-token failed");
+      if (res.status === 204) return null;
+      if (!res.ok) {
+        throw new Error("GET /api/coinlist/oauth/access-token failed");
+      }
       const data = (await res.json()) as { value: string; expiresAt: string };
       return {
         value: data.value,

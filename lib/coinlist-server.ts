@@ -17,7 +17,7 @@ export function getCoinListServer(
   return createCoinListServer({
     clientId: ClientId(
       requiredEnv(
-        "COINLIST_CLIENT_ID",
+        "NEXT_PUBLIC_COINLIST_CLIENT_ID",
         process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID,
       ),
     ),
