@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       ),
     ),
     getAccessToken: async () => {
-      const res = await fetch("/api/coinlist/access-token", {
+      const res = await fetch("/api/coinlist/oauth/access-token", {
         credentials: "include",
       });
       if (res.status === 401 || res.status === 204) return null;

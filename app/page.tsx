@@ -35,7 +35,7 @@ function HomeContent() {
     setLoggingOut(true);
     setLogoutError(null);
     try {
-      const res = await fetch("/auth/coinlist/logout", {
+      const res = await fetch("/api/coinlist/oauth/logout", {
         method: "POST",
         credentials: "include",
       });

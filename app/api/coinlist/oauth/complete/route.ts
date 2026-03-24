@@ -3,45 +3,28 @@ import { AuthorizationCode, CodeVerifier } from "coinlist-react/server";
 
 import { getCoinListServer } from "@/lib/coinlist-server";
 
-const LOG_PREFIX = "[coinlist/oauth/complete]";
+interface CompleteOAuthRequest {
+  code: string;
+  codeVerifier: string;
+}
 
 export async function POST(req: Request) {
-  const body: unknown = await req.json().catch(() => null);
-  const obj: Record<string, unknown> =
-    typeof body === "object" && body != null
-      ? (body as Record<string, unknown>)
-      : {};
-  const code = obj.code;
-  const codeVerifier = obj.codeVerifier;
+  const body: CompleteOAuthRequest = await req.json();
+  const code = body.code;
+  const codeVerifier = body.codeVerifier;
 
   if (typeof code !== "string" || typeof codeVerifier !== "string") {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  const res = NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
 
-  try {
-    await getCoinListServer(res).completeOAuth(
-      AuthorizationCode(code),
-      CodeVerifier(codeVerifier),
-    );
-  } catch (err) {
-    console.error(LOG_PREFIX, "completeOAuth threw", err);
-    if (
-      err &&
-      typeof err === "object" &&
-      "response" in err &&
-      err.response &&
-      typeof err.response === "object"
-    ) {
-      const r = err.response as { status?: unknown; body?: unknown };
-      console.error(LOG_PREFIX, "token HTTP response", {
-        status: r.status,
-        body: r.body,
-      });
-    }
-    throw err;
-  }
+  // The CoinList SDK will set the OAuth session cookie
+  // via the SessionStore impl that you provided
+  await getCoinListServer(response).completeOAuth(
+    AuthorizationCode(code),
+    CodeVerifier(codeVerifier),
+  );
 
-  return res;
+  return response;
 }

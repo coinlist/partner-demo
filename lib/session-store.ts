@@ -16,10 +16,7 @@ type StoredSession = {
  * Copy cookies set on `source` onto `target` so the handler can return `target`
  * with the same Set-Cookie headers (e.g. after refresh in accessToken()).
  */
-export function mergeResponseCookies(
-  source: NextResponse,
-  target: NextResponse,
-) {
+export function copyCookiesFromTo(source: NextResponse, target: NextResponse) {
   for (const cookie of source.cookies.getAll()) {
     const { name, value, ...options } = cookie;
     target.cookies.set(name, value, options);
