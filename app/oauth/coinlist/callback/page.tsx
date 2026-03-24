@@ -49,12 +49,22 @@ function CoinListCallbackContent() {
     })();
   }, [coinlist, searchParams, router]);
 
-  return <p>Completing sign-in…</p>;
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <p>Completing sign-in…</p>
+    </div>
+  );
 }
 
 export default function CoinListCallbackPage() {
   return (
-    <Suspense fallback={<p>Completing sign-in…</p>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p>Completing sign-in…</p>
+        </div>
+      }
+    >
       <CoinListCallbackContent />
     </Suspense>
   );
