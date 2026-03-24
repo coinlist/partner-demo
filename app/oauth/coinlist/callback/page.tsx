@@ -20,21 +20,22 @@ function CoinListCallbackContent() {
 
     if (!searchParams.get("code")) return;
 
-    const res = coinlist.completeOAuth();
-    if (res.type === "error") {
+    const oauthRes = coinlist.completeOAuth();
+    if (oauthRes.type === "error") {
       router.replace("/?error=coinlist_oauth");
       return;
     }
 
     done.current = true;
+
     void (async () => {
       const complete = await fetch("/api/coinlist/oauth/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          code: res.code,
-          codeVerifier: res.codeVerifier,
+          code: oauthRes.code,
+          codeVerifier: oauthRes.codeVerifier,
         }),
       });
 
@@ -44,6 +45,7 @@ function CoinListCallbackContent() {
         return;
       }
 
+      // Fetch a fresh access token
       await coinlist.init();
       router.replace("/");
     })();
@@ -69,4 +71,3 @@ export default function CoinListCallbackPage() {
     </Suspense>
   );
 }
-
