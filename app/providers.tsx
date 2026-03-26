@@ -1,8 +1,8 @@
 "use client";
 
 import { requiredEnv } from "@/lib/env";
-import { ClientId, CoinListProvider, RedirectUri } from "coinlist-react";
-import type { ClientConfig } from "coinlist-react";
+import { ClientId, CoinListProvider, RedirectUri } from "@coinlist-co/react";
+import type { ClientConfig } from "@coinlist-co/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const config: ClientConfig = {

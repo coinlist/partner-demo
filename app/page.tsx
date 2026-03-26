@@ -1,7 +1,7 @@
 "use client";
 
-import { CoinListSignInCard } from "coinlist-react/client/components";
-import { useCoinList } from "coinlist-react";
+import { CoinListSignInCard } from "@coinlist-co/react/client/components";
+import { useCoinList } from "@coinlist-co/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type ReactNode } from "react";
 
