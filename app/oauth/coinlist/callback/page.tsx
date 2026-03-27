@@ -1,6 +1,6 @@
 "use client";
 
-import { useCoinList } from "coinlist-react";
+import { useCoinList } from "@coinlist-co/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 

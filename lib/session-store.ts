@@ -2,8 +2,8 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { OAuthSession, SessionStore } from "coinlist-react/server";
-import { OAuthRefreshToken } from "coinlist-react/server";
+import type { OAuthSession, SessionStore } from "@coinlist-co/react/server";
+import { OAuthRefreshToken } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
