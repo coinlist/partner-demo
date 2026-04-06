@@ -1,6 +1,9 @@
 "use client";
 
-import { CoinListSignInCard } from "@coinlist-co/react/client/components";
+import {
+  CoinListSignInCard,
+  OffersGrid,
+} from "@coinlist-co/react/client/components";
 import { useCoinList } from "@coinlist-co/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type ReactNode } from "react";
@@ -138,6 +141,7 @@ function LoggedInPanel({
         {loggingOut ? "Signing out…" : "Sign out"}
       </button>
       <InlineErrorText message={logoutError} />
+      <OffersGrid />
     </div>
   );
 }
