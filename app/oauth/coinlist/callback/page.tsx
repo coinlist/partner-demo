@@ -2,10 +2,11 @@
 
 import {
   CompleteCoinListOAuthFailureReason,
+  type UseCompleteCoinListOAuthOptions,
   useCompleteCoinListOAuth,
 } from "@coinlist-co/react";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 
 export default function CoinListCallbackPage() {
   return (
@@ -24,25 +25,36 @@ export default function CoinListCallbackPage() {
 function CoinListCallbackContent() {
   const router = useRouter();
 
-  useCompleteCoinListOAuth({
-    postOAuthComplete: async (payload) => {
-      const complete = await fetch("/api/coinlist/oauth/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          code: payload.code,
-          codeVerifier: payload.codeVerifier,
-        }),
-      });
-      return complete.ok;
-    },
-    onFailure: (reason: CompleteCoinListOAuthFailureReason) => {
+  const postOAuthComplete = useCallback<
+    UseCompleteCoinListOAuthOptions["postOAuthComplete"]
+  >(async (payload) => {
+    const complete = await fetch("/api/coinlist/oauth/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        code: payload.code,
+        codeVerifier: payload.codeVerifier,
+      }),
+    });
+    return complete.ok;
+  }, []);
+
+  const onFailure = useCallback(
+    (reason: CompleteCoinListOAuthFailureReason) => {
       router.replace(`/?error=${reason}`);
     },
-    onSuccess: () => {
-      router.replace("/");
-    },
+    [router],
+  );
+
+  const onSuccess = useCallback(() => {
+    router.replace("/");
+  }, [router]);
+
+  useCompleteCoinListOAuth({
+    postOAuthComplete,
+    onFailure,
+    onSuccess,
   });
 
   return (
