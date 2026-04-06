@@ -18,7 +18,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),
     ),
-    baseUrl: "/api/coinlist-proxy",
     getAccessToken: async () => {
       const res = await fetch("/api/coinlist/oauth/access-token", {
         credentials: "include",
