@@ -1,12 +1,12 @@
 "use client";
 
-import {
-  CoinListSignInCard,
-  OffersGrid,
-} from "@coinlist-co/react/client/components";
+import { CoinListSignInCard } from "@coinlist-co/react/client/components";
 import { useCoinList } from "@coinlist-co/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type ReactNode } from "react";
+import { ErrorBanner } from "@/components/ErrorBanner";
+import { HomeView } from "@/features/home/HomeView";
+import { LoginView } from "@/features/login/LoginView";
 
 export default function HomePage() {
   return (
@@ -75,19 +75,6 @@ function PageShell({ children }: { children: ReactNode }) {
   );
 }
 
-function ErrorBanner({ message }: { message: string | null }) {
-  if (!message) return null;
-
-  return (
-    <p
-      role="alert"
-      className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
-    >
-      {message}
-    </p>
-  );
-}
-
 function AuthStateSection({
   isReady,
   authState,
@@ -106,56 +93,15 @@ function AuthStateSection({
   }
 
   if (authState === "logged-out") {
-    return <CoinListSignInCard />;
+    return <LoginView />;
   }
 
   return (
-    <LoggedInPanel
+    <HomeView
       loggingOut={loggingOut}
       logoutError={logoutError}
       onLogout={onLogout}
     />
-  );
-}
-
-function LoggedInPanel({
-  loggingOut,
-  logoutError,
-  onLogout,
-}: {
-  loggingOut: boolean;
-  logoutError: string | null;
-  onLogout: () => Promise<void>;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <p className="text-center text-base text-zinc-800 dark:text-zinc-200">
-        You are logged in. 🎉
-      </p>
-      <button
-        type="button"
-        onClick={() => onLogout()}
-        disabled={loggingOut}
-        className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-      >
-        {loggingOut ? "Signing out…" : "Sign out"}
-      </button>
-      <InlineErrorText message={logoutError} />
-      <OffersGrid />
-    </div>
-  );
-}
-
-function InlineErrorText({ message }: { message: string | null }) {
-  if (!message) return null;
-
-  return (
-    <p
-      role="alert"
-      className="text-center text-sm text-red-600 dark:text-red-400"
-    >
-      {message}
-    </p>
   );
 }
 
