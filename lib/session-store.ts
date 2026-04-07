@@ -107,4 +107,6 @@ function cookieOptions() {
   };
 }
 
-export const NO_OP_COOKIES_SINK = NextResponse.json({});
+export function createNoOpCookiesSink(): NextResponse {
+  return NextResponse.json({});
+}
