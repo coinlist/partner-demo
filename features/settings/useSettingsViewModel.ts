@@ -1,6 +1,8 @@
 "use client";
 
+import { ROUTES } from "@/lib/routes";
 import { useCoinList } from "@coinlist-co/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export type SettingsUiState = {
@@ -19,6 +21,7 @@ export function useSettingsViewModel(): {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const { coinlist } = useCoinList();
+  const router = useRouter();
 
   const uiState: SettingsUiState = {
     logoutLoading,
@@ -41,6 +44,7 @@ export function useSettingsViewModel(): {
       });
       if (!res.ok) throw new Error("logout failed");
       coinlist.logout();
+      router.replace(ROUTES.ROOT);
     } catch {
       setLogoutError("Could not sign out. Try again.");
     } finally {
