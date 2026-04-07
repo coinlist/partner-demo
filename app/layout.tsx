@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CoinList Partner Demo",
-  description: "A demo app for the integrating with CoinList",
+  description: "A demo app for integrating with CoinList",
 };
 
 export default function RootLayout({
