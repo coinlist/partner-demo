@@ -1,5 +1,6 @@
 "use client";
 
+import { ROUTES } from "@/lib/routes";
 import { useRouter } from "next/navigation";
 
 export type HomeUiState = {};
@@ -19,7 +20,7 @@ export function useHomeViewModel(): {
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {
       case "ON_SETTINGS_CLICK":
-        router.push("/settings");
+        router.push(ROUTES.SETTINGS);
         break;
     }
   };
