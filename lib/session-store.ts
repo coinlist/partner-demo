@@ -106,3 +106,7 @@ function cookieOptions() {
     path: "/",
   };
 }
+
+export function createNoOpCookiesSink(): NextResponse {
+  return NextResponse.json({});
+}
