@@ -12,8 +12,8 @@ exploring the source code.
 ```shell
 cp .environments/.env.example .env
 ```
-2. Update the `NEXT_PUBLIC_COINLIST_CLIENT_ID` and `COINLIST_CLIENT_SECRET` with your CoinList provided credentails. If you don't have one, ask your CoinList content to provide you with such. You can still play with app even with the dummy values from `.env.example` but you won't be able to complete OAuth.
-3. Run the NextJS app locally:
+2. Update `NEXT_PUBLIC_COINLIST_CLIENT_ID` and `COINLIST_CLIENT_SECRET` with the credentials provided by CoinList. If you don't have them, ask your CoinList contact to provide them. You can still use the app with the dummy values from `.env.example`, but you won't be able to complete OAuth.
+3. Run the Next.js app locally:
 ```shell
 npm run dev
 ```
