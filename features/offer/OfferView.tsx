@@ -76,6 +76,14 @@ export function OfferView({ state, onEvent }: Props) {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
+            <div className="lg:hidden">
+              <OfferSidebarCard
+                statusText="Token Sale"
+                tokenCode={state.tokenCode}
+                tokenPriceUsd={state.tokenPriceUsd}
+              />
+            </div>
+
             <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
               <OfferHeader
                 name={state.name}
@@ -104,11 +112,13 @@ export function OfferView({ state, onEvent }: Props) {
             {state.faqs.length > 0 ? <OfferFaq faqs={state.faqs} /> : null}
           </div>
 
-          <OfferSidebarCard
-            statusText="Token Sale"
-            tokenCode={state.tokenCode}
-            tokenPriceUsd={state.tokenPriceUsd}
-          />
+          <div className="hidden lg:block">
+            <OfferSidebarCard
+              statusText="Token Sale"
+              tokenCode={state.tokenCode}
+              tokenPriceUsd={state.tokenPriceUsd}
+            />
+          </div>
         </div>
       </div>
     </div>
