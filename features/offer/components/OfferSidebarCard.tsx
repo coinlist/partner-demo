@@ -18,7 +18,7 @@ export function OfferSidebarCard({
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-zinc-300">{tokenCode}</p>
           <p className="text-sm font-semibold text-zinc-100">
-            {tokenPriceUsd === null ? "--" : `$${tokenPriceUsd.toFixed(2)}`}
+            {tokenPriceUsd ? "--" : `$${tokenPriceUsd?.toFixed(2)}`}
           </p>
         </div>
       </div>
