@@ -22,7 +22,7 @@ export function HomeView({ onEvent }: Props) {
       <div className="flex justify-end">
         <SettingsButton onClick={onSettingsClick} />
       </div>
-      <div className="flex flex-1 items-center justify-center">
+      <div className="mt-4 flex flex-1 items-center justify-center sm:mt-6">
         <OffersGrid onOfferClick={onOfferClick} className="justify-items-center" />
       </div>
     </div>
