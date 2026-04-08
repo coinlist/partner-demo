@@ -3,15 +3,18 @@
 import { OffersGrid } from "@coinlist-co/react/client/components";
 import { Settings } from "lucide-react";
 import { HomeUiEvent, HomeUiState } from "./useHomeViewModel";
+import { Offer } from "@coinlist-co/react";
 
 export interface Props {
-  state: HomeUiState;
   onEvent: (event: HomeUiEvent) => void;
 }
 
-export function HomeView({ state, onEvent }: Props) {
+export function HomeView({ onEvent }: Props) {
   const onSettingsClick = () => {
     onEvent({ type: "ON_SETTINGS_CLICK" });
+  };
+  const onOfferClick = (offer: Offer) => {
+    onEvent({ type: "ON_OFFER_CLICK", offer });
   };
 
   return (
@@ -20,7 +23,7 @@ export function HomeView({ state, onEvent }: Props) {
         <SettingsButton onClick={onSettingsClick} />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <OffersGrid />
+        <OffersGrid onOfferClick={onOfferClick} />
       </div>
     </div>
   );

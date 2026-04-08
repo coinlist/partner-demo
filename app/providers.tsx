@@ -6,6 +6,8 @@ import type { ClientConfig } from "@coinlist-co/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const config: ClientConfig = {
+    // TODO: Remove - temp workaround for a CORS issue in the Public API
+    baseUrl: "/api/coinlist/client",
     clientId: ClientId(
       requiredEnv(
         "NEXT_PUBLIC_COINLIST_CLIENT_ID",

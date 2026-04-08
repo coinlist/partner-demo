@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+html {
+  background: var(--background);
+}
+
+html,
+body {
+  min-height: 100%;
+}
