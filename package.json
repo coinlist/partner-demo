@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@coinlist-co/react": "^0.1.1",
+    "@coinlist-co/react": "^0.1.2",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3"
