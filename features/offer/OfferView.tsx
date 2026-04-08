@@ -3,6 +3,7 @@
 import { OfferBanner } from "./components/OfferBanner";
 import { OfferFaq } from "./components/OfferFaq";
 import { OfferHeader } from "./components/OfferHeader";
+import { OfferLink } from "./components/OfferLink";
 import { OfferMilestones } from "./components/OfferMilestones";
 import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
@@ -90,15 +91,7 @@ export function OfferView({ state, onEvent }: Props) {
               {state.links.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {state.links.map((link) => (
-                    <a
-                      key={link.label + link.url}
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-full border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:bg-zinc-700"
-                    >
-                      {link.label}
-                    </a>
+                    <OfferLink key={link.label + link.url} link={link} />
                   ))}
                 </div>
               ) : null}
