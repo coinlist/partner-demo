@@ -31,7 +31,9 @@ export function OfferView({ state, onEvent }: Props) {
     return (
       <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
         <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-900/50 bg-red-950/30 p-6">
-          <h1 className="text-lg font-semibold text-red-200">Could not load offer</h1>
+          <h1 className="text-lg font-semibold text-red-200">
+            Could not load offer
+          </h1>
           <p className="mt-2 text-sm text-red-200/90">{state.message}</p>
           <div className="mt-5 flex gap-3">
             <button
@@ -89,7 +91,7 @@ export function OfferView({ state, onEvent }: Props) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   {state.links.map((link) => (
                     <a
-                      key={link.url}
+                      key={link.label + link.url}
                       href={link.url}
                       target="_blank"
                       rel="noreferrer"
