@@ -2,7 +2,7 @@
 
 import { OffersGrid } from "@coinlist-co/react/client/components";
 import { Settings } from "lucide-react";
-import { HomeUiEvent, HomeUiState } from "./useHomeViewModel";
+import { HomeUiEvent } from "./useHomeViewModel";
 import { Offer } from "@coinlist-co/react";
 
 export interface Props {
@@ -23,7 +23,7 @@ export function HomeView({ onEvent }: Props) {
         <SettingsButton onClick={onSettingsClick} />
       </div>
       <div className="flex flex-1 items-center justify-center">
-        <OffersGrid onOfferClick={onOfferClick} />
+        <OffersGrid onOfferClick={onOfferClick} className="justify-items-center" />
       </div>
     </div>
   );
