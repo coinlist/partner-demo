@@ -1,14 +1,16 @@
 "use client";
 
-import { OfferBanner } from "./components/OfferBanner";
-import { OfferFaq } from "./components/OfferFaq";
-import { OfferHeader } from "./components/OfferHeader";
-import { OfferLink } from "./components/OfferLink";
-import { OfferMilestones } from "./components/OfferMilestones";
-import { OfferSidebarCard } from "./components/OfferSidebarCard";
-import { OfferTerms } from "./components/OfferTerms";
+import {
+  OfferDetailBanner,
+  OfferDetailFaq,
+  OfferDetailHeader,
+  OfferDetailLinks,
+  OfferDetailMilestones,
+  OfferDetailSidebar,
+  OfferDetailTerms,
+} from "@coinlist-co/react/client/components";
 import { ArrowLeft } from "lucide-react";
-import { OfferUiEvent, OfferUiState } from "./useOfferViewModel";
+import { type OfferUiEvent, type OfferUiState } from "./useOfferViewModel";
 
 export interface Props {
   state: OfferUiState;
@@ -72,20 +74,21 @@ export function OfferView({ state, onEvent }: Props) {
           Back to offers
         </button>
 
-        <OfferBanner name={state.name} bannerUrl={state.bannerUrl} />
+        <OfferDetailBanner name={state.name} bannerUrl={state.bannerUrl} />
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
             <div className="lg:hidden">
-              <OfferSidebarCard
-                statusText="Token Sale"
+              <OfferDetailSidebar
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
+                startsAt={state.startsAt}
+                endsAt={state.endsAt}
               />
             </div>
 
             <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
-              <OfferHeader
+              <OfferDetailHeader
                 name={state.name}
                 tagline={state.tagline}
                 logoUrl={state.logoUrl}
@@ -96,27 +99,20 @@ export function OfferView({ state, onEvent }: Props) {
                   {state.about ?? "No description available yet."}
                 </p>
               </div>
-              {state.links.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {state.links.map((link) => (
-                    <OfferLink key={link.label + link.url} link={link} />
-                  ))}
-                </div>
-              ) : null}
+              <OfferDetailLinks links={state.links} className="mt-4" />
             </section>
 
-            {state.terms.length > 0 ? <OfferTerms terms={state.terms} /> : null}
-            {state.milestones.length > 0 ? (
-              <OfferMilestones milestones={state.milestones} />
-            ) : null}
-            {state.faqs.length > 0 ? <OfferFaq faqs={state.faqs} /> : null}
+            <OfferDetailTerms terms={state.terms} />
+            <OfferDetailMilestones milestones={state.milestones} />
+            <OfferDetailFaq faqs={state.faqs} />
           </div>
 
           <div className="hidden lg:block">
-            <OfferSidebarCard
-              statusText="Token Sale"
+            <OfferDetailSidebar
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
+              startsAt={state.startsAt}
+              endsAt={state.endsAt}
             />
           </div>
         </div>
