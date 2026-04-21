@@ -2,10 +2,13 @@
 
 import { ROUTES } from "@/lib/routes";
 import {
-  OfferDetailFaqItem,
-  OfferDetailLink,
-  OfferDetailMilestone,
-  OfferDetailTerm,
+  OfferDetailBannerUi,
+  OfferDetailFaqItemUi,
+  OfferDetailHeaderUi,
+  OfferDetailLinkUi,
+  OfferDetailMilestoneUi,
+  OfferDetailSidebarUi,
+  OfferDetailTermUi,
 } from "@coinlist-co/react/client/components";
 import { OfferId } from "@coinlist-co/react/client";
 import { useCoinListOfferDetails } from "@coinlist-co/react/client/hooks";
@@ -17,19 +20,14 @@ export type OfferUiState =
   | {
       type: "CONTENT";
       offerId: string;
-      name: string;
-      tagline: string | null;
-      bannerUrl: string | null;
-      logoUrl: string | null;
       about: string | null;
-      startsAt: Date;
-      endsAt: Date;
-      links: OfferDetailLink[];
-      terms: OfferDetailTerm[];
-      milestones: OfferDetailMilestone[];
-      faqs: OfferDetailFaqItem[];
-      tokenCode: string;
-      tokenPriceUsd: number | null;
+      bannerUi: OfferDetailBannerUi;
+      headerUi: OfferDetailHeaderUi;
+      sidebarUi: OfferDetailSidebarUi;
+      links: OfferDetailLinkUi[];
+      terms: OfferDetailTermUi[];
+      milestones: OfferDetailMilestoneUi[];
+      faqs: OfferDetailFaqItemUi[];
     };
 
 export type OfferUiEvent =
@@ -99,31 +97,26 @@ function mapOfferUiState(
       return {
         type: "CONTENT",
         offerId: routeOfferId,
-        name: offerDetail.name,
-        tagline: offerDetail.tagline,
-        bannerUrl: offerDetail.bannerUrl,
-        logoUrl: offerDetail.logoUrl,
         about: offerDetail.about,
-        startsAt: offerDetail.startsAt,
-        endsAt: offerDetail.endsAt,
+        bannerUi: OfferDetailBannerUi.fromDomain(offerDetail),
+        headerUi: OfferDetailHeaderUi.fromDomain(offerDetail),
+        sidebarUi: OfferDetailSidebarUi.fromDomain(offerDetail, offerDetail.options[0] ?? null),
         links: offerDetail.links.flatMap((l) => {
-          const ui = OfferDetailLink.fromDomain(l);
+          const ui = OfferDetailLinkUi.fromDomain(l);
           return ui ? [ui] : [];
         }),
         terms: offerDetail.terms.flatMap((t) => {
-          const ui = OfferDetailTerm.fromDomain(t);
+          const ui = OfferDetailTermUi.fromDomain(t);
           return ui ? [ui] : [];
         }),
         milestones: offerDetail.milestones.flatMap((m) => {
-          const ui = OfferDetailMilestone.fromDomain(m);
+          const ui = OfferDetailMilestoneUi.fromDomain(m);
           return ui ? [ui] : [];
         }),
         faqs: offerDetail.faqs.flatMap((f) => {
-          const ui = OfferDetailFaqItem.fromDomain(f);
+          const ui = OfferDetailFaqItemUi.fromDomain(f);
           return ui ? [ui] : [];
         }),
-        tokenCode: offerDetail.asset.code,
-        tokenPriceUsd: offerDetail.options[0]?.priceUsd ?? null,
       };
     }
   }

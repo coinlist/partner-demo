@@ -74,25 +74,16 @@ export function OfferView({ state, onEvent }: Props) {
           Back to offers
         </button>
 
-        <OfferDetailBanner name={state.name} bannerUrl={state.bannerUrl} />
+        <OfferDetailBanner ui={state.bannerUi} />
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
             <div className="lg:hidden">
-              <OfferDetailSidebar
-                tokenCode={state.tokenCode}
-                tokenPriceUsd={state.tokenPriceUsd}
-                startsAt={state.startsAt}
-                endsAt={state.endsAt}
-              />
+              <OfferDetailSidebar ui={state.sidebarUi} />
             </div>
 
             <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
-              <OfferDetailHeader
-                name={state.name}
-                tagline={state.tagline}
-                logoUrl={state.logoUrl}
-              />
+              <OfferDetailHeader ui={state.headerUi} />
               <div className="mt-5">
                 <h2 className="text-xl font-semibold text-zinc-100">About</h2>
                 <p className="mt-2 text-sm leading-6 text-zinc-300">
@@ -108,12 +99,7 @@ export function OfferView({ state, onEvent }: Props) {
           </div>
 
           <div className="hidden lg:block">
-            <OfferDetailSidebar
-              tokenCode={state.tokenCode}
-              tokenPriceUsd={state.tokenPriceUsd}
-              startsAt={state.startsAt}
-              endsAt={state.endsAt}
-            />
+            <OfferDetailSidebar ui={state.sidebarUi} />
           </div>
         </div>
       </div>
