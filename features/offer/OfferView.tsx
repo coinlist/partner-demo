@@ -82,16 +82,11 @@ export function OfferView({ state, onEvent }: Props) {
               <OfferDetailSidebar ui={state.sidebarUi} />
             </div>
 
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
-              <OfferDetailHeader ui={state.headerUi} />
-              <div className="mt-5">
-                <h2 className="text-xl font-semibold text-zinc-100">About</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">
-                  {state.about ?? "No description available yet."}
-                </p>
-              </div>
-              <OfferDetailLinks links={state.links} className="mt-4" />
-            </section>
+            <OfferDetailHeader ui={state.headerUi} />
+            <p className="text-sm leading-6 text-zinc-300">
+              {state.about ?? "No description available yet."}
+            </p>
+            <OfferDetailLinks links={state.links} />
 
             <OfferDetailTerms terms={state.terms} />
             <OfferDetailMilestones milestones={state.milestones} />
