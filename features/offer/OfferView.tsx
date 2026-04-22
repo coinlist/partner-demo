@@ -9,6 +9,8 @@ import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
 import { ArrowLeft } from "lucide-react";
 import { OfferUiEvent, OfferUiState } from "./useOfferViewModel";
+import { RequirementsChecklist } from "@coinlist-co/react/client/components";
+import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 
 export interface Props {
   state: OfferUiState;
@@ -76,12 +78,20 @@ export function OfferView({ state, onEvent }: Props) {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
-            <div className="lg:hidden">
+            <div className="lg:hidden space-y-6">
               <OfferSidebarCard
                 statusText="Token Sale"
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
               />
+              {state.optionId ? (
+                <RequirementsChecklist
+                  offerId={OfferId(state.offerId)}
+                  optionId={OfferOptionId(state.optionId)}
+                  title="Requirements"
+                  description="Complete these steps to participate in the token sale."
+                />
+              ) : null}
             </div>
 
             <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
@@ -118,6 +128,16 @@ export function OfferView({ state, onEvent }: Props) {
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
             />
+            {state.optionId ? (
+              <div className="mt-6">
+                <RequirementsChecklist
+                  offerId={OfferId(state.offerId)}
+                  optionId={OfferOptionId(state.optionId)}
+                  title="Requirements"
+                  description="Complete these steps to participate in the token sale."
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

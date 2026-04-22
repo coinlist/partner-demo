@@ -38,6 +38,7 @@ export type OfferUiState =
   | {
       type: "CONTENT";
       offerId: string;
+      optionId: string | null;
       name: string;
       tagline: string | null;
       bannerUrl: string | null;
@@ -132,6 +133,7 @@ function mapOfferUiState(
       return {
         type: "CONTENT",
         offerId: routeOfferId,
+        optionId: offerDetailsState.offerDetail.options[0]?.id ?? null,
         name: offerDetailsState.offerDetail.name,
         tagline: offerDetailsState.offerDetail.tagline,
         bannerUrl: offerDetailsState.offerDetail.bannerUrl,
