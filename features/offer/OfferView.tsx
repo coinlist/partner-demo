@@ -17,6 +17,36 @@ export interface Props {
   onEvent: (event: OfferUiEvent) => void;
 }
 
+function SidebarContent({
+  tokenCode,
+  tokenPriceUsd,
+  offerId,
+  optionId,
+}: {
+  tokenCode: string;
+  tokenPriceUsd: number;
+  offerId: string;
+  optionId: string | null;
+}) {
+  return (
+    <>
+      <OfferSidebarCard
+        statusText="Token Sale"
+        tokenCode={tokenCode}
+        tokenPriceUsd={tokenPriceUsd}
+      />
+      {optionId ? (
+        <RequirementsChecklist
+          offerId={OfferId(offerId)}
+          optionId={OfferOptionId(optionId)}
+          title="Requirements"
+          description="Complete these steps to participate in the token sale."
+        />
+      ) : null}
+    </>
+  );
+}
+
 export function OfferView({ state, onEvent }: Props) {
   if (state.type === "LOADING") {
     return (
@@ -79,19 +109,12 @@ export function OfferView({ state, onEvent }: Props) {
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
             <div className="lg:hidden space-y-6">
-              <OfferSidebarCard
-                statusText="Token Sale"
+              <SidebarContent
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
+                offerId={state.offerId}
+                optionId={state.optionId}
               />
-              {state.optionId ? (
-                <RequirementsChecklist
-                  offerId={OfferId(state.offerId)}
-                  optionId={OfferOptionId(state.optionId)}
-                  title="Requirements"
-                  description="Complete these steps to participate in the token sale."
-                />
-              ) : null}
             </div>
 
             <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
@@ -122,22 +145,13 @@ export function OfferView({ state, onEvent }: Props) {
             {state.faqs.length > 0 ? <OfferFaq faqs={state.faqs} /> : null}
           </div>
 
-          <div className="hidden lg:block">
-            <OfferSidebarCard
-              statusText="Token Sale"
+          <div className="hidden lg:block space-y-6">
+            <SidebarContent
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
+              offerId={state.offerId}
+              optionId={state.optionId}
             />
-            {state.optionId ? (
-              <div className="mt-6">
-                <RequirementsChecklist
-                  offerId={OfferId(state.offerId)}
-                  optionId={OfferOptionId(state.optionId)}
-                  title="Requirements"
-                  description="Complete these steps to participate in the token sale."
-                />
-              </div>
-            ) : null}
           </div>
         </div>
       </div>
