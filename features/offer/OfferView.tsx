@@ -17,36 +17,6 @@ export interface Props {
   onEvent: (event: OfferUiEvent) => void;
 }
 
-function SidebarContent({
-  tokenCode,
-  tokenPriceUsd,
-  offerId,
-  optionId,
-}: {
-  tokenCode: string;
-  tokenPriceUsd: number;
-  offerId: string;
-  optionId: string | null;
-}) {
-  return (
-    <>
-      <OfferSidebarCard
-        statusText="Token Sale"
-        tokenCode={tokenCode}
-        tokenPriceUsd={tokenPriceUsd}
-      />
-      {optionId ? (
-        <RequirementsChecklist
-          offerId={OfferId(offerId)}
-          optionId={OfferOptionId(optionId)}
-          title="Requirements"
-          description="Complete these steps to participate in the token sale."
-        />
-      ) : null}
-    </>
-  );
-}
-
 export function OfferView({ state, onEvent }: Props) {
   if (state.type === "LOADING") {
     return (
@@ -67,7 +37,9 @@ export function OfferView({ state, onEvent }: Props) {
           <h1 className="text-lg font-semibold text-red-700 dark:text-red-200">
             Could not load offer
           </h1>
-          <p className="mt-2 text-sm text-red-600/90 dark:text-red-200/90">{state.message}</p>
+          <p className="mt-2 text-sm text-red-600/90 dark:text-red-200/90">
+            {state.message}
+          </p>
           <div className="mt-5 flex gap-3">
             <button
               type="button"
@@ -124,7 +96,9 @@ export function OfferView({ state, onEvent }: Props) {
                 logoUrl={state.logoUrl}
               />
               <div className="mt-5">
-                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">About</h2>
+                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                  About
+                </h2>
                 <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   {state.about ?? "No description available yet."}
                 </p>
@@ -156,5 +130,35 @@ export function OfferView({ state, onEvent }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+function SidebarContent({
+  tokenCode,
+  tokenPriceUsd,
+  offerId,
+  optionId,
+}: {
+  tokenCode: string;
+  tokenPriceUsd: string | null;
+  offerId: OfferId;
+  optionId: OfferOptionId | null;
+}) {
+  return (
+    <>
+      <OfferSidebarCard
+        statusText="Token Sale"
+        tokenCode={tokenCode}
+        tokenPriceUsd={tokenPriceUsd != null ? Number(tokenPriceUsd) : null}
+      />
+      {optionId ? (
+        <RequirementsChecklist
+          offerId={offerId}
+          optionId={optionId}
+          title="Requirements"
+          description="Complete these steps to participate in the token sale."
+        />
+      ) : null}
+    </>
   );
 }

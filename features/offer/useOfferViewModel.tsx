@@ -1,7 +1,7 @@
 "use client";
 
 import { ROUTES } from "@/lib/routes";
-import { OfferId } from "@coinlist-co/react/client";
+import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 import { useCoinListOfferDetails } from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
 
@@ -37,8 +37,8 @@ export type OfferUiState =
     }
   | {
       type: "CONTENT";
-      offerId: string;
-      optionId: string | null;
+      offerId: OfferId;
+      optionId: OfferOptionId | null;
       name: string;
       tagline: string | null;
       bannerUrl: string | null;
@@ -51,7 +51,7 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       tokenCode: string;
-      tokenPriceUsd: number | null;
+      tokenPriceUsd: string | null;
     };
 
 export type OfferUiEvent =
@@ -70,7 +70,9 @@ export function useOfferViewModel(): {
   const router = useRouter();
 
   const routeOfferId = parseRouteOfferId(params.id);
-  const { offerDetailsState } = useCoinListOfferDetails(OfferId(routeOfferId ?? ""));
+  const { offerDetailsState } = useCoinListOfferDetails(
+    OfferId(routeOfferId ?? ""),
+  );
 
   const state: OfferUiState = mapOfferUiState(routeOfferId, offerDetailsState);
 
@@ -105,7 +107,9 @@ function parseRouteOfferId(id: string | string[] | undefined): string | null {
 
 function mapOfferUiState(
   routeOfferId: string | null,
-  offerDetailsState: ReturnType<typeof useCoinListOfferDetails>["offerDetailsState"],
+  offerDetailsState: ReturnType<
+    typeof useCoinListOfferDetails
+  >["offerDetailsState"],
 ): OfferUiState {
   if (!routeOfferId) {
     return {
@@ -132,7 +136,7 @@ function mapOfferUiState(
     case "CONTENT":
       return {
         type: "CONTENT",
-        offerId: routeOfferId,
+        offerId: OfferId(routeOfferId),
         optionId: offerDetailsState.offerDetail.options[0]?.id ?? null,
         name: offerDetailsState.offerDetail.name,
         tagline: offerDetailsState.offerDetail.tagline,
@@ -167,7 +171,8 @@ function mapOfferUiState(
             answer: faq.answer ?? "",
           })),
         tokenCode: offerDetailsState.offerDetail.asset.code,
-        tokenPriceUsd: offerDetailsState.offerDetail.options[0]?.priceUsd ?? null,
+        tokenPriceUsd:
+          offerDetailsState.offerDetail.options[0]?.priceUsd ?? null,
       };
   }
 }
