@@ -20,11 +20,11 @@ export interface Props {
 export function OfferView({ state, onEvent }: Props) {
   if (state.type === "LOADING") {
     return (
-      <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
+      <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
         <div className="mx-auto w-full max-w-6xl animate-pulse space-y-4">
-          <div className="h-40 rounded-2xl bg-zinc-900" />
-          <div className="h-24 rounded-2xl bg-zinc-900" />
-          <div className="h-56 rounded-2xl bg-zinc-900" />
+          <div className="h-40 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+          <div className="h-24 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+          <div className="h-56 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
         </div>
       </div>
     );
@@ -32,17 +32,17 @@ export function OfferView({ state, onEvent }: Props) {
 
   if (state.type === "ERROR") {
     return (
-      <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
-        <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-900/50 bg-red-950/30 p-6">
-          <h1 className="text-lg font-semibold text-red-200">
+      <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+        <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-900/50 dark:bg-red-950/30">
+          <h1 className="text-lg font-semibold text-red-700 dark:text-red-200">
             Could not load offer
           </h1>
-          <p className="mt-2 text-sm text-red-200/90">{state.message}</p>
+          <p className="mt-2 text-sm text-red-600/90 dark:text-red-200/90">{state.message}</p>
           <div className="mt-5 flex gap-3">
             <button
               type="button"
               onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
             >
               <ArrowLeft size={16} />
               Back to offers
@@ -51,7 +51,7 @@ export function OfferView({ state, onEvent }: Props) {
               <button
                 type="button"
                 onClick={() => onEvent({ type: "ON_RETRY_CLICK" })}
-                className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Retry
               </button>
@@ -63,12 +63,12 @@ export function OfferView({ state, onEvent }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
+    <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <button
           type="button"
           onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
-          className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
           <ArrowLeft size={16} />
           Back to offers
@@ -94,15 +94,15 @@ export function OfferView({ state, onEvent }: Props) {
               ) : null}
             </div>
 
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+            <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
               <OfferHeader
                 name={state.name}
                 tagline={state.tagline}
                 logoUrl={state.logoUrl}
               />
               <div className="mt-5">
-                <h2 className="text-xl font-semibold text-zinc-100">About</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">
+                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">About</h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   {state.about ?? "No description available yet."}
                 </p>
               </div>
