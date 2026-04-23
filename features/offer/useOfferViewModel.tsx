@@ -2,7 +2,10 @@
 
 import { ROUTES } from "@/lib/routes";
 import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
-import { useCoinListOfferDetails } from "@coinlist-co/react/client/hooks";
+import {
+  LoadOfferDetailsState,
+  useCoinListOfferDetails,
+} from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -128,9 +131,7 @@ function parseRouteOfferId(id: string | string[] | undefined): string | null {
 
 function mapOfferUiState(
   routeOfferId: string | null,
-  offerDetailsState: ReturnType<
-    typeof useCoinListOfferDetails
-  >["offerDetailsState"],
+  offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
 ): OfferUiState {
   if (!routeOfferId) {
@@ -161,11 +162,8 @@ function mapOfferUiState(
         slug: opt.slug.toString(),
         priceUsd: opt.priceUsd,
       }));
-      const resolvedOptionId =
-        selectedOptionId ?? options[0]?.id ?? null;
-      const selectedOption = options.find(
-        (opt) => opt.id === resolvedOptionId,
-      );
+      const resolvedOptionId = selectedOptionId ?? options[0]?.id ?? null;
+      const selectedOption = options.find((opt) => opt.id === resolvedOptionId);
       return {
         type: "CONTENT",
         offerId: OfferId(routeOfferId),
