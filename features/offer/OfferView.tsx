@@ -8,7 +8,9 @@ import { OfferMilestones } from "./components/OfferMilestones";
 import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
 import { ArrowLeft } from "lucide-react";
-import { OfferUiEvent, OfferUiState } from "./useOfferViewModel";
+import { OfferUiEvent, OfferUiOption, OfferUiState } from "./useOfferViewModel";
+import { RequirementsChecklist } from "@coinlist-co/react/client/components";
+import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 
 export interface Props {
   state: OfferUiState;
@@ -18,11 +20,11 @@ export interface Props {
 export function OfferView({ state, onEvent }: Props) {
   if (state.type === "LOADING") {
     return (
-      <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
+      <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
         <div className="mx-auto w-full max-w-6xl animate-pulse space-y-4">
-          <div className="h-40 rounded-2xl bg-zinc-900" />
-          <div className="h-24 rounded-2xl bg-zinc-900" />
-          <div className="h-56 rounded-2xl bg-zinc-900" />
+          <div className="h-40 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+          <div className="h-24 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+          <div className="h-56 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
         </div>
       </div>
     );
@@ -30,17 +32,19 @@ export function OfferView({ state, onEvent }: Props) {
 
   if (state.type === "ERROR") {
     return (
-      <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
-        <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-900/50 bg-red-950/30 p-6">
-          <h1 className="text-lg font-semibold text-red-200">
+      <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+        <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-900/50 dark:bg-red-950/30">
+          <h1 className="text-lg font-semibold text-red-700 dark:text-red-200">
             Could not load offer
           </h1>
-          <p className="mt-2 text-sm text-red-200/90">{state.message}</p>
+          <p className="mt-2 text-sm text-red-600/90 dark:text-red-200/90">
+            {state.message}
+          </p>
           <div className="mt-5 flex gap-3">
             <button
               type="button"
               onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
             >
               <ArrowLeft size={16} />
               Back to offers
@@ -49,7 +53,7 @@ export function OfferView({ state, onEvent }: Props) {
               <button
                 type="button"
                 onClick={() => onEvent({ type: "ON_RETRY_CLICK" })}
-                className="rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Retry
               </button>
@@ -61,12 +65,12 @@ export function OfferView({ state, onEvent }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 px-6 py-8 font-sans text-zinc-100">
+    <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <button
           type="button"
           onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
-          className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-100 transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
           <ArrowLeft size={16} />
           Back to offers
@@ -76,23 +80,30 @@ export function OfferView({ state, onEvent }: Props) {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <div className="space-y-6">
-            <div className="lg:hidden">
-              <OfferSidebarCard
-                statusText="Token Sale"
+            <div className="lg:hidden space-y-6">
+              <SidebarContent
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
+                offerId={state.offerId}
+                options={state.options}
+                selectedOptionId={state.selectedOptionId}
+                onOptionSelect={(optionId) =>
+                  onEvent({ type: "ON_OPTION_SELECT", optionId })
+                }
               />
             </div>
 
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+            <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
               <OfferHeader
                 name={state.name}
                 tagline={state.tagline}
                 logoUrl={state.logoUrl}
               />
               <div className="mt-5">
-                <h2 className="text-xl font-semibold text-zinc-100">About</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-300">
+                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                  About
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   {state.about ?? "No description available yet."}
                 </p>
               </div>
@@ -112,15 +123,82 @@ export function OfferView({ state, onEvent }: Props) {
             {state.faqs.length > 0 ? <OfferFaq faqs={state.faqs} /> : null}
           </div>
 
-          <div className="hidden lg:block">
-            <OfferSidebarCard
-              statusText="Token Sale"
+          <div className="hidden lg:block space-y-6">
+            <SidebarContent
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
+              offerId={state.offerId}
+              options={state.options}
+              selectedOptionId={state.selectedOptionId}
+              onOptionSelect={(optionId) =>
+                onEvent({ type: "ON_OPTION_SELECT", optionId })
+              }
             />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function SidebarContent({
+  tokenCode,
+  tokenPriceUsd,
+  offerId,
+  options,
+  selectedOptionId,
+  onOptionSelect,
+}: {
+  tokenCode: string;
+  tokenPriceUsd: string | null;
+  offerId: OfferId;
+  options: OfferUiOption[];
+  selectedOptionId: OfferOptionId | null;
+  onOptionSelect: (optionId: OfferOptionId) => void;
+}) {
+  return (
+    <>
+      <OfferSidebarCard
+        statusText="Token Sale"
+        tokenCode={tokenCode}
+        tokenPriceUsd={tokenPriceUsd != null ? Number(tokenPriceUsd) : null}
+      />
+      {options.length > 1 ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Options
+          </p>
+          <div className="flex flex-col gap-2">
+            {options.map((opt) => (
+              <button
+                key={opt.id.toString()}
+                type="button"
+                onClick={() => onOptionSelect(opt.id)}
+                className={`rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${
+                  opt.id === selectedOptionId
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-300"
+                    : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <span className="capitalize">{opt.slug.replace(/-/g, " ")}</span>
+                {opt.priceUsd ? (
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    ${opt.priceUsd}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {selectedOptionId ? (
+        <RequirementsChecklist
+          offerId={offerId}
+          optionId={selectedOptionId}
+          title="Requirements"
+          description="Complete these steps to participate in the token sale."
+        />
+      ) : null}
+    </>
   );
 }
