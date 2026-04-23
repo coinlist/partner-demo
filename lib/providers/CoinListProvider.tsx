@@ -12,6 +12,7 @@ export function DemoCoinListProvider({
   const config: ClientConfig = {
     // TODO: Remove - temp workaround for a CORS issue in the Public API
     baseUrl: "/api/coinlist/client",
+    sandbox: true,
     clientId: ClientId(
       requiredEnv(
         "NEXT_PUBLIC_COINLIST_CLIENT_ID",
