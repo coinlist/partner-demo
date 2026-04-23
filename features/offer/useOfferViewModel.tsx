@@ -4,6 +4,7 @@ import { ROUTES } from "@/lib/routes";
 import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 import { useCoinListOfferDetails } from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export type OfferUiLink = {
   label: string;
@@ -26,6 +27,12 @@ export type OfferUiFaq = {
   answer: string;
 };
 
+export type OfferUiOption = {
+  id: OfferOptionId;
+  slug: string;
+  priceUsd: string | null;
+};
+
 export type OfferUiState =
   | {
       type: "LOADING";
@@ -38,7 +45,8 @@ export type OfferUiState =
   | {
       type: "CONTENT";
       offerId: OfferId;
-      optionId: OfferOptionId | null;
+      options: OfferUiOption[];
+      selectedOptionId: OfferOptionId | null;
       name: string;
       tagline: string | null;
       bannerUrl: string | null;
@@ -60,6 +68,10 @@ export type OfferUiEvent =
     }
   | {
       type: "ON_RETRY_CLICK";
+    }
+  | {
+      type: "ON_OPTION_SELECT";
+      optionId: OfferOptionId;
     };
 
 export function useOfferViewModel(): {
@@ -68,13 +80,19 @@ export function useOfferViewModel(): {
 } {
   const params = useParams<{ id: string | string[] }>();
   const router = useRouter();
+  const [selectedOptionId, setSelectedOptionId] =
+    useState<OfferOptionId | null>(null);
 
   const routeOfferId = parseRouteOfferId(params.id);
   const { offerDetailsState } = useCoinListOfferDetails(
     OfferId(routeOfferId ?? ""),
   );
 
-  const state: OfferUiState = mapOfferUiState(routeOfferId, offerDetailsState);
+  const state: OfferUiState = mapOfferUiState(
+    routeOfferId,
+    offerDetailsState,
+    selectedOptionId,
+  );
 
   const onEvent = (event: OfferUiEvent) => {
     switch (event.type) {
@@ -83,6 +101,9 @@ export function useOfferViewModel(): {
         break;
       case "ON_RETRY_CLICK":
         router.refresh();
+        break;
+      case "ON_OPTION_SELECT":
+        setSelectedOptionId(event.optionId);
         break;
     }
   };
@@ -110,6 +131,7 @@ function mapOfferUiState(
   offerDetailsState: ReturnType<
     typeof useCoinListOfferDetails
   >["offerDetailsState"],
+  selectedOptionId: OfferOptionId | null,
 ): OfferUiState {
   if (!routeOfferId) {
     return {
@@ -133,11 +155,22 @@ function mapOfferUiState(
             : "Could not load offer details. Please try again.",
         isAuthError: offerDetailsState.reason === "not-authenticated",
       };
-    case "CONTENT":
+    case "CONTENT": {
+      const options = offerDetailsState.offerDetail.options.map((opt) => ({
+        id: opt.id,
+        slug: opt.slug.toString(),
+        priceUsd: opt.priceUsd,
+      }));
+      const resolvedOptionId =
+        selectedOptionId ?? options[0]?.id ?? null;
+      const selectedOption = options.find(
+        (opt) => opt.id === resolvedOptionId,
+      );
       return {
         type: "CONTENT",
         offerId: OfferId(routeOfferId),
-        optionId: offerDetailsState.offerDetail.options[0]?.id ?? null,
+        options,
+        selectedOptionId: resolvedOptionId,
         name: offerDetailsState.offerDetail.name,
         tagline: offerDetailsState.offerDetail.tagline,
         bannerUrl: offerDetailsState.offerDetail.bannerUrl,
@@ -171,8 +204,8 @@ function mapOfferUiState(
             answer: faq.answer ?? "",
           })),
         tokenCode: offerDetailsState.offerDetail.asset.code,
-        tokenPriceUsd:
-          offerDetailsState.offerDetail.options[0]?.priceUsd ?? null,
+        tokenPriceUsd: selectedOption?.priceUsd ?? null,
       };
+    }
   }
 }

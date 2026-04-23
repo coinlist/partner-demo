@@ -8,7 +8,7 @@ import { OfferMilestones } from "./components/OfferMilestones";
 import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
 import { ArrowLeft } from "lucide-react";
-import { OfferUiEvent, OfferUiState } from "./useOfferViewModel";
+import { OfferUiEvent, OfferUiOption, OfferUiState } from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react/client/components";
 import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 
@@ -85,7 +85,11 @@ export function OfferView({ state, onEvent }: Props) {
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
                 offerId={state.offerId}
-                optionId={state.optionId}
+                options={state.options}
+                selectedOptionId={state.selectedOptionId}
+                onOptionSelect={(optionId) =>
+                  onEvent({ type: "ON_OPTION_SELECT", optionId })
+                }
               />
             </div>
 
@@ -124,7 +128,11 @@ export function OfferView({ state, onEvent }: Props) {
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
               offerId={state.offerId}
-              optionId={state.optionId}
+              options={state.options}
+              selectedOptionId={state.selectedOptionId}
+              onOptionSelect={(optionId) =>
+                onEvent({ type: "ON_OPTION_SELECT", optionId })
+              }
             />
           </div>
         </div>
@@ -137,12 +145,16 @@ function SidebarContent({
   tokenCode,
   tokenPriceUsd,
   offerId,
-  optionId,
+  options,
+  selectedOptionId,
+  onOptionSelect,
 }: {
   tokenCode: string;
   tokenPriceUsd: string | null;
   offerId: OfferId;
-  optionId: OfferOptionId | null;
+  options: OfferUiOption[];
+  selectedOptionId: OfferOptionId | null;
+  onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
     <>
@@ -151,10 +163,38 @@ function SidebarContent({
         tokenCode={tokenCode}
         tokenPriceUsd={tokenPriceUsd != null ? Number(tokenPriceUsd) : null}
       />
-      {optionId ? (
+      {options.length > 1 ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Options
+          </p>
+          <div className="flex flex-col gap-2">
+            {options.map((opt) => (
+              <button
+                key={opt.id.toString()}
+                type="button"
+                onClick={() => onOptionSelect(opt.id)}
+                className={`rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${
+                  opt.id === selectedOptionId
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-300"
+                    : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <span className="capitalize">{opt.slug.replace(/-/g, " ")}</span>
+                {opt.priceUsd ? (
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    ${opt.priceUsd}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {selectedOptionId ? (
         <RequirementsChecklist
           offerId={offerId}
-          optionId={optionId}
+          optionId={selectedOptionId}
           title="Requirements"
           description="Complete these steps to participate in the token sale."
         />
