@@ -10,7 +10,6 @@ export function DemoCoinListProvider({
   children: React.ReactNode;
 }) {
   const config: ClientConfig = {
-    sandbox: true,
     clientId: ClientId(
       requiredEnv(
         "NEXT_PUBLIC_COINLIST_CLIENT_ID",
