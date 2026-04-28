@@ -132,20 +132,27 @@ export function OfferParticipations({
     );
   }
 
-  if (state.type === "ERROR" || state.participations.length === 0) {
-    return null;
-  }
+  const isEmpty =
+    state.type === "ERROR" ||
+    (state.type === "CONTENT" && state.participations.length === 0);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
       <p className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         My Participations
       </p>
-      <div className="-mx-2">
-        {state.participations.map((p) => (
-          <ParticipationRow key={p.id} participation={p} />
-        ))}
-      </div>
+      {isEmpty ? (
+        <p className="px-2 py-3 text-sm text-zinc-400 dark:text-zinc-500">
+          No participations yet.
+        </p>
+      ) : (
+        <div className="-mx-2">
+          {state.type === "CONTENT" &&
+            state.participations.map((p) => (
+              <ParticipationRow key={p.id} participation={p} />
+            ))}
+        </div>
+      )}
     </div>
   );
 }
