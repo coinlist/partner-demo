@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  type OfferUiParticipation,
-  type OfferUiParticipationsState,
+  type ParticipationUi,
+  type ParticipationsUiState,
 } from "../useOfferViewModel";
 
-function statusLabel(status: OfferUiParticipation["status"]): string {
+function statusLabel(status: ParticipationUi["status"]): string {
   switch (status) {
     case "completed":
       return "Secured";
@@ -20,7 +20,7 @@ function statusLabel(status: OfferUiParticipation["status"]): string {
   }
 }
 
-function statusColor(status: OfferUiParticipation["status"]): string {
+function statusColor(status: ParticipationUi["status"]): string {
   switch (status) {
     case "completed":
       return "text-emerald-600 dark:text-emerald-400";
@@ -70,7 +70,7 @@ function AssetAvatar({ code }: { code: string }) {
 function ParticipationRow({
   participation,
 }: {
-  participation: OfferUiParticipation;
+  participation: ParticipationUi;
 }) {
   const label = statusLabel(participation.status);
   const colorClass = statusColor(participation.status);
@@ -106,7 +106,7 @@ function ParticipationRow({
 export function OfferParticipations({
   state,
 }: {
-  state: OfferUiParticipationsState;
+  state: ParticipationsUiState;
 }) {
   if (state.type === "LOADING") {
     return (

@@ -42,7 +42,7 @@ export type OfferUiOption = {
   priceUsd: string | null;
 };
 
-export type OfferUiParticipation = {
+export type ParticipationUi = {
   id: string;
   displayAmount: string;
   assetCode: string;
@@ -52,10 +52,10 @@ export type OfferUiParticipation = {
   insertedAt: Date | null;
 };
 
-export type OfferUiParticipationsState =
+export type ParticipationsUiState =
   | { type: "LOADING" }
   | { type: "ERROR" }
-  | { type: "CONTENT"; participations: OfferUiParticipation[] };
+  | { type: "CONTENT"; participations: ParticipationUi[] };
 
 export type OfferUiState =
   | {
@@ -84,7 +84,7 @@ export type OfferUiState =
       faqs: OfferUiFaq[];
       tokenCode: string;
       tokenPriceUsd: string | null;
-      participationsState: OfferUiParticipationsState;
+      participationsState: ParticipationsUiState;
     };
 
 export type OfferUiEvent =
@@ -115,7 +115,7 @@ export function useOfferViewModel(): {
 
   const { isReady, coinlist } = useCoinList();
   const [participationsState, setParticipationsState] =
-    useState<OfferUiParticipationsState>({ type: "LOADING" });
+    useState<ParticipationsUiState>({ type: "LOADING" });
 
   useEffect(() => {
     if (!isReady || !routeOfferId) return;
@@ -170,7 +170,7 @@ function parseRouteOfferId(id: string | string[] | undefined): string | null {
   return id;
 }
 
-function mapParticipation(p: Participation): OfferUiParticipation {
+function mapParticipation(p: Participation): ParticipationUi {
   return {
     id: p.id.toString(),
     displayAmount: p.displayAmount,
@@ -186,7 +186,7 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  participationsState: OfferUiParticipationsState,
+  participationsState: ParticipationsUiState,
 ): OfferUiState {
   if (!routeOfferId) {
     return {

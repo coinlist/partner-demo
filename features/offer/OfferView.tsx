@@ -12,7 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import {
   OfferUiEvent,
   OfferUiOption,
-  OfferUiParticipationsState,
+  ParticipationsUiState,
   OfferUiState,
 } from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react/client/components";
@@ -163,7 +163,7 @@ function SidebarContent({
   offerId: OfferId;
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
-  participationsState: OfferUiParticipationsState;
+  participationsState: ParticipationsUiState;
   onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
@@ -190,7 +190,9 @@ function SidebarContent({
                     : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
-                <span className="capitalize">{opt.slug.replace(/-/g, " ")}</span>
+                <span className="capitalize">
+                  {opt.slug.replace(/-/g, " ")}
+                </span>
                 {opt.priceUsd ? (
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
                     ${opt.priceUsd}
