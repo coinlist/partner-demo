@@ -1,13 +1,19 @@
 "use client";
 
 import { ROUTES } from "@/lib/routes";
-import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
+import {
+  OfferId,
+  OfferOptionId,
+  type Participation,
+  type ParticipationStatus,
+} from "@coinlist-co/react/client";
 import {
   LoadOfferDetailsState,
+  useCoinList,
   useCoinListOfferDetails,
 } from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type OfferUiLink = {
   label: string;
@@ -36,6 +42,21 @@ export type OfferUiOption = {
   priceUsd: string | null;
 };
 
+export type OfferUiParticipation = {
+  id: string;
+  displayAmount: string;
+  assetCode: string;
+  status: ParticipationStatus;
+  chain: string;
+  walletAddress: string | null;
+  insertedAt: Date | null;
+};
+
+export type OfferUiParticipationsState =
+  | { type: "LOADING" }
+  | { type: "ERROR" }
+  | { type: "CONTENT"; participations: OfferUiParticipation[] };
+
 export type OfferUiState =
   | {
       type: "LOADING";
@@ -63,6 +84,7 @@ export type OfferUiState =
       faqs: OfferUiFaq[];
       tokenCode: string;
       tokenPriceUsd: string | null;
+      participationsState: OfferUiParticipationsState;
     };
 
 export type OfferUiEvent =
@@ -91,10 +113,29 @@ export function useOfferViewModel(): {
     OfferId(routeOfferId ?? ""),
   );
 
+  const { isReady, coinlist } = useCoinList();
+  const [participationsState, setParticipationsState] =
+    useState<OfferUiParticipationsState>({ type: "LOADING" });
+
+  useEffect(() => {
+    if (!isReady || !routeOfferId) return;
+    setParticipationsState({ type: "LOADING" });
+    coinlist
+      .fetchAllParticipations(OfferId(routeOfferId))
+      .then((participations) =>
+        setParticipationsState({
+          type: "CONTENT",
+          participations: participations.map(mapParticipation),
+        }),
+      )
+      .catch(() => setParticipationsState({ type: "ERROR" }));
+  }, [isReady, coinlist, routeOfferId]);
+
   const state: OfferUiState = mapOfferUiState(
     routeOfferId,
     offerDetailsState,
     selectedOptionId,
+    participationsState,
   );
 
   const onEvent = (event: OfferUiEvent) => {
@@ -129,10 +170,23 @@ function parseRouteOfferId(id: string | string[] | undefined): string | null {
   return id;
 }
 
+function mapParticipation(p: Participation): OfferUiParticipation {
+  return {
+    id: p.id.toString(),
+    displayAmount: p.displayAmount,
+    assetCode: p.asset.code.toString(),
+    status: p.status,
+    chain: p.chain.toString(),
+    walletAddress: p.walletAddress?.toString() ?? null,
+    insertedAt: p.insertedAt,
+  };
+}
+
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
+  participationsState: OfferUiParticipationsState,
 ): OfferUiState {
   if (!routeOfferId) {
     return {
@@ -203,6 +257,7 @@ function mapOfferUiState(
           })),
         tokenCode: offerDetailsState.offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
+        participationsState,
       };
     }
   }

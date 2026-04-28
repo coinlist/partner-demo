@@ -5,10 +5,16 @@ import { OfferFaq } from "./components/OfferFaq";
 import { OfferHeader } from "./components/OfferHeader";
 import { OfferLink } from "./components/OfferLink";
 import { OfferMilestones } from "./components/OfferMilestones";
+import { OfferParticipations } from "./components/OfferParticipations";
 import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
 import { ArrowLeft } from "lucide-react";
-import { OfferUiEvent, OfferUiOption, OfferUiState } from "./useOfferViewModel";
+import {
+  OfferUiEvent,
+  OfferUiOption,
+  OfferUiParticipationsState,
+  OfferUiState,
+} from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react/client/components";
 import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 
@@ -87,6 +93,7 @@ export function OfferView({ state, onEvent }: Props) {
                 offerId={state.offerId}
                 options={state.options}
                 selectedOptionId={state.selectedOptionId}
+                participationsState={state.participationsState}
                 onOptionSelect={(optionId) =>
                   onEvent({ type: "ON_OPTION_SELECT", optionId })
                 }
@@ -130,6 +137,7 @@ export function OfferView({ state, onEvent }: Props) {
               offerId={state.offerId}
               options={state.options}
               selectedOptionId={state.selectedOptionId}
+              participationsState={state.participationsState}
               onOptionSelect={(optionId) =>
                 onEvent({ type: "ON_OPTION_SELECT", optionId })
               }
@@ -147,6 +155,7 @@ function SidebarContent({
   offerId,
   options,
   selectedOptionId,
+  participationsState,
   onOptionSelect,
 }: {
   tokenCode: string;
@@ -154,6 +163,7 @@ function SidebarContent({
   offerId: OfferId;
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
+  participationsState: OfferUiParticipationsState;
   onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
@@ -199,6 +209,7 @@ function SidebarContent({
           description="Complete these steps to participate in the token sale."
         />
       ) : null}
+      <OfferParticipations state={participationsState} />
     </>
   );
 }
