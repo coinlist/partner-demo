@@ -4,16 +4,16 @@ import { ROUTES } from "@/lib/routes";
 import {
   OfferId,
   OfferOptionId,
-  type Participation,
   type ParticipationStatus,
 } from "@coinlist-co/react/client";
 import {
   LoadOfferDetailsState,
-  useCoinList,
+  LoadParticipationsState,
   useCoinListOfferDetails,
+  useParticipations,
 } from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export type OfferUiLink = {
   label: string;
@@ -108,31 +108,12 @@ export function useOfferViewModel(): {
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
 
-  const routeOfferId = parseRouteOfferId(params.id);
-  const { offerDetailsState } = useCoinListOfferDetails(
-    OfferId(routeOfferId ?? ""),
-  );
-
-  const { isReady, coinlist } = useCoinList();
-  const [participationsState, setParticipationsState] =
-    useState<ParticipationsUiState>({ type: "LOADING" });
-
-  useEffect(() => {
-    if (!isReady || !routeOfferId) return;
-    setParticipationsState({ type: "LOADING" });
-    coinlist
-      .fetchAllParticipations(OfferId(routeOfferId))
-      .then((participations) =>
-        setParticipationsState({
-          type: "CONTENT",
-          participations: participations.map(mapParticipation),
-        }),
-      )
-      .catch(() => setParticipationsState({ type: "ERROR" }));
-  }, [isReady, coinlist, routeOfferId]);
+  const offerId = parseRouteOfferId(params.id) ?? OfferId("");
+  const { offerDetailsState } = useCoinListOfferDetails(offerId);
+  const { participationsState } = useParticipations(offerId);
 
   const state: OfferUiState = mapOfferUiState(
-    routeOfferId,
+    offerId,
     offerDetailsState,
     selectedOptionId,
     participationsState,
@@ -158,36 +139,39 @@ export function useOfferViewModel(): {
   };
 }
 
-function parseRouteOfferId(id: string | string[] | undefined): string | null {
+function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
   if (!id) {
     return null;
   }
 
   if (Array.isArray(id)) {
-    return id[0] ?? null;
+    return OfferId(id[0]) ?? null;
   }
 
-  return id;
-}
-
-function mapParticipation(p: Participation): ParticipationUi {
-  return {
-    id: p.id.toString(),
-    displayAmount: p.displayAmount,
-    assetCode: p.asset.code.toString(),
-    status: p.status,
-    chain: p.chain.toString(),
-    walletAddress: p.walletAddress?.toString() ?? null,
-    insertedAt: p.insertedAt,
-  };
+  return OfferId(id);
 }
 
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  participationsState: ParticipationsUiState,
+  loadParticipationsState: LoadParticipationsState,
 ): OfferUiState {
+  const participationsState: ParticipationsUiState =
+    loadParticipationsState.type === "CONTENT"
+      ? {
+          type: "CONTENT",
+          participations: loadParticipationsState.participations.map((p) => ({
+            id: p.id.toString(),
+            displayAmount: p.displayAmount,
+            assetCode: p.asset.code.toString(),
+            status: p.status,
+            chain: p.chain.toString(),
+            walletAddress: p.walletAddress?.toString() ?? null,
+            insertedAt: p.insertedAt,
+          })),
+        }
+      : { type: loadParticipationsState.type };
   if (!routeOfferId) {
     return {
       type: "ERROR",
