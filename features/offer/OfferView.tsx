@@ -5,10 +5,16 @@ import { OfferFaq } from "./components/OfferFaq";
 import { OfferHeader } from "./components/OfferHeader";
 import { OfferLink } from "./components/OfferLink";
 import { OfferMilestones } from "./components/OfferMilestones";
+import { OfferParticipations } from "./components/OfferParticipations";
 import { OfferSidebarCard } from "./components/OfferSidebarCard";
 import { OfferTerms } from "./components/OfferTerms";
 import { ArrowLeft } from "lucide-react";
-import { OfferUiEvent, OfferUiOption, OfferUiState } from "./useOfferViewModel";
+import {
+  OfferUiEvent,
+  OfferUiOption,
+  ParticipationsUiState,
+  OfferUiState,
+} from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react/client/components";
 import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
 
@@ -87,6 +93,7 @@ export function OfferView({ state, onEvent }: Props) {
                 offerId={state.offerId}
                 options={state.options}
                 selectedOptionId={state.selectedOptionId}
+                participationsState={state.participationsState}
                 onOptionSelect={(optionId) =>
                   onEvent({ type: "ON_OPTION_SELECT", optionId })
                 }
@@ -130,6 +137,7 @@ export function OfferView({ state, onEvent }: Props) {
               offerId={state.offerId}
               options={state.options}
               selectedOptionId={state.selectedOptionId}
+              participationsState={state.participationsState}
               onOptionSelect={(optionId) =>
                 onEvent({ type: "ON_OPTION_SELECT", optionId })
               }
@@ -147,6 +155,7 @@ function SidebarContent({
   offerId,
   options,
   selectedOptionId,
+  participationsState,
   onOptionSelect,
 }: {
   tokenCode: string;
@@ -154,6 +163,7 @@ function SidebarContent({
   offerId: OfferId;
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
+  participationsState: ParticipationsUiState;
   onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
@@ -180,7 +190,9 @@ function SidebarContent({
                     : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
-                <span className="capitalize">{opt.slug.replace(/-/g, " ")}</span>
+                <span className="capitalize">
+                  {opt.slug.replace(/-/g, " ")}
+                </span>
                 {opt.priceUsd ? (
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
                     ${opt.priceUsd}
@@ -199,6 +211,7 @@ function SidebarContent({
           description="Complete these steps to participate in the token sale."
         />
       ) : null}
+      <OfferParticipations state={participationsState} />
     </>
   );
 }

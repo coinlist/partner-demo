@@ -1,10 +1,16 @@
 "use client";
 
 import { ROUTES } from "@/lib/routes";
-import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
+import {
+  OfferId,
+  OfferOptionId,
+  type ParticipationStatus,
+} from "@coinlist-co/react/client";
 import {
   LoadOfferDetailsState,
+  LoadParticipationsState,
   useCoinListOfferDetails,
+  useParticipations,
 } from "@coinlist-co/react/client/hooks";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,6 +42,21 @@ export type OfferUiOption = {
   priceUsd: string | null;
 };
 
+export type ParticipationUi = {
+  id: string;
+  displayAmount: string;
+  assetCode: string;
+  status: ParticipationStatus;
+  chain: string;
+  walletAddress: string | null;
+  insertedAt: Date | null;
+};
+
+export type ParticipationsUiState =
+  | { type: "LOADING" }
+  | { type: "ERROR" }
+  | { type: "CONTENT"; participations: ParticipationUi[] };
+
 export type OfferUiState =
   | {
       type: "LOADING";
@@ -63,6 +84,7 @@ export type OfferUiState =
       faqs: OfferUiFaq[];
       tokenCode: string;
       tokenPriceUsd: string | null;
+      participationsState: ParticipationsUiState;
     };
 
 export type OfferUiEvent =
@@ -86,15 +108,15 @@ export function useOfferViewModel(): {
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
 
-  const routeOfferId = parseRouteOfferId(params.id);
-  const { offerDetailsState } = useCoinListOfferDetails(
-    OfferId(routeOfferId ?? ""),
-  );
+  const offerId = parseRouteOfferId(params.id) ?? OfferId("");
+  const { offerDetailsState } = useCoinListOfferDetails(offerId);
+  const { participationsState } = useParticipations(offerId);
 
   const state: OfferUiState = mapOfferUiState(
-    routeOfferId,
+    offerId,
     offerDetailsState,
     selectedOptionId,
+    participationsState,
   );
 
   const onEvent = (event: OfferUiEvent) => {
@@ -117,23 +139,39 @@ export function useOfferViewModel(): {
   };
 }
 
-function parseRouteOfferId(id: string | string[] | undefined): string | null {
+function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
   if (!id) {
     return null;
   }
 
   if (Array.isArray(id)) {
-    return id[0] ?? null;
+    return OfferId(id[0]) ?? null;
   }
 
-  return id;
+  return OfferId(id);
 }
 
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
+  loadParticipationsState: LoadParticipationsState,
 ): OfferUiState {
+  const participationsState: ParticipationsUiState =
+    loadParticipationsState.type === "CONTENT"
+      ? {
+          type: "CONTENT",
+          participations: loadParticipationsState.participations.map((p) => ({
+            id: p.id.toString(),
+            displayAmount: p.displayAmount,
+            assetCode: p.asset.code.toString(),
+            status: p.status,
+            chain: p.chain.toString(),
+            walletAddress: p.walletAddress?.toString() ?? null,
+            insertedAt: p.insertedAt,
+          })),
+        }
+      : { type: loadParticipationsState.type };
   if (!routeOfferId) {
     return {
       type: "ERROR",
@@ -203,6 +241,7 @@ function mapOfferUiState(
           })),
         tokenCode: offerDetailsState.offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
+        participationsState,
       };
     }
   }
