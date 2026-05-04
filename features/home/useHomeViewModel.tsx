@@ -4,7 +4,9 @@ import { ROUTES } from "@/lib/routes";
 import { Offer } from "@coinlist-co/react";
 import { useRouter } from "next/navigation";
 
-export type HomeUiState = {};
+export type HomeUiState = {
+  preLoadedOffers: Offer[] | undefined;
+};
 
 export type HomeUiEvent =
   | {
@@ -15,13 +17,15 @@ export type HomeUiEvent =
       offer: Offer;
     };
 
-export function useHomeViewModel(): {
+export function useHomeViewModel(offers: Offer[] | undefined): {
   state: HomeUiState;
   onEvent: (event: HomeUiEvent) => void;
 } {
   const router = useRouter();
 
-  const state: HomeUiState = {};
+  const state: HomeUiState = {
+    preLoadedOffers: offers,
+  };
 
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {
