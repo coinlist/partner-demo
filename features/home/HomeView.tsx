@@ -1,6 +1,6 @@
 "use client";
 
-import { OffersGrid } from "@coinlist-co/react/client/components";
+import { OffersGrid } from "@coinlist-co/react";
 import { Settings } from "lucide-react";
 import { HomeUiEvent, HomeUiState } from "./useHomeViewModel";
 import { Offer } from "@coinlist-co/react";

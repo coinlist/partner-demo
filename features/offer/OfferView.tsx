@@ -15,8 +15,8 @@ import {
   ParticipationsUiState,
   OfferUiState,
 } from "./useOfferViewModel";
-import { RequirementsChecklist } from "@coinlist-co/react/client/components";
-import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
+import { RequirementsChecklist } from "@coinlist-co/react";
+import { OfferId, OfferOptionId } from "@coinlist-co/react";
 
 export interface Props {
   state: OfferUiState;

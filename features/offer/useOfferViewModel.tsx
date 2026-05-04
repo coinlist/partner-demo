@@ -5,13 +5,13 @@ import {
   OfferId,
   OfferOptionId,
   type ParticipationStatus,
-} from "@coinlist-co/react/client";
+} from "@coinlist-co/react";
 import {
   LoadOfferDetailsState,
   LoadParticipationsState,
   useCoinListOfferDetails,
   useParticipations,
-} from "@coinlist-co/react/client/hooks";
+} from "@coinlist-co/react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 

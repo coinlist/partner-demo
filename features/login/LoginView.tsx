@@ -1,6 +1,6 @@
 "use client";
 
-import { CoinListSignInCard } from "@coinlist-co/react/client/components";
+import { CoinListSignInCard } from "@coinlist-co/react";
 import { LoginUiState } from "./useLoginViewModel";
 import { ErrorBanner } from "@/components/ErrorBanner";
 
