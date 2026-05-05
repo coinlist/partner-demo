@@ -1,15 +1,17 @@
 import "server-only";
 
-import type { NextResponse } from "next/server";
 import {
   createCoinListServer,
   type CoinListServer,
+  type SessionStore,
 } from "@coinlist-co/react/server";
 import { ClientId, ClientSecret, RedirectUri } from "@coinlist-co/react/shared";
-import { createSessionCookiesStore } from "./session-store";
+import { createNextHeadersCookiesStore } from "./session-store";
 import { requiredEnv } from "./env";
 
-export function coinListServer(outgoingResponse: NextResponse): CoinListServer {
+export function coinListServer(
+  sessionStore: SessionStore = createNextHeadersCookiesStore(),
+): CoinListServer {
   return createCoinListServer({
     clientId: ClientId(
       requiredEnv(
@@ -26,6 +28,6 @@ export function coinListServer(outgoingResponse: NextResponse): CoinListServer {
         process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI,
       ),
     ),
-    sessionStore: createSessionCookiesStore(outgoingResponse),
+    sessionStore,
   });
 }

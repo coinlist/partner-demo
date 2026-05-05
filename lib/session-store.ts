@@ -1,7 +1,6 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 import type { OAuthSession } from "@coinlist-co/react/shared";
 import { OAuthRefreshToken } from "@coinlist-co/react/shared";
 import type { SessionStore } from "@coinlist-co/react/server";
@@ -9,27 +8,19 @@ import type { SessionStore } from "@coinlist-co/react/server";
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
 /**
- * Copy cookies set on `source` onto `target` so the handler can return `target`
- * with the same Set-Cookie headers (e.g. after refresh in accessToken()).
- */
-export function copyCookiesFromTo(source: NextResponse, target: NextResponse) {
-  for (const cookie of source.cookies.getAll()) {
-    const { name, value, ...options } = cookie;
-    target.cookies.set(name, value, options);
-  }
-}
-
-/**
- * Session persistence for the CoinList server SDK.
- * This is a responsibility of the CoinList SDK user.
+ * Session persistence for the CoinList server SDK backed by `cookies()` from
+ * `next/headers`. This is the recommended approach for Next.js App Router:
  *
- * In Route Handlers, always pass the `NextResponse` you will return from the
- * handler. `cookies().set()` from `next/headers` does not reliably attach
- * Set-Cookie to the route response; `response.cookies.set()` does.
+ * - In **Route Handlers** `(await cookies()).set()` writes a `Set-Cookie`
+ *   header onto the outgoing response automatically – no need to pass a
+ *   `NextResponse` around.
+ * - In **Server Actions** cookies are equally writable.
+ *
+ * Do NOT use this from a plain Server Component: Next.js only allows cookie
+ * mutation inside Route Handlers and Server Actions. Use `getServerSession()`
+ * to read the session without triggering any refresh side-effects.
  */
-export function createSessionCookiesStore(
-  outgoingResponse: NextResponse,
-): SessionStore {
+export function createNextHeadersCookiesStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {
       const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
@@ -37,19 +28,31 @@ export function createSessionCookiesStore(
     },
 
     async setSession(session: OAuthSession | null): Promise<void> {
+      const cookieStore = await cookies();
       if (session == null) {
-        outgoingResponse.cookies.delete(COINLIST_SESSION_COOKIE);
+        cookieStore.delete(COINLIST_SESSION_COOKIE);
         return;
       }
-
-      const value = serializeSession(session);
-      outgoingResponse.cookies.set(
+      cookieStore.set(
         COINLIST_SESSION_COOKIE,
-        value,
+        serializeSession(session),
         cookieOptions(),
       );
     },
   };
+}
+
+/**
+ * Read the current session directly from the incoming request cookie without
+ * going through the SDK (i.e. without triggering a token refresh).
+ *
+ * Use this in Server Components to gate which view to render. Actual token
+ * refresh is handled by the Route Handler at `/api/coinlist/oauth/access-token`
+ * which can safely write cookies back to the response.
+ */
+export async function getServerSession(): Promise<OAuthSession | null> {
+  const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
+  return deserializeSession(raw);
 }
 
 function deserializeSession(raw?: string): OAuthSession | null {
@@ -108,6 +111,3 @@ function cookieOptions() {
   };
 }
 
-export function createNoOpCookiesSink(): NextResponse {
-  return NextResponse.json({});
-}
