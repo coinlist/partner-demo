@@ -25,7 +25,7 @@ export function HomeView({ state, onEvent }: Props) {
       </div>
       <div className="mt-4 flex flex-1 items-center justify-center sm:mt-6">
         <OffersGrid
-          data={state.preLoadedOffers}
+          data={state.preloadedOffers}
           onOfferClick={onOfferClick}
           className="justify-items-center"
           loading={<OffersGridLoading />}
