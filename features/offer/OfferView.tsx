@@ -14,14 +14,9 @@ import {
   OfferUiOption,
   ParticipationsUiState,
   OfferUiState,
-  RequirementsServerData,
 } from "./useOfferViewModel";
-import { RequirementsChecklist } from "@coinlist-co/react/client/components";
-import {
-  LoadRequirementsState,
-  OfferId,
-  OfferOptionId,
-} from "@coinlist-co/react/client";
+import { RequirementsChecklist, RequirementsData } from "@coinlist-co/react";
+import { OfferId, OfferOptionId } from "@coinlist-co/react/shared";
 
 export interface Props {
   state: OfferUiState;
@@ -172,7 +167,7 @@ function SidebarContent({
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
   participationsState: ParticipationsUiState;
-  requirementsData: RequirementsServerData | null;
+  requirementsData: RequirementsData | undefined;
   onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
@@ -218,7 +213,7 @@ function SidebarContent({
           optionId={selectedOptionId}
           title="Requirements"
           description="Complete these steps to participate in the token sale."
-          serverData={requirementsData ?? undefined}
+          data={requirementsData}
         />
       ) : null}
       <OfferParticipations state={participationsState} />

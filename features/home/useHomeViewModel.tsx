@@ -1,11 +1,11 @@
 "use client";
 
 import { ROUTES } from "@/lib/routes";
-import { Offer } from "@coinlist-co/react";
+import { Offer } from "@coinlist-co/react/shared";
 import { useRouter } from "next/navigation";
 
 export type HomeUiState = {
-  preLoadedOffers: Offer[] | undefined;
+  preloadedOffers: Offer[] | undefined;
 };
 
 export type HomeUiEvent =
@@ -24,7 +24,7 @@ export function useHomeViewModel(offers: Offer[] | undefined): {
   const router = useRouter();
 
   const state: HomeUiState = {
-    preLoadedOffers: offers,
+    preloadedOffers: offers,
   };
 
   const onEvent = (event: HomeUiEvent) => {

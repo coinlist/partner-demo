@@ -7,7 +7,7 @@ export default async function HomePage() {
   const coinlistServer = coinListServer(createNoOpCookiesSink());
   const loggedIn = await coinlistServer.accessToken().catch(() => null);
   if (loggedIn) {
-    const offers = await coinlistServer.fetchAllOffers().catch(() => undefined);
+    const offers = await coinlistServer.fetchOffers().catch(() => undefined);
     return <HomeContainer offers={offers} />;
   } else {
     return <LoginContainer />;

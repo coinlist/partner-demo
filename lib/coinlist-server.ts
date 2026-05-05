@@ -1,13 +1,11 @@
 import "server-only";
 
 import type { NextResponse } from "next/server";
-import type { CoinListServer } from "@coinlist-co/react/server";
 import {
-  ClientId,
-  ClientSecret,
   createCoinListServer,
-  RedirectUri,
+  type CoinListServer,
 } from "@coinlist-co/react/server";
+import { ClientId, ClientSecret, RedirectUri } from "@coinlist-co/react/shared";
 import { createSessionCookiesStore } from "./session-store";
 import { requiredEnv } from "./env";
 

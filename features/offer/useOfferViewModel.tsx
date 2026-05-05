@@ -5,14 +5,14 @@ import {
   OfferId,
   OfferOptionId,
   type ParticipationStatus,
-} from "@coinlist-co/react/client";
+} from "@coinlist-co/react/shared";
 import {
   LoadOfferDetailsState,
   LoadParticipationsState,
-  useCoinListOfferDetails,
-  UseCoinListRequirementsOptions,
+  useOfferDetails,
   useParticipations,
-} from "@coinlist-co/react/client/hooks";
+  RequirementsData,
+} from "@coinlist-co/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { OfferDetailPreloadData } from "./OfferContainer";
@@ -59,9 +59,6 @@ export type ParticipationsUiState =
   | { type: "ERROR" }
   | { type: "CONTENT"; participations: ParticipationUi[] };
 
-export type RequirementsServerData =
-  UseCoinListRequirementsOptions["serverData"];
-
 export type OfferUiState =
   | {
       type: "LOADING";
@@ -90,7 +87,7 @@ export type OfferUiState =
       tokenCode: string;
       tokenPriceUsd: string | null;
       participationsState: ParticipationsUiState;
-      requirementsData: RequirementsServerData | null;
+      requirementsData: RequirementsData | undefined;
     };
 
 export type OfferUiEvent =
@@ -116,16 +113,16 @@ export function useOfferViewModel(
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
 
-  const { offerDetailsState } = useCoinListOfferDetails(offerId, {
-    serverData: preloadData?.offerDetail,
+  const { offerDetailsState } = useOfferDetails(offerId, {
+    data: preloadData?.offerDetail,
   });
   const { participationsState } = useParticipations(offerId, {
-    serverData: preloadData?.participations,
+    data: preloadData?.participations,
   });
-  let requirementsServerData: RequirementsServerData | undefined = undefined;
+  let requirementsData: RequirementsData | undefined = undefined;
   if (preloadData?.requirements && preloadData.requirementStatuses) {
-    requirementsServerData = {
-      requirementsByOptionId: preloadData?.requirements,
+    requirementsData = {
+      requirements: preloadData?.requirements,
       statuses: preloadData?.requirementStatuses,
     };
   }
@@ -135,7 +132,7 @@ export function useOfferViewModel(
     offerDetailsState,
     selectedOptionId,
     participationsState,
-    requirementsServerData,
+    requirementsData,
   );
 
   const onEvent = (event: OfferUiEvent) => {
@@ -163,7 +160,7 @@ function mapOfferUiState(
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
   loadParticipationsState: LoadParticipationsState,
-  requirementsData: RequirementsServerData,
+  requirementsData: RequirementsData | undefined,
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
     loadParticipationsState.type === "CONTENT"

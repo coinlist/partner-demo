@@ -1,6 +1,6 @@
 "use client";
 
-import { Offer } from "@coinlist-co/react/server";
+import { Offer } from "@coinlist-co/react/shared";
 import { HomeView } from "./HomeView";
 import { useHomeViewModel } from "./useHomeViewModel";
 

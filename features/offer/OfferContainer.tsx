@@ -7,7 +7,7 @@ import {
   Participation,
   Requirement,
   RequirementStatusInfo,
-} from "@coinlist-co/react";
+} from "@coinlist-co/react/shared";
 import { OfferView } from "./OfferView";
 import { useOfferViewModel } from "./useOfferViewModel";
 

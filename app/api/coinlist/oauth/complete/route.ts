@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AuthorizationCode, CodeVerifier } from "@coinlist-co/react/server";
+import { AuthorizationCode, CodeVerifier } from "@coinlist-co/react/shared";
 
 import { coinListServer } from "@/lib/coinlist-server";
 

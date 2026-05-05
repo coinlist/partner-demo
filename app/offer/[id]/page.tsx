@@ -4,7 +4,7 @@ import {
 } from "@/features/offer/OfferContainer";
 import { coinListServer } from "@/lib/coinlist-server";
 import { createNoOpCookiesSink } from "@/lib/session-store";
-import { OfferId } from "@coinlist-co/react/server";
+import { OfferId } from "@coinlist-co/react/shared";
 import { redirect } from "next/navigation";
 
 export default async function OfferPage({
@@ -23,7 +23,7 @@ export default async function OfferPage({
     coinlistServer.fetchOfferDetails(offerId),
     coinlistServer.fetchOfferRequirements(offerId),
     coinlistServer.fetchRequirementStatuses(offerId),
-    coinlistServer.fetchAllParticipations(offerId),
+    coinlistServer.fetchParticipations(offerId),
   ]).catch(() => null);
   let preloadData: OfferDetailPreloadData | null = null;
   if (preloadDataArr) {

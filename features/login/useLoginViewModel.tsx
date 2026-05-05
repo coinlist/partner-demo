@@ -1,6 +1,6 @@
 "use client";
 
-import { CompleteCoinListOAuthFailureReason } from "@coinlist-co/react";
+import { CompleteOAuthFailureReason } from "@coinlist-co/react";
 import { useSearchParams } from "next/navigation";
 
 export type LoginUiState = {
@@ -23,17 +23,15 @@ export function useLoginViewModel(): {
 
 function parseOAuthFailureReason(
   value: string | null,
-): CompleteCoinListOAuthFailureReason | null {
+): CompleteOAuthFailureReason | null {
   if (!value) {
     return null;
   }
 
-  return value as CompleteCoinListOAuthFailureReason;
+  return value as CompleteOAuthFailureReason;
 }
 
-function getOAuthErrorMessage(
-  reason: CompleteCoinListOAuthFailureReason,
-): string {
+function getOAuthErrorMessage(reason: CompleteOAuthFailureReason): string {
   switch (reason) {
     case "user_canceled":
       return "Sign-in was canceled before completion. Please try again.";
