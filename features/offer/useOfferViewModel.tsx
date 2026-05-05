@@ -5,11 +5,11 @@ import {
   OfferId,
   OfferOptionId,
   type ParticipationStatus,
-} from "@coinlist-co/react";
+} from "@coinlist-co/react/shared";
 import {
   LoadOfferDetailsState,
   LoadParticipationsState,
-  useCoinListOfferDetails,
+  useOfferDetails,
   useParticipations,
 } from "@coinlist-co/react";
 import { useParams, useRouter } from "next/navigation";
@@ -109,7 +109,7 @@ export function useOfferViewModel(): {
     useState<OfferOptionId | null>(null);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId("");
-  const { offerDetailsState } = useCoinListOfferDetails(offerId);
+  const { offerDetailsState } = useOfferDetails(offerId);
   const { participationsState } = useParticipations(offerId);
 
   const state: OfferUiState = mapOfferUiState(

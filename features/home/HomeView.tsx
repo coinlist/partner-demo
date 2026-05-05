@@ -3,7 +3,7 @@
 import { OffersGrid } from "@coinlist-co/react";
 import { Settings } from "lucide-react";
 import { HomeUiEvent, HomeUiState } from "./useHomeViewModel";
-import { Offer } from "@coinlist-co/react";
+import { Offer } from "@coinlist-co/react/shared";
 
 export interface Props {
   state: HomeUiState;
@@ -25,7 +25,7 @@ export function HomeView({ state, onEvent }: Props) {
       </div>
       <div className="mt-4 flex flex-1 items-center justify-center sm:mt-6">
         <OffersGrid
-          serverOffers={state.preLoadedOffers}
+          data={state.preLoadedOffers}
           onOfferClick={onOfferClick}
           className="justify-items-center"
           loading={<OffersGridLoading />}

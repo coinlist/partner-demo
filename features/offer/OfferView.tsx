@@ -16,7 +16,7 @@ import {
   OfferUiState,
 } from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react";
-import { OfferId, OfferOptionId } from "@coinlist-co/react";
+import { OfferId, OfferOptionId } from "@coinlist-co/react/shared";
 
 export interface Props {
   state: OfferUiState;

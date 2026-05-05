@@ -1,7 +1,7 @@
 "use client";
 
 import { ROUTES } from "@/lib/routes";
-import { Offer } from "@coinlist-co/react";
+import { Offer } from "@coinlist-co/react/shared";
 import { useRouter } from "next/navigation";
 
 export type HomeUiState = {
