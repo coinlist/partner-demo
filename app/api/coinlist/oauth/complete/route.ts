@@ -16,8 +16,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  // The CoinList SDK writes the session cookie via the SessionStore
-  // (cookies() from next/headers, which sets Set-Cookie on this response).
   await coinListServer().completeOAuth(
     AuthorizationCode(code),
     CodeVerifier(codeVerifier),

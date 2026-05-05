@@ -7,19 +7,6 @@ import type { SessionStore } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
-/**
- * Session persistence for the CoinList server SDK backed by `cookies()` from
- * `next/headers`. This is the recommended approach for Next.js App Router:
- *
- * - In **Route Handlers** `(await cookies()).set()` writes a `Set-Cookie`
- *   header onto the outgoing response automatically – no need to pass a
- *   `NextResponse` around.
- * - In **Server Actions** cookies are equally writable.
- *
- * Do NOT use this from a plain Server Component: Next.js only allows cookie
- * mutation inside Route Handlers and Server Actions. Use `getServerSession()`
- * to read the session without triggering any refresh side-effects.
- */
 export function createNextHeadersCookiesStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {
@@ -42,14 +29,6 @@ export function createNextHeadersCookiesStore(): SessionStore {
   };
 }
 
-/**
- * Read the current session directly from the incoming request cookie without
- * going through the SDK (i.e. without triggering a token refresh).
- *
- * Use this in Server Components to gate which view to render. Actual token
- * refresh is handled by the Route Handler at `/api/coinlist/oauth/access-token`
- * which can safely write cookies back to the response.
- */
 export async function getServerSession(): Promise<OAuthSession | null> {
   const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
   return deserializeSession(raw);
