@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  CompleteCoinListOAuthFailureReason,
-  useCompleteCoinListOAuth,
+  CompleteOAuthFailureReason,
+  useCompleteOAuth,
 } from "@coinlist-co/react";
 import { useRouter } from "next/navigation";
 
 export default function CoinListCallbackPage() {
   const router = useRouter();
 
-  useCompleteCoinListOAuth({
+  useCompleteOAuth({
     async postOAuthComplete({ code, codeVerifier }) {
       const res = await fetch("/api/coinlist/oauth/complete", {
         method: "POST",
@@ -19,7 +19,7 @@ export default function CoinListCallbackPage() {
       });
       return res.ok;
     },
-    onFailure(reason: CompleteCoinListOAuthFailureReason) {
+    onFailure(reason: CompleteOAuthFailureReason) {
       router.replace(`/?error=${encodeURIComponent(reason)}`);
     },
     onSuccess() {

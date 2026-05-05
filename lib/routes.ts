@@ -1,4 +1,4 @@
-import { OfferId } from "@coinlist-co/react";
+import { OfferId } from "@coinlist-co/react/shared";
 
 export const ROUTES = {
   ROOT: "/",

@@ -1,7 +1,8 @@
 "use client";
 
 import { requiredEnv } from "@/lib/env";
-import { ClientId, CoinListProvider, RedirectUri } from "@coinlist-co/react";
+import { CoinListProvider } from "@coinlist-co/react";
+import { ClientId, RedirectUri } from "@coinlist-co/react/shared";
 import type { ClientConfig } from "@coinlist-co/react";
 
 export function DemoCoinListProvider({
