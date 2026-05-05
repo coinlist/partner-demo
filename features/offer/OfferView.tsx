@@ -14,9 +14,14 @@ import {
   OfferUiOption,
   ParticipationsUiState,
   OfferUiState,
+  RequirementsServerData,
 } from "./useOfferViewModel";
 import { RequirementsChecklist } from "@coinlist-co/react/client/components";
-import { OfferId, OfferOptionId } from "@coinlist-co/react/client";
+import {
+  LoadRequirementsState,
+  OfferId,
+  OfferOptionId,
+} from "@coinlist-co/react/client";
 
 export interface Props {
   state: OfferUiState;
@@ -94,6 +99,7 @@ export function OfferView({ state, onEvent }: Props) {
                 options={state.options}
                 selectedOptionId={state.selectedOptionId}
                 participationsState={state.participationsState}
+                requirementsData={state.requirementsData}
                 onOptionSelect={(optionId) =>
                   onEvent({ type: "ON_OPTION_SELECT", optionId })
                 }
@@ -138,6 +144,7 @@ export function OfferView({ state, onEvent }: Props) {
               options={state.options}
               selectedOptionId={state.selectedOptionId}
               participationsState={state.participationsState}
+              requirementsData={state.requirementsData}
               onOptionSelect={(optionId) =>
                 onEvent({ type: "ON_OPTION_SELECT", optionId })
               }
@@ -156,6 +163,7 @@ function SidebarContent({
   options,
   selectedOptionId,
   participationsState,
+  requirementsData,
   onOptionSelect,
 }: {
   tokenCode: string;
@@ -164,6 +172,7 @@ function SidebarContent({
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
   participationsState: ParticipationsUiState;
+  requirementsData: RequirementsServerData | null;
   onOptionSelect: (optionId: OfferOptionId) => void;
 }) {
   return (
@@ -209,6 +218,7 @@ function SidebarContent({
           optionId={selectedOptionId}
           title="Requirements"
           description="Complete these steps to participate in the token sale."
+          serverData={requirementsData ?? undefined}
         />
       ) : null}
       <OfferParticipations state={participationsState} />

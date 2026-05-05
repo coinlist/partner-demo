@@ -10,10 +10,12 @@ import {
   LoadOfferDetailsState,
   LoadParticipationsState,
   useCoinListOfferDetails,
+  UseCoinListRequirementsOptions,
   useParticipations,
 } from "@coinlist-co/react/client/hooks";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OfferDetailPreloadData } from "./OfferContainer";
 
 export type OfferUiLink = {
   label: string;
@@ -57,6 +59,9 @@ export type ParticipationsUiState =
   | { type: "ERROR" }
   | { type: "CONTENT"; participations: ParticipationUi[] };
 
+export type RequirementsServerData =
+  UseCoinListRequirementsOptions["serverData"];
+
 export type OfferUiState =
   | {
       type: "LOADING";
@@ -85,6 +90,7 @@ export type OfferUiState =
       tokenCode: string;
       tokenPriceUsd: string | null;
       participationsState: ParticipationsUiState;
+      requirementsData: RequirementsServerData | null;
     };
 
 export type OfferUiEvent =
@@ -99,24 +105,37 @@ export type OfferUiEvent =
       optionId: OfferOptionId;
     };
 
-export function useOfferViewModel(): {
+export function useOfferViewModel(
+  offerId: OfferId,
+  preloadData: OfferDetailPreloadData | null,
+): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
 } {
-  const params = useParams<{ id: string | string[] }>();
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
 
-  const offerId = parseRouteOfferId(params.id) ?? OfferId("");
-  const { offerDetailsState } = useCoinListOfferDetails(offerId);
-  const { participationsState } = useParticipations(offerId);
+  const { offerDetailsState } = useCoinListOfferDetails(offerId, {
+    serverData: preloadData?.offerDetail,
+  });
+  const { participationsState } = useParticipations(offerId, {
+    serverData: preloadData?.participations,
+  });
+  let requirementsServerData: RequirementsServerData | undefined = undefined;
+  if (preloadData?.requirements && preloadData.requirementStatuses) {
+    requirementsServerData = {
+      requirementsByOptionId: preloadData?.requirements,
+      statuses: preloadData?.requirementStatuses,
+    };
+  }
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
     offerDetailsState,
     selectedOptionId,
     participationsState,
+    requirementsServerData,
   );
 
   const onEvent = (event: OfferUiEvent) => {
@@ -139,23 +158,12 @@ export function useOfferViewModel(): {
   };
 }
 
-function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
-  if (!id) {
-    return null;
-  }
-
-  if (Array.isArray(id)) {
-    return OfferId(id[0]) ?? null;
-  }
-
-  return OfferId(id);
-}
-
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
   loadParticipationsState: LoadParticipationsState,
+  requirementsData: RequirementsServerData,
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
     loadParticipationsState.type === "CONTENT"
@@ -242,6 +250,7 @@ function mapOfferUiState(
         tokenCode: offerDetailsState.offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
         participationsState,
+        requirementsData,
       };
     }
   }
