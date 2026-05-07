@@ -1,9 +1,9 @@
 import { coinListServer } from "@/lib/coinlist-server";
 import { cookiesSessionStore } from "@/lib/session-store";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const { store, applyCookies } = cookiesSessionStore();
+export async function GET(request: NextRequest) {
+  const { store, applyCookies } = cookiesSessionStore(request);
   const token = await coinListServer(store).accessToken();
   if (token == null) {
     return applyCookies(new NextResponse(null, { status: 204 }));

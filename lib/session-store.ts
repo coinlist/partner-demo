@@ -1,18 +1,13 @@
 import "server-only";
 
-import { cookies } from "next/headers";
-import type { NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import type { OAuthSession } from "@coinlist-co/react/shared";
 import { OAuthRefreshToken } from "@coinlist-co/react/shared";
 import type { SessionStore } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
-// Use in Route Handlers: buffers setSession() and applies it to the response
-// via response.cookies.set(), which reliably attaches Set-Cookie headers.
-// cookies().set() from next/headers does NOT reliably attach Set-Cookie to
-// NextResponse objects returned from Route Handlers.
-export function cookiesSessionStore(): {
+export function cookiesSessionStore(request: NextRequest): {
   store: SessionStore;
   applyCookies: (response: NextResponse) => NextResponse;
 } {
@@ -20,7 +15,7 @@ export function cookiesSessionStore(): {
 
   const store: SessionStore = {
     async getSession(): Promise<OAuthSession | null> {
-      const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
+      const raw = request.cookies.get(COINLIST_SESSION_COOKIE)?.value;
       return deserializeSession(raw);
     },
     async setSession(session: OAuthSession | null): Promise<void> {
@@ -48,6 +43,7 @@ export function cookiesSessionStore(): {
 export function readOnlySessionStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {
+      const { cookies } = await import("next/headers");
       const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
       return deserializeSession(raw);
     },
