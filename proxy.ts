@@ -4,11 +4,11 @@ import { cookiesSessionStore } from "@/lib/session-store";
 
 export const config = {
   // Excludes:
+  //   api           — all API routes
   //   _next/static  — Next.js bundled assets
   //   _next/image   — Next.js image optimization
   //   favicon.ico
-  //   api/coinlist/oauth/access-token — has its own token logic; running here too would double-refresh
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/coinlist/oauth/access-token).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
 
 export async function proxy(request: NextRequest) {
