@@ -6,7 +6,6 @@ import {
   type SessionStore,
 } from "@coinlist-co/react/server";
 import { ClientId, ClientSecret, RedirectUri } from "@coinlist-co/react/shared";
-import { createNextHeadersCookiesStore } from "./session-store";
 import { requiredEnv } from "./env";
 
 export function coinListServer(
