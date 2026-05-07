@@ -8,9 +8,7 @@ import {
 import { ClientId, ClientSecret, RedirectUri } from "@coinlist-co/react/shared";
 import { requiredEnv } from "./env";
 
-export function coinListServer(
-  sessionStore: SessionStore = createNextHeadersCookiesStore(),
-): CoinListServer {
+export function coinListServer(sessionStore: SessionStore): CoinListServer {
   return createCoinListServer({
     clientId: ClientId(
       requiredEnv(

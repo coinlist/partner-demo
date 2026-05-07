@@ -8,24 +8,11 @@ import type { SessionStore } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
-export async function getSessionOrNull(): Promise<OAuthSession | null> {
-  try {
-    const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
-    return deserializeSession(raw);
-  } catch {
-    return null;
-  }
-}
-
-export function validAccessToken(session: OAuthSession): boolean {
-  return session.accessToken.expiresAt > new Date();
-}
-
 // Use in Route Handlers: buffers setSession() and applies it to the response
 // via response.cookies.set(), which reliably attaches Set-Cookie headers.
 // cookies().set() from next/headers does NOT reliably attach Set-Cookie to
 // NextResponse objects returned from Route Handlers.
-export function createRouteHandlerCookiesStore(): {
+export function cookiesSessionStore(): {
   store: SessionStore;
   applyCookies: (response: NextResponse) => NextResponse;
 } {
@@ -56,6 +43,15 @@ export function createRouteHandlerCookiesStore(): {
   }
 
   return { store, applyCookies };
+}
+
+export function readOnlySessionStore(): SessionStore {
+  return {
+    async getSession(): Promise<OAuthSession | null> {
+      const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
+      return deserializeSession(raw);
+    },
+  };
 }
 
 function cookieOptions() {
@@ -113,40 +109,4 @@ function serializeSession(session: OAuthSession): string {
       ? { refreshToken: String(session.refreshToken) }
       : {}),
   });
-}
-
-/**
- * Session store for use in Next.js Server Components (e.g. app/page.tsx).
- *
- * Next.js does not allow setting cookies from Server Components — only from
- * Route Handlers and Server Actions. This store reads the session normally so
- * the SDK can use the current access token, but silently discards any writes.
- *
- * IMPORTANT: Because writes are discarded, you must NEVER call an SDK method
- * that may trigger a token refresh when using this store. A refresh consumes
- * the refresh token via a network call, but the new session cannot be persisted,
- * leaving the browser with an invalidated refresh token and causing silent logout.
- *
- * Safe pattern for Server Components:
- *
- *   const session = await getSessionOrNull();
- *   if (!session || !validAccessToken(session)) {
- *     // Token absent or expired — let the client handle renewal via the
- *     // GET /api/coinlist/oauth/access-token Route Handler, which CAN persist
- *     // the refreshed session using createRouteHandlerCookiesStore().
- *     return <HomeContainer offers={undefined} />;
- *   }
- *   // Token is valid — safe to call SDK methods; no refresh will fire.
- *   const offers = await coinListServer(noOpSessionStore()).fetchOffers()...
- */
-export function noOpSessionStore(): SessionStore {
-  return {
-    async getSession(): Promise<OAuthSession | null> {
-      const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
-      return deserializeSession(raw);
-    },
-    async setSession(): Promise<void> {
-      // no-op: intentionally discards writes (see JSDoc above).
-    },
-  };
 }
