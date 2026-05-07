@@ -1,14 +1,18 @@
 import { coinListServer } from "@/lib/coinlist-server";
+import { createRouteHandlerCookiesStore } from "@/lib/session-store";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const token = await coinListServer().accessToken();
+  const { store, applyCookies } = createRouteHandlerCookiesStore();
+  const token = await coinListServer(store).accessToken();
   if (token == null) {
-    return new NextResponse(null, { status: 204 });
+    return applyCookies(new NextResponse(null, { status: 204 }));
   }
 
-  return NextResponse.json({
-    value: token.value,
-    expiresAt: token.expiresAt.toISOString(),
-  });
+  return applyCookies(
+    NextResponse.json({
+      value: token.value,
+      expiresAt: token.expiresAt.toISOString(),
+    }),
+  );
 }

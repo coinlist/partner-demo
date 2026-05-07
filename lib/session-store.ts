@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 import type { OAuthSession } from "@coinlist-co/react/shared";
 import { OAuthRefreshToken } from "@coinlist-co/react/shared";
 import type { SessionStore } from "@coinlist-co/react/server";
@@ -19,6 +20,43 @@ export async function hasSession(): Promise<boolean> {
 export async function getSessionOrNull(): Promise<OAuthSession | null> {
   const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
   return deserializeSession(raw);
+}
+
+// Use in Route Handlers: buffers setSession() and applies it to the response
+// via response.cookies.set(), which reliably attaches Set-Cookie headers.
+// cookies().set() from next/headers does NOT reliably attach Set-Cookie to
+// NextResponse objects returned from Route Handlers.
+export function createRouteHandlerCookiesStore(): {
+  store: SessionStore;
+  applyCookies: (response: NextResponse) => NextResponse;
+} {
+  let pendingSession: OAuthSession | null | undefined = undefined;
+
+  const store: SessionStore = {
+    async getSession(): Promise<OAuthSession | null> {
+      const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
+      return deserializeSession(raw);
+    },
+    async setSession(session: OAuthSession | null): Promise<void> {
+      pendingSession = session;
+    },
+  };
+
+  function applyCookies(response: NextResponse): NextResponse {
+    if (pendingSession === undefined) return response;
+    if (pendingSession === null) {
+      response.cookies.delete(COINLIST_SESSION_COOKIE);
+    } else {
+      response.cookies.set(
+        COINLIST_SESSION_COOKIE,
+        serializeSession(pendingSession),
+        cookieOptions(),
+      );
+    }
+    return response;
+  }
+
+  return { store, applyCookies };
 }
 
 export function createNextHeadersCookiesStore(): SessionStore {
@@ -96,5 +134,6 @@ function cookieOptions() {
     secure: isProd,
     sameSite: "lax" as const,
     path: "/",
+    maxAge: 60 * 60 * 24 * 90, // 90 days
   };
 }

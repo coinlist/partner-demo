@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { AuthorizationCode, CodeVerifier } from "@coinlist-co/react/shared";
 import { coinListServer } from "@/lib/coinlist-server";
+import { createRouteHandlerCookiesStore } from "@/lib/session-store";
 
 interface CompleteOAuthRequest {
   code: string;
@@ -16,10 +17,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  await coinListServer().completeOAuth(
+  const { store, applyCookies } = createRouteHandlerCookiesStore();
+  await coinListServer(store).completeOAuth(
     AuthorizationCode(code),
     CodeVerifier(codeVerifier),
   );
 
-  return NextResponse.json({ ok: true });
+  return applyCookies(NextResponse.json({ ok: true }));
 }
