@@ -4,6 +4,10 @@ import { cookiesSessionStore } from "@/lib/session-store";
 
 export async function middleware(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
-  await coinListServer(store).accessToken();
+  try {
+    await coinListServer(store).accessToken();
+  } catch {
+    return NextResponse.next(); // degrade gracefully
+  }
   return applyCookies(NextResponse.next());
 }
