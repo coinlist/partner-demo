@@ -1,54 +1,63 @@
 import "server-only";
 
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import type { NextRequest, NextResponse } from "next/server";
 import type { OAuthSession } from "@coinlist-co/react/shared";
 import { OAuthRefreshToken } from "@coinlist-co/react/shared";
 import type { SessionStore } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
-/**
- * Copy cookies set on `source` onto `target` so the handler can return `target`
- * with the same Set-Cookie headers (e.g. after refresh in accessToken()).
- */
-export function copyCookiesFromTo(source: NextResponse, target: NextResponse) {
-  for (const cookie of source.cookies.getAll()) {
-    const { name, value, ...options } = cookie;
-    target.cookies.set(name, value, options);
+export function cookiesSessionStore(request: NextRequest): {
+  store: SessionStore;
+  applyCookies: (response: NextResponse) => NextResponse;
+} {
+  let pendingSession: OAuthSession | null | undefined = undefined;
+
+  const store: SessionStore = {
+    async getSession(): Promise<OAuthSession | null> {
+      const raw = request.cookies.get(COINLIST_SESSION_COOKIE)?.value;
+      return deserializeSession(raw);
+    },
+    async setSession(session: OAuthSession | null): Promise<void> {
+      pendingSession = session;
+    },
+  };
+
+  function applyCookies(response: NextResponse): NextResponse {
+    if (pendingSession === undefined) return response;
+    if (pendingSession === null) {
+      response.cookies.delete(COINLIST_SESSION_COOKIE);
+    } else {
+      response.cookies.set(
+        COINLIST_SESSION_COOKIE,
+        serializeSession(pendingSession),
+        cookieOptions(),
+      );
+    }
+    return response;
   }
+
+  return { store, applyCookies };
 }
 
-/**
- * Session persistence for the CoinList server SDK.
- * This is a responsibility of the CoinList SDK user.
- *
- * In Route Handlers, always pass the `NextResponse` you will return from the
- * handler. `cookies().set()` from `next/headers` does not reliably attach
- * Set-Cookie to the route response; `response.cookies.set()` does.
- */
-export function createSessionCookiesStore(
-  outgoingResponse: NextResponse,
-): SessionStore {
+export function readOnlySessionStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {
+      const { cookies } = await import("next/headers");
       const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
       return deserializeSession(raw);
     },
+  };
+}
 
-    async setSession(session: OAuthSession | null): Promise<void> {
-      if (session == null) {
-        outgoingResponse.cookies.delete(COINLIST_SESSION_COOKIE);
-        return;
-      }
-
-      const value = serializeSession(session);
-      outgoingResponse.cookies.set(
-        COINLIST_SESSION_COOKIE,
-        value,
-        cookieOptions(),
-      );
-    },
+function cookieOptions() {
+  const isProd = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 90, // 90 days
   };
 }
 
@@ -96,18 +105,4 @@ function serializeSession(session: OAuthSession): string {
       ? { refreshToken: String(session.refreshToken) }
       : {}),
   });
-}
-
-function cookieOptions() {
-  const isProd = process.env.NODE_ENV === "production";
-  return {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax" as const,
-    path: "/",
-  };
-}
-
-export function createNoOpCookiesSink(): NextResponse {
-  return NextResponse.json({});
 }

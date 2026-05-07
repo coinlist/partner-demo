@@ -1,18 +1,18 @@
 import { coinListServer } from "@/lib/coinlist-server";
-import { copyCookiesFromTo } from "@/lib/session-store";
-import { NextResponse } from "next/server";
+import { cookiesSessionStore } from "@/lib/session-store";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const cookieSink = new NextResponse(null, { status: 204 });
-  const token = await coinListServer(cookieSink).accessToken();
+export async function GET(request: NextRequest) {
+  const { store, applyCookies } = cookiesSessionStore(request);
+  const token = await coinListServer(store).accessToken();
   if (token == null) {
-    return cookieSink;
+    return applyCookies(new NextResponse(null, { status: 204 }));
   }
 
-  const response = NextResponse.json({
-    value: token.value,
-    expiresAt: token.expiresAt.toISOString(),
-  });
-  copyCookiesFromTo(cookieSink, response);
-  return response;
+  return applyCookies(
+    NextResponse.json({
+      value: token.value,
+      expiresAt: token.expiresAt.toISOString(),
+    }),
+  );
 }
