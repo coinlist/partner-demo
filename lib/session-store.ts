@@ -29,11 +29,6 @@ export function createNextHeadersCookiesStore(): SessionStore {
   };
 }
 
-export async function getServerSession(): Promise<OAuthSession | null> {
-  const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
-  return deserializeSession(raw);
-}
-
 function deserializeSession(raw?: string): OAuthSession | null {
   if (!raw) return null;
 
@@ -89,4 +84,3 @@ function cookieOptions() {
     path: "/",
   };
 }
-
