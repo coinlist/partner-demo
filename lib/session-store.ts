@@ -7,6 +7,20 @@ import type { SessionStore } from "@coinlist-co/react/server";
 
 const COINLIST_SESSION_COOKIE = "coinlist_session";
 
+export async function hasSession(): Promise<boolean> {
+  try {
+    const session = await getSessionOrNull();
+    return !!session;
+  } catch {
+    return false;
+  }
+}
+
+export async function getSessionOrNull(): Promise<OAuthSession | null> {
+  const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
+  return deserializeSession(raw);
+}
+
 export function createNextHeadersCookiesStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {

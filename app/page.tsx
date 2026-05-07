@@ -1,12 +1,13 @@
 import { HomeContainer } from "@/features/home/HomeContainer";
 import { LoginContainer } from "@/features/login/LoginContainer";
 import { coinListServer } from "@/lib/coinlist-server";
+import { hasSession } from "@/lib/session-store";
 
 export default async function HomePage() {
-  const coinlist = coinListServer();
-  const validAccessToken = await coinlist.accessToken();
-  if (validAccessToken) {
-    const offers = await coinlist.fetchOffers().catch(() => undefined);
+  if (await hasSession()) {
+    const offers = await coinListServer()
+      .fetchOffers()
+      .catch(() => undefined);
     return <HomeContainer offers={offers} />;
   } else {
     return <LoginContainer />;
