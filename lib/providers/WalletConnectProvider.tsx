@@ -1,11 +1,11 @@
 'use client';
 
+import { Blockchain } from '@coinlist-co/react/shared';
+import { mainnet } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { mainnet } from '@reown/appkit/networks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
-import { Blockchain } from '@coinlist-co/react/shared';
 
 export const ETHEREUM_CHAIN = Blockchain('ethereum');
 
@@ -24,7 +24,11 @@ createAppKit({
 
 const queryClient = new QueryClient();
 
-export function WalletConnectProvider({ children }: { children: React.ReactNode }) {
+export function WalletConnectProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

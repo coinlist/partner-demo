@@ -4,21 +4,22 @@ import { useCoinList } from '@coinlist-co/react';
 import {
   type AssetId,
   type OfferDetail,
-  type OfferOption,
   type OfferId,
+  type OfferOption,
   WalletAddress,
 } from '@coinlist-co/react/shared';
 import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
+import { waitForTransactionReceipt } from '@wagmi/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { erc20Abi, parseUnits } from 'viem';
 import { useConfig, useWriteContract } from 'wagmi';
-import { waitForTransactionReceipt } from '@wagmi/core';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 
 // TODO: Replace with the actual CoinList contract address that receives ERC-20 approvals
-const COINLIST_SPENDER_ADDRESS = '0x0000000000000000000000000000000000000000' as const;
+const COINLIST_SPENDER_ADDRESS =
+  '0x0000000000000000000000000000000000000000' as const;
 
 // TODO: Replace with actual on-chain contract addresses for each supported asset
 // Key is the CoinList assetId string, value is the ERC-20 contract address on Ethereum mainnet
@@ -75,7 +76,7 @@ export function useInvestViewModel(
   const { open: openAppKit } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
-  const { mutateAsync: writeContractAsync } = useWriteContract();
+  const { mutateAsync: approveErc20 } = useWriteContract();
 
   const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
     offerDetail.fundingAssets[0]?.id ?? null
@@ -126,7 +127,9 @@ export function useInvestViewModel(
       option.totalTokenSupply != null
         ? `${option.totalTokenSupply.toLocaleString()} ${tokenCode}`
         : null,
-    purchaseOptions: offerDetail.fundingAssets.map((a) => a.code.toString()).join(', '),
+    purchaseOptions: offerDetail.fundingAssets
+      .map((a) => a.code.toString())
+      .join(', '),
     minimumPurchaseUsd:
       option.minimumPurchaseUsd != null
         ? `Minimum: $${option.minimumPurchaseUsd}`
@@ -165,29 +168,35 @@ export function useInvestViewModel(
         setAmountInput(event.value);
         break;
       case 'ON_SIGN_AND_COMMIT':
-        if (walletState.type !== 'CONNECTED' || !selectedAssetId || !address) break;
+        if (walletState.type !== 'CONNECTED' || !selectedAssetId || !address)
+          break;
         setSubmitState('submitting');
         setSubmitError(null);
         (async () => {
           try {
             const assetIdStr = selectedAssetId.toString();
             const tokenAddress = ASSET_CONTRACT_ADDRESS[assetIdStr];
-            const decimals = ASSET_DECIMALS[assetIdStr] ?? DEFAULT_ASSET_DECIMALS;
+            const decimals =
+              ASSET_DECIMALS[assetIdStr] ?? DEFAULT_ASSET_DECIMALS;
 
             if (!tokenAddress) {
-              throw new Error(`No contract address configured for asset ${assetIdStr}`);
+              throw new Error(
+                `No contract address configured for asset ${assetIdStr}`
+              );
             }
 
             const approvalAmount = parseUnits(amountInput, decimals);
 
-            const approvalTxHash = await writeContractAsync({
+            const approvalTxHash = await approveErc20({
               address: tokenAddress,
               abi: erc20Abi,
               functionName: 'approve',
               args: [COINLIST_SPENDER_ADDRESS, approvalAmount],
             });
 
-            await waitForTransactionReceipt(wagmiConfig, { hash: approvalTxHash });
+            await waitForTransactionReceipt(wagmiConfig, {
+              hash: approvalTxHash,
+            });
 
             await coinlist.createParticipation({
               offerId,
@@ -203,7 +212,9 @@ export function useInvestViewModel(
           } catch (err: unknown) {
             setSubmitState('error');
             setSubmitError(
-              err instanceof Error ? err.message : 'An error occurred. Please try again.'
+              err instanceof Error
+                ? err.message
+                : 'An error occurred. Please try again.'
             );
           }
         })();

@@ -134,7 +134,11 @@ export function useOfferViewModel(): {
         setSelectedOptionId(event.optionId);
         break;
       case 'ON_INVEST_CLICK': {
-        const resolvedOptionId = selectedOptionId ?? (offerDetailsState.type === 'CONTENT' ? offerDetailsState.offerDetail.options[0]?.id ?? null : null);
+        const resolvedOptionId =
+          selectedOptionId ??
+          (offerDetailsState.type === 'CONTENT'
+            ? (offerDetailsState.offerDetail.options[0]?.id ?? null)
+            : null);
         if (resolvedOptionId) {
           router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
         }

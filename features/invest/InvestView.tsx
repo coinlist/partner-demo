@@ -1,7 +1,10 @@
 'use client';
 
 import { ArrowLeft, ChevronRight, Wallet } from 'lucide-react';
-import type { InvestUiEvent, InvestUiState } from '@/features/invest/useInvestViewModel';
+import type {
+  InvestUiEvent,
+  InvestUiState,
+} from '@/features/invest/useInvestViewModel';
 
 interface Props {
   state: InvestUiState;
@@ -21,7 +24,9 @@ function formatCountdown(endsAt: Date): string {
 export function InvestView({ state, onEvent }: Props) {
   const isConnected = state.walletState.type === 'CONNECTED';
   const canSubmit =
-    isConnected && state.amountInput.length > 0 && state.submitState !== 'submitting';
+    isConnected &&
+    state.amountInput.length > 0 &&
+    state.submitState !== 'submitting';
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -50,7 +55,9 @@ export function InvestView({ state, onEvent }: Props) {
           </h1>
 
           {/* Funding source */}
-          <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">Funding source</p>
+          <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+            Funding source
+          </p>
 
           {isConnected && state.walletState.type === 'CONNECTED' ? (
             <div className="flex items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">
@@ -78,14 +85,19 @@ export function InvestView({ state, onEvent }: Props) {
               <hr className="my-4 border-zinc-100 dark:border-zinc-800" />
 
               {/* Pay with */}
-              <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">Pay with</p>
+              <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+                Pay with
+              </p>
               <div className="mb-5 flex gap-2">
                 {state.fundingAssets.map((asset) => (
                   <button
                     key={asset.assetId.toString()}
                     type="button"
                     onClick={() =>
-                      onEvent({ type: 'ON_ASSET_SELECT', assetId: asset.assetId })
+                      onEvent({
+                        type: 'ON_ASSET_SELECT',
+                        assetId: asset.assetId,
+                      })
                     }
                     className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
                       asset.assetId === state.selectedAssetId
@@ -99,7 +111,9 @@ export function InvestView({ state, onEvent }: Props) {
               </div>
 
               {/* Amount */}
-              <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">Amount</p>
+              <p className="mb-2 text-sm text-zinc-500 dark:text-zinc-400">
+                Amount
+              </p>
               <div className="mb-5 flex items-center rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">
                 <span className="text-sm text-zinc-400">$</span>
                 <input
@@ -132,11 +146,15 @@ export function InvestView({ state, onEvent }: Props) {
                 : 'cursor-not-allowed bg-zinc-300 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-500'
             }`}
           >
-            {state.submitState === 'submitting' ? 'Submitting…' : 'Sign & Commit'}
+            {state.submitState === 'submitting'
+              ? 'Submitting…'
+              : 'Sign & Commit'}
           </button>
 
           {state.submitState === 'error' && state.submitError && (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400">{state.submitError}</p>
+            <p className="mt-3 text-sm text-red-600 dark:text-red-400">
+              {state.submitError}
+            </p>
           )}
 
           {/* Footer */}
@@ -179,7 +197,9 @@ export function InvestView({ state, onEvent }: Props) {
                 <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                   ${state.sidebar.tokenPriceUsd}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Token Price</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Token Price
+                </p>
               </div>
             )}
           </div>
@@ -187,7 +207,10 @@ export function InvestView({ state, onEvent }: Props) {
           {/* Sidebar rows */}
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {state.sidebar.fullyDilutedValue && (
-              <SidebarRow label="Fully Diluted Value" value={state.sidebar.fullyDilutedValue} />
+              <SidebarRow
+                label="Fully Diluted Value"
+                value={state.sidebar.fullyDilutedValue}
+              />
             )}
             {state.sidebar.allocatedTokenSupply && (
               <SidebarRow
@@ -195,9 +218,15 @@ export function InvestView({ state, onEvent }: Props) {
                 value={state.sidebar.allocatedTokenSupply}
               />
             )}
-            <SidebarRow label="Purchase Options" value={state.sidebar.purchaseOptions} />
+            <SidebarRow
+              label="Purchase Options"
+              value={state.sidebar.purchaseOptions}
+            />
             {state.sidebar.minimumPurchaseUsd && (
-              <SidebarRow label="Purchase Limits" value={state.sidebar.minimumPurchaseUsd} />
+              <SidebarRow
+                label="Purchase Limits"
+                value={state.sidebar.minimumPurchaseUsd}
+              />
             )}
           </div>
         </div>
