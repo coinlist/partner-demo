@@ -15,7 +15,13 @@ export function OfferHeader({
     <div className="flex items-center gap-4">
       <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
         {logoUrl ? (
-          <Image src={logoUrl} alt={name} fill className="object-cover" />
+          <Image
+            src={logoUrl}
+            alt={name}
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
         ) : (
           <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-200">
             {name.slice(0, 1).toUpperCase()}
