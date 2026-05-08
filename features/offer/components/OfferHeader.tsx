@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 export function OfferHeader({
   name,
   tagline,
@@ -11,14 +13,9 @@ export function OfferHeader({
 }) {
   return (
     <div className="flex items-center gap-4">
-      <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
+      <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
         {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={logoUrl}
-            alt={name}
-            className="h-full w-full object-cover"
-          />
+          <Image src={logoUrl} alt={name} fill className="object-cover" />
         ) : (
           <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-200">
             {name.slice(0, 1).toUpperCase()}
