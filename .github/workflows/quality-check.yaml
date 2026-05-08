@@ -6,7 +6,7 @@ on:
       - main
   workflow_call:
 jobs:
-  build-lint-test:
+  build-lint-typecheck:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
