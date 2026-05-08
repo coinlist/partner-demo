@@ -1,8 +1,8 @@
 'use client';
 
 import type { Offer } from '@coinlist-co/react/shared';
-import { HomeView } from './HomeView';
-import { useHomeViewModel } from './useHomeViewModel';
+import { HomeView } from '@/features/home/HomeView';
+import { useHomeViewModel } from '@/features/home/useHomeViewModel';
 
 export interface Props {
   offers: Offer[] | undefined;

@@ -3,20 +3,20 @@
 import { RequirementsChecklist } from '@coinlist-co/react';
 import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
 import { ArrowLeft } from 'lucide-react';
-import { OfferBanner } from './components/OfferBanner';
-import { OfferFaq } from './components/OfferFaq';
-import { OfferHeader } from './components/OfferHeader';
-import { OfferLink } from './components/OfferLink';
-import { OfferMilestones } from './components/OfferMilestones';
-import { OfferParticipations } from './components/OfferParticipations';
-import { OfferSidebarCard } from './components/OfferSidebarCard';
-import { OfferTerms } from './components/OfferTerms';
+import { OfferBanner } from '@/features/offer/components/OfferBanner';
+import { OfferFaq } from '@/features/offer/components/OfferFaq';
+import { OfferHeader } from '@/features/offer/components/OfferHeader';
+import { OfferLink } from '@/features/offer/components/OfferLink';
+import { OfferMilestones } from '@/features/offer/components/OfferMilestones';
+import { OfferParticipations } from '@/features/offer/components/OfferParticipations';
+import { OfferSidebarCard } from '@/features/offer/components/OfferSidebarCard';
+import { OfferTerms } from '@/features/offer/components/OfferTerms';
 import type {
   OfferUiEvent,
   OfferUiOption,
   OfferUiState,
   ParticipationsUiState,
-} from './useOfferViewModel';
+} from '@/features/offer/useOfferViewModel';
 
 export interface Props {
   state: OfferUiState;

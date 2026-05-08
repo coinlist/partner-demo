@@ -3,7 +3,10 @@
 import { OffersGrid } from '@coinlist-co/react';
 import type { Offer } from '@coinlist-co/react/shared';
 import { Settings } from 'lucide-react';
-import type { HomeUiEvent, HomeUiState } from './useHomeViewModel';
+import type {
+  HomeUiEvent,
+  HomeUiState,
+} from '@/features/home/useHomeViewModel';
 
 export interface Props {
   state: HomeUiState;

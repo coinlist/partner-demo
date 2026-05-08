@@ -1,5 +1,5 @@
 import { LinkIcon } from 'lucide-react';
-import type { OfferUiLink } from '../useOfferViewModel';
+import type { OfferUiLink } from '@/features/offer/useOfferViewModel';
 
 interface Props {
   link: OfferUiLink;

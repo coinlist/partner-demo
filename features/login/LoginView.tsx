@@ -2,7 +2,7 @@
 
 import { CoinListSignInCard } from '@coinlist-co/react';
 import { ErrorBanner } from '@/components/ErrorBanner';
-import type { LoginUiState } from './useLoginViewModel';
+import type { LoginUiState } from '@/features/login/useLoginViewModel';
 
 export interface Props {
   state: LoginUiState;

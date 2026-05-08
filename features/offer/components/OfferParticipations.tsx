@@ -3,7 +3,7 @@
 import type {
   ParticipationsUiState,
   ParticipationUi,
-} from '../useOfferViewModel';
+} from '@/features/offer/useOfferViewModel';
 
 function statusLabel(status: ParticipationUi['status']): string {
   switch (status) {

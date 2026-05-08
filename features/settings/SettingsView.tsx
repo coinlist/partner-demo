@@ -3,7 +3,10 @@
 import { LogOut, Settings } from 'lucide-react';
 import { BackButton } from '@/components/BackButton';
 import { InlineErrorText } from '@/components/InlineErrorText';
-import type { SettingsUiEvent, SettingsUiState } from './useSettingsViewModel';
+import type {
+  SettingsUiEvent,
+  SettingsUiState,
+} from '@/features/settings/useSettingsViewModel';
 
 export interface Props {
   state: SettingsUiState;

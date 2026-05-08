@@ -6,7 +6,7 @@ import {
   type SessionStore,
 } from '@coinlist-co/react/server';
 import { ClientId, ClientSecret, RedirectUri } from '@coinlist-co/react/shared';
-import { requiredEnv } from './env';
+import { requiredEnv } from '@/lib/env';
 
 export function coinListServer(sessionStore: SessionStore): CoinListServer {
   return createCoinListServer({
