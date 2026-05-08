@@ -1,0 +1,46 @@
+id: arch
+name: Project architecture
+description: Rules for building in this NextJS project.
+rules:
+  - id: no-ui-and-features-in-api-routes
+    description: NextJS API routes must not depend on UI and features.
+    target: "@/app/api/**"
+    forbidden:
+      - import: react
+        transitive: true
+      - import: "@/features/**"
+      - import: "@/components/**"
+    fix: Remove UI, features and components import from the route.
+
+  - id: page-uses-container
+    description: TBD
+    target: "@/app/**/page"
+    exclude:
+      - "@/app/oauth/coinlist/callback/page"
+    uses:
+      - "@/features/**/*Container"
+    fix: TBD
+
+  - id: container-wires-view-viewmodel
+    description: TBD
+    target: "@/features/**/{{FileName}}Container"
+    uses:
+      - "{{TARGET_DIR}}/{{FileName}}View"
+      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+    fix: TBD
+
+  - id: viewmodel-abstracted-from-ui
+    description: TBD
+    target: "@/features/**/use{{FileName}}ViewModel"
+    forbidden:
+      - import: "@/components/**"
+      - import: "@/features/**/components/*"
+      - import: "@/features/**/*View"
+    fix: TBD
+
+  - id: view-uses-viewmodel-state-event
+    description: TBD
+    target: "@/features/**/{{FileName}}View"
+    uses:
+      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+    fix: TBD
