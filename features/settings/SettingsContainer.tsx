@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { SettingsView } from "./SettingsView";
-import { useSettingsViewModel } from "./useSettingsViewModel";
+import { SettingsView } from '@/features/settings/SettingsView';
+import { useSettingsViewModel } from '@/features/settings/useSettingsViewModel';
 
 export function SettingsContainer() {
   const { state, onEvent } = useSettingsViewModel();

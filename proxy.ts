@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { coinListServer } from "@/lib/coinlist-server";
-import { cookiesSessionStore } from "@/lib/session-store";
+import { type NextRequest, NextResponse } from 'next/server';
+import { coinListServer } from '@/lib/coinlist-server';
+import { cookiesSessionStore } from '@/lib/session-store';
 
 export const config = {
   // Excludes:
@@ -8,7 +8,7 @@ export const config = {
   //   _next/static  — Next.js bundled assets
   //   _next/image   — Next.js image optimization
   //   favicon.ico
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
 
 export async function proxy(request: NextRequest) {

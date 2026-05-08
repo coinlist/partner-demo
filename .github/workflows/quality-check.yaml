@@ -1,0 +1,39 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_call:
+jobs:
+  build-lint-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 🏧Checkout
+        uses: actions/checkout@v6
+
+      - name: 🐢Setup nodejs
+        id: nodejs
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: 🚚Install js dependencies
+        run: npm ci
+
+      - name: 🔎 Typecheck
+        run: npm run typecheck
+
+      - name: 🧭 Biome check
+        run: npm run lint
+
+      - name: ✨ Deslop check
+        run: npm run deslop
+
+      - name: Setup fake environment
+        run: cp .environments/.env.example .env.local
+
+      - name: 🏗️Build
+        run: npm run build

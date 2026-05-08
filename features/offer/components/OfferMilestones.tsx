@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 type OfferMilestone = {
   name: string;
   schedule: string;
-  status: "completed" | "active" | "upcoming";
+  status: 'completed' | 'active' | 'upcoming';
 };
 
 export function OfferMilestones({
@@ -45,16 +45,16 @@ function StatusDot({
   status,
   isLast,
 }: {
-  status: OfferMilestone["status"];
+  status: OfferMilestone['status'];
   isLast: boolean;
 }) {
-  const isCompleted = status === "completed";
+  const isCompleted = status === 'completed';
   const dotClass = isCompleted
-    ? "border-emerald-400 bg-emerald-400"
-    : "border-zinc-900 bg-zinc-900 dark:border-zinc-100 dark:bg-zinc-100";
+    ? 'border-emerald-400 bg-emerald-400'
+    : 'border-zinc-900 bg-zinc-900 dark:border-zinc-100 dark:bg-zinc-100';
   const lineClass = isCompleted
-    ? "bg-emerald-400/70"
-    : "bg-zinc-900/80 dark:bg-zinc-100/80";
+    ? 'bg-emerald-400/70'
+    : 'bg-zinc-900/80 dark:bg-zinc-100/80';
 
   return (
     <span className="relative mt-0.5 flex w-5 justify-center self-stretch">

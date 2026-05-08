@@ -1,37 +1,37 @@
-"use client";
+'use client';
 
-import {
-  type ParticipationUi,
-  type ParticipationsUiState,
-} from "../useOfferViewModel";
+import type {
+  ParticipationsUiState,
+  ParticipationUi,
+} from '@/features/offer/useOfferViewModel';
 
-function statusLabel(status: ParticipationUi["status"]): string {
+function statusLabel(status: ParticipationUi['status']): string {
   switch (status) {
-    case "completed":
-      return "Secured";
-    case "remitted":
-    case "remit_submitted":
-      return "Refunded";
-    case "failed":
-    case "remit_failed":
-      return "Failed";
+    case 'completed':
+      return 'Secured';
+    case 'remitted':
+    case 'remit_submitted':
+      return 'Refunded';
+    case 'failed':
+    case 'remit_failed':
+      return 'Failed';
     default:
-      return "Committed";
+      return 'Committed';
   }
 }
 
-function statusColor(status: ParticipationUi["status"]): string {
+function statusColor(status: ParticipationUi['status']): string {
   switch (status) {
-    case "completed":
-      return "text-emerald-600 dark:text-emerald-400";
-    case "remitted":
-    case "remit_submitted":
-      return "text-sky-600 dark:text-sky-400";
-    case "failed":
-    case "remit_failed":
-      return "text-red-600 dark:text-red-400";
+    case 'completed':
+      return 'text-emerald-600 dark:text-emerald-400';
+    case 'remitted':
+    case 'remit_submitted':
+      return 'text-sky-600 dark:text-sky-400';
+    case 'failed':
+    case 'remit_failed':
+      return 'text-red-600 dark:text-red-400';
     default:
-      return "text-zinc-700 dark:text-zinc-300";
+      return 'text-zinc-700 dark:text-zinc-300';
   }
 }
 
@@ -42,7 +42,7 @@ const EXPLORER_MAP: Record<string, (address: string) => string> = {
 
 function explorerUrl(
   chain: string,
-  walletAddress: string | null,
+  walletAddress: string | null
 ): string | null {
   if (!walletAddress) return null;
   const builder = EXPLORER_MAP[chain.toLowerCase()];
@@ -50,11 +50,11 @@ function explorerUrl(
 }
 
 function formatDate(date: Date | null): string {
-  if (!date) return "";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  if (!date) return '';
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -86,7 +86,7 @@ function ParticipationRow({
         </p>
         <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
           {participation.assetCode}
-          {date ? ` • ${date}` : ""}
+          {date ? ` • ${date}` : ''}
         </p>
       </div>
     </div>
@@ -108,7 +108,7 @@ export function OfferParticipations({
 }: {
   state: ParticipationsUiState;
 }) {
-  if (state.type === "LOADING") {
+  if (state.type === 'LOADING') {
     return (
       <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
         <p className="mb-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -132,9 +132,8 @@ export function OfferParticipations({
     );
   }
 
-  const isError = state.type === "ERROR";
-  const isEmpty =
-    state.type === "CONTENT" && state.participations.length === 0;
+  const isError = state.type === 'ERROR';
+  const isEmpty = state.type === 'CONTENT' && state.participations.length === 0;
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
@@ -151,7 +150,7 @@ export function OfferParticipations({
         </p>
       ) : (
         <div className="-mx-2">
-          {state.type === "CONTENT" &&
+          {state.type === 'CONTENT' &&
             state.participations.map((p) => (
               <ParticipationRow key={p.id} participation={p} />
             ))}

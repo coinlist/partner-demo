@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { CoinListSignInCard } from "@coinlist-co/react";
-import { LoginUiState } from "./useLoginViewModel";
-import { ErrorBanner } from "@/components/ErrorBanner";
+import { CoinListSignInCard } from '@coinlist-co/react';
+import { ErrorBanner } from '@/components/ErrorBanner';
+import type { LoginUiState } from '@/features/login/useLoginViewModel';
 
 export interface Props {
   state: LoginUiState;

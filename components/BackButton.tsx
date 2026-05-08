@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export interface BackButtonProps {
   label?: string;
 }
 
-export function BackButton({ label = "Back" }: BackButtonProps) {
+export function BackButton({ label = 'Back' }: BackButtonProps) {
   const router = useRouter();
 
   const onBackClick = () => {

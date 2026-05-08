@@ -1,7 +1,7 @@
-import { OfferId } from "@coinlist-co/react/shared";
+import type { OfferId } from '@coinlist-co/react/shared';
 
 export const ROUTES = {
-  ROOT: "/",
-  SETTINGS: "/settings",
+  ROOT: '/',
+  SETTINGS: '/settings',
   OFFER_DETAILS: (id: OfferId): string => `/offer/${id}`,
 };

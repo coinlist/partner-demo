@@ -1,6 +1,6 @@
-import { coinListServer } from "@/lib/coinlist-server";
-import { cookiesSessionStore } from "@/lib/session-store";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from 'next/server';
+import { coinListServer } from '@/lib/coinlist-server';
+import { cookiesSessionStore } from '@/lib/session-store';
 
 export async function GET(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
@@ -13,6 +13,6 @@ export async function GET(request: NextRequest) {
     NextResponse.json({
       value: token.value,
       expiresAt: token.expiresAt.toISOString(),
-    }),
+    })
   );
 }

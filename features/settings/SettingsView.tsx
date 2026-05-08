@@ -1,9 +1,12 @@
-"use client";
+'use client';
 
-import { BackButton } from "@/components/BackButton";
-import { InlineErrorText } from "@/components/InlineErrorText";
-import { LogOut, Settings } from "lucide-react";
-import { SettingsUiEvent, SettingsUiState } from "./useSettingsViewModel";
+import { LogOut, Settings } from 'lucide-react';
+import { BackButton } from '@/components/BackButton';
+import { InlineErrorText } from '@/components/InlineErrorText';
+import type {
+  SettingsUiEvent,
+  SettingsUiState,
+} from '@/features/settings/useSettingsViewModel';
 
 export interface Props {
   state: SettingsUiState;
@@ -12,7 +15,7 @@ export interface Props {
 
 export function SettingsView({ state, onEvent }: Props) {
   const onLogoutClick = () => {
-    onEvent({ type: "ON_LOGOUT" });
+    onEvent({ type: 'ON_LOGOUT' });
   };
 
   return (
@@ -54,7 +57,7 @@ export function SettingsView({ state, onEvent }: Props) {
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/70 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
             >
               <LogOut size={16} />
-              {state.logoutLoading ? "Signing out..." : "Sign out"}
+              {state.logoutLoading ? 'Signing out...' : 'Sign out'}
             </button>
           </div>
           <div className="mt-3">

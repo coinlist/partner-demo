@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ROUTES } from "@/lib/routes";
-import { Offer } from "@coinlist-co/react/shared";
-import { useRouter } from "next/navigation";
+import type { Offer } from '@coinlist-co/react/shared';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/routes';
 
 export type HomeUiState = {
   preloadedOffers: Offer[] | undefined;
@@ -10,10 +10,10 @@ export type HomeUiState = {
 
 export type HomeUiEvent =
   | {
-      type: "ON_SETTINGS_CLICK";
+      type: 'ON_SETTINGS_CLICK';
     }
   | {
-      type: "ON_OFFER_CLICK";
+      type: 'ON_OFFER_CLICK';
       offer: Offer;
     };
 
@@ -29,10 +29,10 @@ export function useHomeViewModel(offers: Offer[] | undefined): {
 
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {
-      case "ON_SETTINGS_CLICK":
+      case 'ON_SETTINGS_CLICK':
         router.push(ROUTES.SETTINGS);
         break;
-      case "ON_OFFER_CLICK":
+      case 'ON_OFFER_CLICK':
         router.push(ROUTES.OFFER_DETAILS(event.offer.id));
         break;
     }

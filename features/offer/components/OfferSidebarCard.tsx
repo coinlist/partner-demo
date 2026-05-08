@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 export function OfferSidebarCard({
   statusText,
@@ -10,9 +10,9 @@ export function OfferSidebarCard({
   tokenPriceUsd: number | null;
 }) {
   const tokenPriceDisplay =
-    typeof tokenPriceUsd === "number" && Number.isFinite(tokenPriceUsd)
+    typeof tokenPriceUsd === 'number' && Number.isFinite(tokenPriceUsd)
       ? `$${tokenPriceUsd.toFixed(2)}`
-      : "--";
+      : '--';
 
   return (
     <aside className="top-6 space-y-4">

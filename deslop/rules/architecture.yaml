@@ -1,0 +1,125 @@
+id: arch
+name: Project architecture
+description: Rules for building in this NextJS project.
+rules:
+  - id: no-ui-and-features-in-api-routes
+    description: >-
+      NextJS API routes must not depend on UI and features. Routes are thin HTTP
+      handlers responsible only for request/response plumbing — auth, validation,
+      calling server-side services, and returning data. Pulling in React components
+      or feature modules couples the transport layer to presentation logic and makes
+      routes harder to test.
+    target: "@/app/api/**"
+    forbidden:
+      - import: react
+        transitive: true
+      - import: "@/features/**"
+      - import: "@/components/**"
+    fix: >-
+      Move any business logic into a service or lib module, and any UI concerns into
+      a feature. The route should only import from @/lib/** or other server-safe
+      utilities.
+
+  - id: page-uses-container
+    description: >-
+      NextJS page components are server-side entry points. They must delegate all
+      rendering to a feature Container rather than containing UI or logic themselves.
+      This keeps pages thin orchestrators that handle data-fetching and auth, while
+      the Container owns the client-side feature boundary.
+    target: "@/app/**/page"
+    exclude:
+      - "@/app/oauth/coinlist/callback/page"
+    uses:
+      - "@/features/**/*Container"
+    fix: >-
+      Extract all UI and logic into a Container component under
+      @/features/<feature>/. The page should only fetch server-side data and pass it
+      as props to the Container.
+
+  - id: container-wires-view-viewmodel
+    description: >-
+      A Container is the glue between data and UI within a feature. It instantiates
+      the ViewModel hook to get state and the event handler, then passes them
+      directly to the View. Containers must not contain JSX beyond rendering the
+      View, and must not contain business logic.
+    target: "@/features/**/{{FileName}}Container"
+    uses:
+      - "{{TARGET_DIR}}/{{FileName}}View"
+      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+    fix: >-
+      The Container should call use{{FileName}}ViewModel() to obtain { state,
+      onEvent } and render <{{FileName}}View state={state} onEvent={onEvent} />.
+      Move any business logic to the ViewModel and any JSX to the View.
+
+  - id: viewmodel-abstracted-from-ui
+    description: >-
+      The ViewModel hook owns all business logic, state derivation, and side effects
+      for a feature. It must be completely decoupled from UI so that it can be tested
+      without rendering. Importing components, views, or feature-local UI modules
+      would create a circular dependency and break testability.
+    target: "@/features/**/use{{FileName}}ViewModel"
+    forbidden:
+      - import: "@/components/**"
+      - import: "@/features/**/components/*"
+      - import: "@/features/**/*View"
+    fix: >-
+      Move any UI-related code into the View. The ViewModel should only return a
+      typed UiState object and an onEvent handler — no JSX, no component imports.
+
+  - id: view-uses-viewmodel-state-event
+    description: >-
+      A View is a pure presentational component. It receives a typed UiState and an
+      onEvent callback from the ViewModel, and must not have its own business logic
+      or data fetching. Importing the ViewModel enforces this contract by making the
+      View's props align with the ViewModel's public surface.
+    target: "@/features/**/{{FileName}}View"
+    uses:
+      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+    fix: >-
+      Import the UiState and UiEvent types from use{{FileName}}ViewModel and declare
+      the View's props as { state: {{FileName}}UiState; onEvent: (event:
+      {{FileName}}UiEvent) => void }. Move any data fetching or logic into the
+      ViewModel.
+
+  - id: lib-no-feature-or-component-imports
+    description: >-
+      @/lib/** is the shared server-side and utility layer that the rest of the app
+      depends on. It must not import from features or components — doing so would
+      invert the dependency direction, create circular dependencies, and make lib
+      modules impossible to use in server contexts such as API routes and pages.
+    target: "@/lib/**"
+    forbidden:
+      - import: "@/features/**"
+      - import: "@/components/**"
+    fix: >-
+      Remove the feature or component import from the lib module. If shared logic is
+      needed, extract it into a new @/lib/** module that both sides can depend on.
+
+  - id: page-no-direct-components
+    description: >-
+      NextJS pages are server-side entry points whose only UI responsibility is to
+      choose and mount the right Container. Importing shared components directly
+      from @/components/** adds presentation logic to the page, bypasses the
+      Container/ViewModel/View architecture, and makes the page harder to test.
+    target: "@/app/**/page"
+    forbidden:
+      - import: "@/components/**"
+    fix: >-
+      Move the component usage into a feature View. If the component is truly
+      page-level chrome (e.g., a layout wrapper), place it in the nearest
+      layout.tsx instead.
+
+  - id: features-no-server-lib
+    description: >-
+      Feature files run on the client under 'use client'. @/lib/coinlist-server
+      imports the 'server-only' package and must never be bundled into the client.
+      Importing it from a feature would silently compile in server credentials and
+      break the Next.js server/client boundary, potentially leaking secrets.
+    target: "@/features/**"
+    forbidden:
+      - import: "@/lib/coinlist-server"
+      - import: "server-only"
+    fix: >-
+      Remove the server lib import from the feature. Server-side data fetching
+      belongs in the page (a Server Component), which can pass the result down as
+      props to the Container.
