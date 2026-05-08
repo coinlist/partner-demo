@@ -13,7 +13,7 @@ import { waitForTransactionReceipt } from '@wagmi/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { erc20Abi, parseUnits } from 'viem';
-import { useConfig, useWriteContract } from 'wagmi';
+import { useConfig, useDisconnect, useWriteContract } from 'wagmi';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 
@@ -63,6 +63,7 @@ export type InvestUiState = {
 export type InvestUiEvent =
   | { type: 'ON_BACK_CLICK' }
   | { type: 'ON_CONNECT_WALLET' }
+  | { type: 'ON_DISCONNECT_WALLET' }
   | { type: 'ON_ASSET_SELECT'; assetId: AssetId }
   | { type: 'ON_AMOUNT_CHANGE'; value: string }
   | { type: 'ON_SIGN_AND_COMMIT' };
@@ -76,6 +77,7 @@ export function useInvestViewModel(
   const { open: openAppKit } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
+  const { disconnect } = useDisconnect();
   const { mutateAsync: approveErc20 } = useWriteContract();
 
   const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
@@ -160,6 +162,9 @@ export function useInvestViewModel(
         break;
       case 'ON_CONNECT_WALLET':
         openAppKit();
+        break;
+      case 'ON_DISCONNECT_WALLET':
+        disconnect();
         break;
       case 'ON_ASSET_SELECT':
         setSelectedAssetId(event.assetId);

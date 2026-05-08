@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ChevronRight, Wallet } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Wallet, X } from 'lucide-react';
 import type {
   InvestUiEvent,
   InvestUiState,
@@ -65,6 +65,14 @@ export function InvestView({ state, onEvent }: Props) {
               <span className="flex-1 text-sm font-medium text-zinc-800 dark:text-zinc-200">
                 {state.walletState.truncatedAddress}
               </span>
+              <button
+                type="button"
+                onClick={() => onEvent({ type: 'ON_DISCONNECT_WALLET' })}
+                className="text-zinc-400 transition hover:text-zinc-700 dark:hover:text-zinc-200"
+                aria-label="Disconnect wallet"
+              >
+                <X size={16} />
+              </button>
             </div>
           ) : (
             <button
