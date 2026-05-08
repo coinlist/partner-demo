@@ -3,44 +3,80 @@ name: Project architecture
 description: Rules for building in this NextJS project.
 rules:
   - id: no-ui-and-features-in-api-routes
-    description: NextJS API routes must not depend on UI and features.
+    description: >-
+      NextJS API routes must not depend on UI and features. Routes are thin HTTP
+      handlers responsible only for request/response plumbing — auth, validation,
+      calling server-side services, and returning data. Pulling in React components
+      or feature modules couples the transport layer to presentation logic and makes
+      routes harder to test.
     target: "@/app/api/**"
     forbidden:
       - import: react
         transitive: true
       - import: "@/features/**"
       - import: "@/components/**"
-    fix: Remove UI, features and components import from the route.
+    fix: >-
+      Move any business logic into a service or lib module, and any UI concerns into
+      a feature. The route should only import from @/lib/** or other server-safe
+      utilities.
 
   - id: page-uses-container
-    description: TBD
+    description: >-
+      NextJS page components are server-side entry points. They must delegate all
+      rendering to a feature Container rather than containing UI or logic themselves.
+      This keeps pages thin orchestrators that handle data-fetching and auth, while
+      the Container owns the client-side feature boundary.
     target: "@/app/**/page"
     exclude:
       - "@/app/oauth/coinlist/callback/page"
     uses:
       - "@/features/**/*Container"
-    fix: TBD
+    fix: >-
+      Extract all UI and logic into a Container component under
+      @/features/<feature>/. The page should only fetch server-side data and pass it
+      as props to the Container.
 
   - id: container-wires-view-viewmodel
-    description: TBD
+    description: >-
+      A Container is the glue between data and UI within a feature. It instantiates
+      the ViewModel hook to get state and the event handler, then passes them
+      directly to the View. Containers must not contain JSX beyond rendering the
+      View, and must not contain business logic.
     target: "@/features/**/{{FileName}}Container"
     uses:
       - "{{TARGET_DIR}}/{{FileName}}View"
       - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
-    fix: TBD
+    fix: >-
+      The Container should call use{{FileName}}ViewModel() to obtain { state,
+      onEvent } and render <{{FileName}}View state={state} onEvent={onEvent} />.
+      Move any business logic to the ViewModel and any JSX to the View.
 
   - id: viewmodel-abstracted-from-ui
-    description: TBD
+    description: >-
+      The ViewModel hook owns all business logic, state derivation, and side effects
+      for a feature. It must be completely decoupled from UI so that it can be tested
+      without rendering. Importing components, views, or feature-local UI modules
+      would create a circular dependency and break testability.
     target: "@/features/**/use{{FileName}}ViewModel"
     forbidden:
       - import: "@/components/**"
       - import: "@/features/**/components/*"
       - import: "@/features/**/*View"
-    fix: TBD
+    fix: >-
+      Move any UI-related code into the View. The ViewModel should only return a
+      typed UiState object and an onEvent handler — no JSX, no component imports.
 
   - id: view-uses-viewmodel-state-event
-    description: TBD
+    description: >-
+      A View is a pure presentational component. It receives a typed UiState and an
+      onEvent callback from the ViewModel, and must not have its own business logic
+      or data fetching. Importing the ViewModel enforces this contract by making the
+      View's props align with the ViewModel's public surface.
     target: "@/features/**/{{FileName}}View"
     uses:
       - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
-    fix: TBD
+    fix: >-
+      Import the UiState and UiEvent types from use{{FileName}}ViewModel and declare
+      the View's props as { state: {{FileName}}UiState; onEvent: (event:
+      {{FileName}}UiEvent) => void }. Move any data fetching or logic into the
+      ViewModel.
