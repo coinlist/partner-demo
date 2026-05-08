@@ -80,3 +80,46 @@ rules:
       the View's props as { state: {{FileName}}UiState; onEvent: (event:
       {{FileName}}UiEvent) => void }. Move any data fetching or logic into the
       ViewModel.
+
+  - id: lib-no-feature-or-component-imports
+    description: >-
+      @/lib/** is the shared server-side and utility layer that the rest of the app
+      depends on. It must not import from features or components — doing so would
+      invert the dependency direction, create circular dependencies, and make lib
+      modules impossible to use in server contexts such as API routes and pages.
+    target: "@/lib/**"
+    forbidden:
+      - import: "@/features/**"
+      - import: "@/components/**"
+    fix: >-
+      Remove the feature or component import from the lib module. If shared logic is
+      needed, extract it into a new @/lib/** module that both sides can depend on.
+
+  - id: page-no-direct-components
+    description: >-
+      NextJS pages are server-side entry points whose only UI responsibility is to
+      choose and mount the right Container. Importing shared components directly
+      from @/components/** adds presentation logic to the page, bypasses the
+      Container/ViewModel/View architecture, and makes the page harder to test.
+    target: "@/app/**/page"
+    forbidden:
+      - import: "@/components/**"
+    fix: >-
+      Move the component usage into a feature View. If the component is truly
+      page-level chrome (e.g., a layout wrapper), place it in the nearest
+      layout.tsx instead.
+
+  - id: features-no-server-lib
+    description: >-
+      Feature files run on the client under 'use client'. @/lib/coinlist-server
+      imports the 'server-only' package and must never be bundled into the client.
+      Importing it from a feature would silently compile in server credentials and
+      break the Next.js server/client boundary, potentially leaking secrets.
+    target: "@/features/**"
+    forbidden:
+      - import: "@/lib/coinlist-server"
+      - import: "server-only"
+    fix: >-
+      Remove the server lib import from the feature. Server-side data fetching
+      belongs in the page (a Server Component), which can pass the result down as
+      props to the Container.
