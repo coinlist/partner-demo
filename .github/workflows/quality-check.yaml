@@ -32,5 +32,8 @@ jobs:
       - name: ✨ Deslop check
         run: npm run deslop
 
+      - name: Setup fake environment
+        run: cp .environments/.env.example .env.local
+
       - name: 🏗️Build
         run: npm run build
