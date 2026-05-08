@@ -97,6 +97,7 @@ export function OfferView({ state, onEvent }: Props) {
                 onOptionSelect={(optionId) =>
                   onEvent({ type: 'ON_OPTION_SELECT', optionId })
                 }
+                onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
               />
             </div>
 
@@ -141,6 +142,7 @@ export function OfferView({ state, onEvent }: Props) {
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
+              onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
             />
           </div>
         </div>
@@ -157,6 +159,7 @@ function SidebarContent({
   selectedOptionId,
   participationsState,
   onOptionSelect,
+  onContinue,
 }: {
   tokenCode: string;
   tokenPriceUsd: string | null;
@@ -165,6 +168,7 @@ function SidebarContent({
   selectedOptionId: OfferOptionId | null;
   participationsState: ParticipationsUiState;
   onOptionSelect: (optionId: OfferOptionId) => void;
+  onContinue: () => void;
 }) {
   return (
     <>
@@ -209,6 +213,7 @@ function SidebarContent({
           optionId={selectedOptionId}
           title="Requirements"
           description="Complete these steps to participate in the token sale."
+          onContinue={onContinue}
         />
       ) : null}
       <OfferParticipations state={participationsState} />

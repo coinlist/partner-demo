@@ -97,6 +97,9 @@ export type OfferUiEvent =
   | {
       type: 'ON_OPTION_SELECT';
       optionId: OfferOptionId;
+    }
+  | {
+      type: 'ON_INVEST_CLICK';
     };
 
 export function useOfferViewModel(): {
@@ -130,6 +133,13 @@ export function useOfferViewModel(): {
       case 'ON_OPTION_SELECT':
         setSelectedOptionId(event.optionId);
         break;
+      case 'ON_INVEST_CLICK': {
+        const resolvedOptionId = selectedOptionId ?? (offerDetailsState.type === 'CONTENT' ? offerDetailsState.offerDetail.options[0]?.id ?? null : null);
+        if (resolvedOptionId) {
+          router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
+        }
+        break;
+      }
     }
   };
 

@@ -1,0 +1,33 @@
+'use client';
+
+import { createAppKit } from '@reown/appkit/react';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet } from '@reown/appkit/networks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { WagmiProvider } from 'wagmi';
+import { Blockchain } from '@coinlist-co/react/shared';
+
+export const ETHEREUM_CHAIN = Blockchain('ethereum');
+
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? '';
+
+const wagmiAdapter = new WagmiAdapter({
+  networks: [mainnet],
+  projectId,
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks: [mainnet],
+  projectId,
+});
+
+const queryClient = new QueryClient();
+
+export function WalletConnectProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
+  );
+}
