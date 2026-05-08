@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { ROUTES } from "@/lib/routes";
-import { useCoinList } from "@coinlist-co/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCoinList } from '@coinlist-co/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ROUTES } from '@/lib/routes';
 
 export type SettingsUiState = {
   logoutLoading: boolean;
@@ -11,7 +11,7 @@ export type SettingsUiState = {
 };
 
 export type SettingsUiEvent = {
-  type: "ON_LOGOUT";
+  type: 'ON_LOGOUT';
 };
 
 export function useSettingsViewModel(): {
@@ -29,7 +29,7 @@ export function useSettingsViewModel(): {
   };
   const onEvent = async (event: SettingsUiEvent) => {
     switch (event.type) {
-      case "ON_LOGOUT":
+      case 'ON_LOGOUT':
         await onLogout();
         break;
     }
@@ -38,15 +38,15 @@ export function useSettingsViewModel(): {
     setLogoutLoading(true);
     setLogoutError(null);
     try {
-      const res = await fetch("/api/coinlist/oauth/logout", {
-        method: "POST",
-        credentials: "include",
+      const res = await fetch('/api/coinlist/oauth/logout', {
+        method: 'POST',
+        credentials: 'include',
       });
-      if (!res.ok) throw new Error("logout failed");
+      if (!res.ok) throw new Error('logout failed');
       coinlist.logout();
       router.replace(ROUTES.ROOT);
     } catch {
-      setLogoutError("Could not sign out. Try again.");
+      setLogoutError('Could not sign out. Try again.');
     } finally {
       setLogoutLoading(false);
     }

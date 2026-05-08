@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { OfferView } from "./OfferView";
-import { useOfferViewModel } from "./useOfferViewModel";
+import { OfferView } from './OfferView';
+import { useOfferViewModel } from './useOfferViewModel';
 
 export function OfferContainer() {
   const { state, onEvent } = useOfferViewModel();

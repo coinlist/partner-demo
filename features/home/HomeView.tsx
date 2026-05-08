@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { OffersGrid } from "@coinlist-co/react";
-import { Settings } from "lucide-react";
-import { HomeUiEvent, HomeUiState } from "./useHomeViewModel";
-import { Offer } from "@coinlist-co/react/shared";
+import { OffersGrid } from '@coinlist-co/react';
+import type { Offer } from '@coinlist-co/react/shared';
+import { Settings } from 'lucide-react';
+import type { HomeUiEvent, HomeUiState } from './useHomeViewModel';
 
 export interface Props {
   state: HomeUiState;
@@ -12,10 +12,10 @@ export interface Props {
 
 export function HomeView({ state, onEvent }: Props) {
   const onSettingsClick = () => {
-    onEvent({ type: "ON_SETTINGS_CLICK" });
+    onEvent({ type: 'ON_SETTINGS_CLICK' });
   };
   const onOfferClick = (offer: Offer) => {
-    onEvent({ type: "ON_OFFER_CLICK", offer });
+    onEvent({ type: 'ON_OFFER_CLICK', offer });
   };
 
   return (

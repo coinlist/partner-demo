@@ -1,17 +1,17 @@
-import "server-only";
+import 'server-only';
 
-import type { NextRequest, NextResponse } from "next/server";
-import type { OAuthSession } from "@coinlist-co/react/shared";
-import { OAuthRefreshToken } from "@coinlist-co/react/shared";
-import type { SessionStore } from "@coinlist-co/react/server";
+import type { SessionStore } from '@coinlist-co/react/server';
+import type { OAuthSession } from '@coinlist-co/react/shared';
+import { OAuthRefreshToken } from '@coinlist-co/react/shared';
+import type { NextRequest, NextResponse } from 'next/server';
 
-const COINLIST_SESSION_COOKIE = "coinlist_session";
+const COINLIST_SESSION_COOKIE = 'coinlist_session';
 
 export function cookiesSessionStore(request: NextRequest): {
   store: SessionStore;
   applyCookies: (response: NextResponse) => NextResponse;
 } {
-  let pendingSession: OAuthSession | null | undefined = undefined;
+  let pendingSession: OAuthSession | null | undefined;
 
   const store: SessionStore = {
     async getSession(): Promise<OAuthSession | null> {
@@ -31,7 +31,7 @@ export function cookiesSessionStore(request: NextRequest): {
       response.cookies.set(
         COINLIST_SESSION_COOKIE,
         serializeSession(pendingSession),
-        cookieOptions(),
+        cookieOptions()
       );
     }
     return response;
@@ -43,7 +43,7 @@ export function cookiesSessionStore(request: NextRequest): {
 export function readOnlySessionStore(): SessionStore {
   return {
     async getSession(): Promise<OAuthSession | null> {
-      const { cookies } = await import("next/headers");
+      const { cookies } = await import('next/headers');
       const raw = (await cookies()).get(COINLIST_SESSION_COOKIE)?.value;
       return deserializeSession(raw);
     },
@@ -51,12 +51,12 @@ export function readOnlySessionStore(): SessionStore {
 }
 
 function cookieOptions() {
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
     secure: isProd,
-    sameSite: "lax" as const,
-    path: "/",
+    sameSite: 'lax' as const,
+    path: '/',
     maxAge: 60 * 60 * 24 * 90, // 90 days
   };
 }
@@ -71,15 +71,15 @@ function deserializeSession(raw?: string): OAuthSession | null {
     return null;
   }
 
-  if (typeof parsed !== "object" || parsed == null) return null;
+  if (typeof parsed !== 'object' || parsed == null) return null;
   const maybe = parsed as {
     accessToken?: { value?: unknown; expiresAt?: unknown };
     refreshToken?: unknown;
   };
 
   if (
-    typeof maybe.accessToken?.value !== "string" ||
-    typeof maybe.accessToken?.expiresAt !== "string"
+    typeof maybe.accessToken?.value !== 'string' ||
+    typeof maybe.accessToken?.expiresAt !== 'string'
   ) {
     return null;
   }
@@ -89,7 +89,7 @@ function deserializeSession(raw?: string): OAuthSession | null {
 
   return {
     accessToken: { value: maybe.accessToken.value, expiresAt },
-    ...(typeof maybe.refreshToken === "string" && maybe.refreshToken !== ""
+    ...(typeof maybe.refreshToken === 'string' && maybe.refreshToken !== ''
       ? { refreshToken: OAuthRefreshToken(maybe.refreshToken) }
       : {}),
   };

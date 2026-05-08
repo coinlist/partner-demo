@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Suspense } from "react";
-import { LoginView } from "./LoginView";
-import { useLoginViewModel } from "./useLoginViewModel";
+import { Suspense } from 'react';
+import { LoginView } from './LoginView';
+import { useLoginViewModel } from './useLoginViewModel';
 
 export function LoginContainer() {
   return (

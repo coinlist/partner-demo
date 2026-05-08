@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { OfferBanner } from "./components/OfferBanner";
-import { OfferFaq } from "./components/OfferFaq";
-import { OfferHeader } from "./components/OfferHeader";
-import { OfferLink } from "./components/OfferLink";
-import { OfferMilestones } from "./components/OfferMilestones";
-import { OfferParticipations } from "./components/OfferParticipations";
-import { OfferSidebarCard } from "./components/OfferSidebarCard";
-import { OfferTerms } from "./components/OfferTerms";
-import { ArrowLeft } from "lucide-react";
-import {
+import { RequirementsChecklist } from '@coinlist-co/react';
+import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
+import { ArrowLeft } from 'lucide-react';
+import { OfferBanner } from './components/OfferBanner';
+import { OfferFaq } from './components/OfferFaq';
+import { OfferHeader } from './components/OfferHeader';
+import { OfferLink } from './components/OfferLink';
+import { OfferMilestones } from './components/OfferMilestones';
+import { OfferParticipations } from './components/OfferParticipations';
+import { OfferSidebarCard } from './components/OfferSidebarCard';
+import { OfferTerms } from './components/OfferTerms';
+import type {
   OfferUiEvent,
   OfferUiOption,
-  ParticipationsUiState,
   OfferUiState,
-} from "./useOfferViewModel";
-import { RequirementsChecklist } from "@coinlist-co/react";
-import { OfferId, OfferOptionId } from "@coinlist-co/react/shared";
+  ParticipationsUiState,
+} from './useOfferViewModel';
 
 export interface Props {
   state: OfferUiState;
@@ -24,7 +24,7 @@ export interface Props {
 }
 
 export function OfferView({ state, onEvent }: Props) {
-  if (state.type === "LOADING") {
+  if (state.type === 'LOADING') {
     return (
       <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
         <div className="mx-auto w-full max-w-6xl animate-pulse space-y-4">
@@ -36,7 +36,7 @@ export function OfferView({ state, onEvent }: Props) {
     );
   }
 
-  if (state.type === "ERROR") {
+  if (state.type === 'ERROR') {
     return (
       <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
         <div className="mx-auto w-full max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-900/50 dark:bg-red-950/30">
@@ -49,7 +49,7 @@ export function OfferView({ state, onEvent }: Props) {
           <div className="mt-5 flex gap-3">
             <button
               type="button"
-              onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
+              onClick={() => onEvent({ type: 'ON_BACK_CLICK' })}
               className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
             >
               <ArrowLeft size={16} />
@@ -58,7 +58,7 @@ export function OfferView({ state, onEvent }: Props) {
             {!state.isAuthError ? (
               <button
                 type="button"
-                onClick={() => onEvent({ type: "ON_RETRY_CLICK" })}
+                onClick={() => onEvent({ type: 'ON_RETRY_CLICK' })}
                 className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Retry
@@ -75,7 +75,7 @@ export function OfferView({ state, onEvent }: Props) {
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <button
           type="button"
-          onClick={() => onEvent({ type: "ON_BACK_CLICK" })}
+          onClick={() => onEvent({ type: 'ON_BACK_CLICK' })}
           className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
           <ArrowLeft size={16} />
@@ -95,7 +95,7 @@ export function OfferView({ state, onEvent }: Props) {
                 selectedOptionId={state.selectedOptionId}
                 participationsState={state.participationsState}
                 onOptionSelect={(optionId) =>
-                  onEvent({ type: "ON_OPTION_SELECT", optionId })
+                  onEvent({ type: 'ON_OPTION_SELECT', optionId })
                 }
               />
             </div>
@@ -111,7 +111,7 @@ export function OfferView({ state, onEvent }: Props) {
                   About
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                  {state.about ?? "No description available yet."}
+                  {state.about ?? 'No description available yet.'}
                 </p>
               </div>
               {state.links.length > 0 ? (
@@ -139,7 +139,7 @@ export function OfferView({ state, onEvent }: Props) {
               selectedOptionId={state.selectedOptionId}
               participationsState={state.participationsState}
               onOptionSelect={(optionId) =>
-                onEvent({ type: "ON_OPTION_SELECT", optionId })
+                onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
             />
           </div>
@@ -186,12 +186,12 @@ function SidebarContent({
                 onClick={() => onOptionSelect(opt.id)}
                 className={`rounded-lg border px-3 py-2 text-left text-sm font-medium transition ${
                   opt.id === selectedOptionId
-                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-300"
-                    : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-300'
+                    : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
                 <span className="capitalize">
-                  {opt.slug.replace(/-/g, " ")}
+                  {opt.slug.replace(/-/g, ' ')}
                 </span>
                 {opt.priceUsd ? (
                   <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">

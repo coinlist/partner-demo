@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { ROUTES } from "@/lib/routes";
 import {
-  OfferId,
-  OfferOptionId,
-  type ParticipationStatus,
-} from "@coinlist-co/react/shared";
-import {
-  LoadOfferDetailsState,
-  LoadParticipationsState,
+  type LoadOfferDetailsState,
+  type LoadParticipationsState,
   useOfferDetails,
   useParticipations,
-} from "@coinlist-co/react";
-import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+} from '@coinlist-co/react';
+import {
+  OfferId,
+  type OfferOptionId,
+  type ParticipationStatus,
+} from '@coinlist-co/react/shared';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ROUTES } from '@/lib/routes';
 
 export type OfferUiLink = {
   label: string;
@@ -28,7 +28,7 @@ export type OfferUiTerm = {
 export type OfferUiMilestone = {
   name: string;
   schedule: string;
-  status: "completed" | "active" | "upcoming";
+  status: 'completed' | 'active' | 'upcoming';
 };
 
 export type OfferUiFaq = {
@@ -53,21 +53,21 @@ export type ParticipationUi = {
 };
 
 export type ParticipationsUiState =
-  | { type: "LOADING" }
-  | { type: "ERROR" }
-  | { type: "CONTENT"; participations: ParticipationUi[] };
+  | { type: 'LOADING' }
+  | { type: 'ERROR' }
+  | { type: 'CONTENT'; participations: ParticipationUi[] };
 
 export type OfferUiState =
   | {
-      type: "LOADING";
+      type: 'LOADING';
     }
   | {
-      type: "ERROR";
+      type: 'ERROR';
       message: string;
       isAuthError: boolean;
     }
   | {
-      type: "CONTENT";
+      type: 'CONTENT';
       offerId: OfferId;
       options: OfferUiOption[];
       selectedOptionId: OfferOptionId | null;
@@ -89,13 +89,13 @@ export type OfferUiState =
 
 export type OfferUiEvent =
   | {
-      type: "ON_BACK_CLICK";
+      type: 'ON_BACK_CLICK';
     }
   | {
-      type: "ON_RETRY_CLICK";
+      type: 'ON_RETRY_CLICK';
     }
   | {
-      type: "ON_OPTION_SELECT";
+      type: 'ON_OPTION_SELECT';
       optionId: OfferOptionId;
     };
 
@@ -108,7 +108,7 @@ export function useOfferViewModel(): {
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
 
-  const offerId = parseRouteOfferId(params.id) ?? OfferId("");
+  const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
   const { participationsState } = useParticipations(offerId);
 
@@ -116,18 +116,18 @@ export function useOfferViewModel(): {
     offerId,
     offerDetailsState,
     selectedOptionId,
-    participationsState,
+    participationsState
   );
 
   const onEvent = (event: OfferUiEvent) => {
     switch (event.type) {
-      case "ON_BACK_CLICK":
+      case 'ON_BACK_CLICK':
         router.push(ROUTES.ROOT);
         break;
-      case "ON_RETRY_CLICK":
+      case 'ON_RETRY_CLICK':
         router.refresh();
         break;
-      case "ON_OPTION_SELECT":
+      case 'ON_OPTION_SELECT':
         setSelectedOptionId(event.optionId);
         break;
     }
@@ -155,12 +155,12 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  loadParticipationsState: LoadParticipationsState,
+  loadParticipationsState: LoadParticipationsState
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
-    loadParticipationsState.type === "CONTENT"
+    loadParticipationsState.type === 'CONTENT'
       ? {
-          type: "CONTENT",
+          type: 'CONTENT',
           participations: loadParticipationsState.participations.map((p) => ({
             id: p.id.toString(),
             displayAmount: p.displayAmount,
@@ -174,27 +174,27 @@ function mapOfferUiState(
       : { type: loadParticipationsState.type };
   if (!routeOfferId) {
     return {
-      type: "ERROR",
-      message: "Offer ID is missing in the URL.",
+      type: 'ERROR',
+      message: 'Offer ID is missing in the URL.',
       isAuthError: false,
     };
   }
 
   switch (offerDetailsState.type) {
-    case "LOADING":
+    case 'LOADING':
       return {
-        type: "LOADING",
+        type: 'LOADING',
       };
-    case "ERROR":
+    case 'ERROR':
       return {
-        type: "ERROR",
+        type: 'ERROR',
         message:
-          offerDetailsState.reason === "not-authenticated"
-            ? "Your session expired. Please sign in again."
-            : "Could not load offer details. Please try again.",
-        isAuthError: offerDetailsState.reason === "not-authenticated",
+          offerDetailsState.reason === 'not-authenticated'
+            ? 'Your session expired. Please sign in again.'
+            : 'Could not load offer details. Please try again.',
+        isAuthError: offerDetailsState.reason === 'not-authenticated',
       };
-    case "CONTENT": {
+    case 'CONTENT': {
       const options = offerDetailsState.offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -203,7 +203,7 @@ function mapOfferUiState(
       const resolvedOptionId = selectedOptionId ?? options[0]?.id ?? null;
       const selectedOption = options.find((opt) => opt.id === resolvedOptionId);
       return {
-        type: "CONTENT",
+        type: 'CONTENT',
         offerId: OfferId(routeOfferId),
         options,
         selectedOptionId: resolvedOptionId,
@@ -217,27 +217,27 @@ function mapOfferUiState(
         links: offerDetailsState.offerDetail.links
           .filter((link) => Boolean(link.label && link.url))
           .map((link) => ({
-            label: link.label ?? "",
-            url: link.url ?? "",
+            label: link.label ?? '',
+            url: link.url ?? '',
           })),
         terms: offerDetailsState.offerDetail.terms
           .filter((term) => Boolean(term.key && term.value))
           .map((term) => ({
-            key: term.key ?? "",
-            value: term.value ?? "",
+            key: term.key ?? '',
+            value: term.value ?? '',
           })),
         milestones: offerDetailsState.offerDetail.milestones
           .filter((milestone) => Boolean(milestone.name && milestone.schedule))
           .map((milestone) => ({
-            name: milestone.name ?? "",
-            schedule: milestone.schedule ?? "",
+            name: milestone.name ?? '',
+            schedule: milestone.schedule ?? '',
             status: milestone.status,
           })),
         faqs: offerDetailsState.offerDetail.faqs
           .filter((faq) => Boolean(faq.question && faq.answer))
           .map((faq) => ({
-            question: faq.question ?? "",
-            answer: faq.answer ?? "",
+            question: faq.question ?? '',
+            answer: faq.answer ?? '',
           })),
         tokenCode: offerDetailsState.offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
