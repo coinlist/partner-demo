@@ -140,7 +140,7 @@ export function InvestView({ state, onEvent }: Props) {
             type="button"
             onClick={() => onEvent({ type: 'ON_SIGN_AND_COMMIT' })}
             disabled={!canSubmit}
-            className={`w-full rounded-2xl py-4 text-sm font-semibold transition ${
+            className={`mt-4 w-full rounded-2xl py-4 text-sm font-semibold transition ${
               canSubmit
                 ? 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'
                 : 'cursor-not-allowed bg-zinc-300 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-500'
