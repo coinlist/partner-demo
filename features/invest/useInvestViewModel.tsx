@@ -16,8 +16,10 @@ import { erc20Abi, parseUnits } from 'viem';
 import {
   type Config,
   useBalance,
+  useChainId,
   useConfig,
   useDisconnect,
+  useSwitchChain,
   useWriteContract,
 } from 'wagmi';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
@@ -38,9 +40,15 @@ import { ROUTES } from '@/lib/routes';
  * array, in the entry where action === "funding" on the Ethereum chain.
  *
  * TODO: Replace with the actual funding contract address for your offer.
+ *
+ * TESTING: The address below is a dummy used for local testing only. It is a
+ * valid Ethereum address with no deployed code, so the ERC-20 approve() call
+ * will succeed on-chain and MetaMask will show the real signing flow, but the
+ * CoinList backend will reject createParticipation because it won't find an
+ * allowance on its real contract. Replace before going live.
  */
 const COINLIST_SPENDER_ADDRESS =
-  '0x0000000000000000000000000000000000000000' as `0x${string}`;
+  '0x1234567890123456789012345678901234567890' as `0x${string}`;
 
 /**
  * ERC-20 contract addresses on Ethereum mainnet, keyed by CoinList asset ID.
@@ -69,6 +77,12 @@ const ASSET_DECIMALS: Record<string, number> = {
 };
 
 const DEFAULT_ASSET_DECIMALS = 6;
+
+/**
+ * Ethereum mainnet chain ID. The approval transaction must be submitted on
+ * this chain regardless of what network the user's wallet is currently on.
+ */
+const ETHEREUM_MAINNET_CHAIN_ID = 1;
 
 /**
  * Minimum ETH balance required to pay gas for the ERC-20 approve transaction.
@@ -122,6 +136,8 @@ export function useInvestViewModel(
   const { open: openAppKit } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
+  const chainId = useChainId();
+  const { mutateAsync: switchChain } = useSwitchChain();
   const { mutateAsync: disconnect } = useDisconnect();
   const { mutateAsync: writeContract } = useWriteContract();
   const { data: ethBalance } = useBalance({
@@ -187,6 +203,8 @@ export function useInvestViewModel(
     setSubmitError(null);
 
     try {
+      await ensureMainnet(chainId, switchChain);
+
       const approvalTxHash = await sendApprovalTransaction(
         writeContract,
         wagmiConfig,
@@ -333,6 +351,20 @@ function validateSubmit(
   }
 
   return null;
+}
+
+/**
+ * Ensures the user's wallet is on Ethereum mainnet before an on-chain
+ * transaction is submitted. If the wallet is on a different chain, this
+ * triggers the wallet's native "Switch Network" prompt (e.g. the MetaMask
+ * network-switch dialog). Throws if the user rejects the switch.
+ */
+async function ensureMainnet(
+  currentChainId: number,
+  switchChain: (params: { chainId: number }) => Promise<unknown>
+): Promise<void> {
+  if (currentChainId === ETHEREUM_MAINNET_CHAIN_ID) return;
+  await switchChain({ chainId: ETHEREUM_MAINNET_CHAIN_ID });
 }
 
 /**
