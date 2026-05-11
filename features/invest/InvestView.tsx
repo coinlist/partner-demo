@@ -114,13 +114,18 @@ export function InvestView({ state, onEvent }: Props) {
                         assetId: asset.assetId,
                       })
                     }
-                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                    className={`flex flex-col items-start rounded-xl border px-4 py-3 text-sm font-medium transition ${
                       asset.assetId === state.selectedAssetId
                         ? 'border-zinc-900 bg-white text-zinc-900 ring-1 ring-zinc-900 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:ring-zinc-100'
                         : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
                     }`}
                   >
-                    {asset.code}
+                    <span>{asset.code}</span>
+                    {asset.balance !== null && (
+                      <span className="mt-0.5 text-xs font-normal text-zinc-400 dark:text-zinc-500">
+                        {asset.balance} available
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

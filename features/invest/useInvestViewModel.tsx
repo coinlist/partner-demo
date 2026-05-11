@@ -19,6 +19,7 @@ import {
   useChainId,
   useConfig,
   useDisconnect,
+  useReadContract,
   useSwitchChain,
   useWriteContract,
 } from 'wagmi';
@@ -103,7 +104,11 @@ export type InvestUiState = {
         truncatedAddress: string;
         ethBalance: string | null;
       };
-  fundingAssets: { assetId: AssetId; code: string }[];
+  fundingAssets: {
+    assetId: AssetId;
+    code: string;
+    balance: string | null;
+  }[];
   selectedAssetId: AssetId | null;
   amountInput: string;
   tokenEquivalent: string | null;
@@ -148,6 +153,24 @@ export function useInvestViewModel(
     address: address as `0x${string}` | undefined,
     query: { enabled: !!address },
   });
+  const { data: usdcBalanceRaw } = useReadContract({
+    address: ASSET_CONTRACT_ADDRESS['usd-coin'],
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [address as `0x${string}`],
+    query: { enabled: !!address },
+  });
+  const { data: usdtBalanceRaw } = useReadContract({
+    address: ASSET_CONTRACT_ADDRESS['2dc8ccb2-d36d-43bb-894e-d45022418d51'],
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [address as `0x${string}`],
+    query: { enabled: !!address },
+  });
+  const tokenBalances: Record<string, bigint | undefined> = {
+    'usd-coin': usdcBalanceRaw,
+    '2dc8ccb2-d36d-43bb-894e-d45022418d51': usdtBalanceRaw,
+  };
 
   const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
     offerDetail.fundingAssets[0]?.id ?? null
@@ -174,6 +197,10 @@ export function useInvestViewModel(
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
+      balance: formatTokenBalance(
+        tokenBalances[a.id.toString()],
+        a.id.toString()
+      ),
     })),
     selectedAssetId,
     amountInput,
@@ -269,6 +296,19 @@ export function useInvestViewModel(
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
+
+function formatTokenBalance(
+  balanceRaw: bigint | undefined,
+  assetId: string
+): string | null {
+  if (balanceRaw === undefined) return null;
+  const decimals = ASSET_DECIMALS[assetId] ?? DEFAULT_ASSET_DECIMALS;
+  const value = Number(balanceRaw) / 10 ** decimals;
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 function deriveWalletState(
   isConnected: boolean,
