@@ -28,7 +28,7 @@ import { ROUTES } from '@/lib/routes';
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 /**
- * The CoinList smart contract that receives ERC-20 approvals for this offer.
+ * Funding contract: The CoinList smart contract that receives ERC-20 approvals for this offer.
  *
  * When a user invests, their wallet signs an ERC-20 approve(spender, amount)
  * transaction giving this contract permission to later pull their funds via
@@ -48,7 +48,7 @@ import { ROUTES } from '@/lib/routes';
  * allowance on its real contract. Replace before going live.
  */
 const COINLIST_SPENDER_ADDRESS =
-  '0x1234567890123456789012345678901234567890' as `0x${string}`;
+  '0xc671659c6dD68f1339e8aA9dbf633ec23589f16a' as `0x${string}`;
 
 /**
  * ERC-20 contract addresses on Ethereum mainnet, keyed by CoinList asset ID.
