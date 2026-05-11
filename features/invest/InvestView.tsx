@@ -62,9 +62,16 @@ export function InvestView({ state, onEvent }: Props) {
           {isConnected && state.walletState.type === 'CONNECTED' ? (
             <div className="flex items-center gap-3 rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-700">
               <Wallet size={18} className="text-zinc-500 dark:text-zinc-400" />
-              <span className="flex-1 text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                {state.walletState.truncatedAddress}
-              </span>
+              <div className="flex flex-1 flex-col">
+                <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                  {state.walletState.truncatedAddress}
+                </span>
+                {state.walletState.ethBalance && (
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                    {state.walletState.ethBalance}
+                  </span>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => onEvent({ type: 'ON_DISCONNECT_WALLET' })}

@@ -12,7 +12,7 @@ import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import { waitForTransactionReceipt } from '@wagmi/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { erc20Abi, parseUnits } from 'viem';
+import { erc20Abi, formatEther, parseUnits } from 'viem';
 import {
   type Config,
   useBalance,
@@ -98,7 +98,11 @@ export type InvestUiState = {
   endsAt: Date;
   walletState:
     | { type: 'DISCONNECTED' }
-    | { type: 'CONNECTED'; truncatedAddress: string };
+    | {
+        type: 'CONNECTED';
+        truncatedAddress: string;
+        ethBalance: string | null;
+      };
   fundingAssets: { assetId: AssetId; code: string }[];
   selectedAssetId: AssetId | null;
   amountInput: string;
@@ -166,7 +170,7 @@ export function useInvestViewModel(
   const state: InvestUiState = {
     backLabel: 'Back to deal page',
     endsAt: offerDetail.endsAt,
-    walletState: deriveWalletState(isConnected, address),
+    walletState: deriveWalletState(isConnected, address, ethBalance?.value),
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
@@ -268,14 +272,19 @@ export function useInvestViewModel(
 
 function deriveWalletState(
   isConnected: boolean,
-  address: string | undefined
+  address: string | undefined,
+  ethBalanceWei: bigint | undefined
 ): InvestUiState['walletState'] {
   if (!isConnected || !address) return { type: 'DISCONNECTED' };
   const truncatedAddress =
     address.length > 10
       ? `${address.slice(0, 6)}...${address.slice(-4)}`
       : address;
-  return { type: 'CONNECTED', truncatedAddress };
+  const ethBalance =
+    ethBalanceWei !== undefined
+      ? `${parseFloat(formatEther(ethBalanceWei)).toFixed(7)} ETH`
+      : null;
+  return { type: 'CONNECTED', truncatedAddress, ethBalance };
 }
 
 function deriveTokenEquivalent(
