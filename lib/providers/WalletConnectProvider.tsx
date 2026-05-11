@@ -6,10 +6,14 @@ import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
+import { requiredEnv } from '@/lib/env';
 
 export const ETHEREUM_CHAIN = Blockchain('ethereum');
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? '';
+const projectId = requiredEnv(
+  'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID',
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+);
 
 const wagmiAdapter = new WagmiAdapter({
   networks: [mainnet],
