@@ -63,7 +63,7 @@ const COINLIST_SPENDER_ADDRESS =
 const ASSET_CONTRACT_ADDRESS: Record<string, `0x${string}`> = {
   'usd-coin': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
   '2dc8ccb2-d36d-43bb-894e-d45022418d51':
-    '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+    '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
 };
 
 /**
