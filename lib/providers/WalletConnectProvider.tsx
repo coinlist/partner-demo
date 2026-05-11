@@ -24,6 +24,12 @@ createAppKit({
   adapters: [wagmiAdapter],
   networks: [mainnet],
   projectId,
+  metadata: {
+    name: 'CoinList Partner Demo',
+    description: 'Demo of the CoinList Partner SDK.',
+    url: 'https://partner.coinlist.dev',
+    icons: [],
+  },
 });
 
 const queryClient = new QueryClient();
