@@ -23,6 +23,8 @@ import {
   useSwitchChain,
   useWriteContract,
 } from 'wagmi';
+import { USDC_ASSET_ID, USDT_ASSET_ID } from '@/lib/coinlist';
+import { USDC_CONTRACT_ADDRESS, USDT_CONTRACT_ADDRESS } from '@/lib/erc20';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 
@@ -48,7 +50,7 @@ import { ROUTES } from '@/lib/routes';
  * CoinList backend will reject createParticipation because it won't find an
  * allowance on its real contract. Replace before going live.
  */
-const COINLIST_SPENDER_ADDRESS =
+const FUNDING_CONTRACT_ADDRESS =
   '0xc671659c6dD68f1339e8aA9dbf633ec23589f16a' as `0x${string}`;
 
 /**
@@ -62,9 +64,8 @@ const COINLIST_SPENDER_ADDRESS =
  * Add entries here for any additional funding assets your offer supports.
  */
 const ASSET_CONTRACT_ADDRESS: Record<string, `0x${string}`> = {
-  'usd-coin': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
-  '2dc8ccb2-d36d-43bb-894e-d45022418d51':
-    '0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
+  [USDC_ASSET_ID]: USDC_CONTRACT_ADDRESS,
+  [USDT_ASSET_ID]: USDT_CONTRACT_ADDRESS,
 };
 
 /**
@@ -73,8 +74,8 @@ const ASSET_CONTRACT_ADDRESS: Record<string, `0x${string}`> = {
  * (e.g. 1_000_000 for USDC which has 6 decimals, not 18 like ETH).
  */
 const ASSET_DECIMALS: Record<string, number> = {
-  'usd-coin': 6, // USDC
-  '2dc8ccb2-d36d-43bb-894e-d45022418d51': 6, // USDT
+  [USDC_ASSET_ID]: 6,
+  [USDT_ASSET_ID]: 6,
 };
 
 const DEFAULT_ASSET_DECIMALS = 6;
@@ -154,22 +155,22 @@ export function useInvestViewModel(
     query: { enabled: !!address },
   });
   const { data: usdcBalanceRaw } = useReadContract({
-    address: ASSET_CONTRACT_ADDRESS['usd-coin'],
+    address: USDC_CONTRACT_ADDRESS,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
     query: { enabled: !!address },
   });
   const { data: usdtBalanceRaw } = useReadContract({
-    address: ASSET_CONTRACT_ADDRESS['2dc8ccb2-d36d-43bb-894e-d45022418d51'],
+    address: USDT_CONTRACT_ADDRESS,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
     query: { enabled: !!address },
   });
   const tokenBalances: Record<string, bigint | undefined> = {
-    'usd-coin': usdcBalanceRaw,
-    '2dc8ccb2-d36d-43bb-894e-d45022418d51': usdtBalanceRaw,
+    [USDC_ASSET_ID]: usdcBalanceRaw,
+    [USDT_ASSET_ID]: usdtBalanceRaw,
   };
 
   const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
@@ -378,7 +379,7 @@ function validateSubmit(
   // Catch misconfiguration early so devs see a clear error instead of a
   // silent on-chain approval to the zero address.
   if (
-    COINLIST_SPENDER_ADDRESS === '0x0000000000000000000000000000000000000000'
+    FUNDING_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000'
   ) {
     return 'COINLIST_SPENDER_ADDRESS is not configured. Set the funding contract address in useInvestViewModel.tsx.';
   }
@@ -453,7 +454,7 @@ async function sendApprovalTransaction(
     address: tokenAddress,
     abi: erc20Abi,
     functionName: 'approve',
-    args: [COINLIST_SPENDER_ADDRESS, approvalAmount],
+    args: [FUNDING_CONTRACT_ADDRESS, approvalAmount],
   });
 
   // Wait until the approval is included in a block. The CoinList backend
