@@ -23,10 +23,14 @@ import {
   useSwitchChain,
   useWriteContract,
 } from 'wagmi';
-import { USDC_ASSET_ID, USDT_ASSET_ID } from '@/lib/coinlist';
-import { USDC_CONTRACT_ADDRESS, USDT_CONTRACT_ADDRESS } from '@/lib/erc20';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
+import { ASSET_CONTRACT_ADDRESS, decimals, USDC, USDT } from '@/types/coinlist';
+import {
+  TxHash,
+  USDC_CONTRACT_ADDRESS,
+  USDT_CONTRACT_ADDRESS,
+} from '@/types/erc20';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -52,33 +56,6 @@ import { ROUTES } from '@/lib/routes';
  */
 const FUNDING_CONTRACT_ADDRESS =
   '0xc671659c6dD68f1339e8aA9dbf633ec23589f16a' as `0x${string}`;
-
-/**
- * ERC-20 contract addresses on Ethereum mainnet, keyed by CoinList asset ID.
- *
- * The asset ID is the `id` field on each entry in OfferDetail.fundingAssets,
- * and corresponds to `generic_token_id` in the backend API. To find the ID
- * for an asset you want to support, inspect the `fundingAssets` array on
- * the offer detail response.
- *
- * Add entries here for any additional funding assets your offer supports.
- */
-const ASSET_CONTRACT_ADDRESS: Record<string, `0x${string}`> = {
-  [USDC_ASSET_ID]: USDC_CONTRACT_ADDRESS,
-  [USDT_ASSET_ID]: USDT_CONTRACT_ADDRESS,
-};
-
-/**
- * Token decimal places, keyed by CoinList asset ID. Used to convert a
- * human-readable amount (e.g. "1000") to the raw integer the EVM expects
- * (e.g. 1_000_000 for USDC which has 6 decimals, not 18 like ETH).
- */
-const ASSET_DECIMALS: Record<string, number> = {
-  [USDC_ASSET_ID]: 6,
-  [USDT_ASSET_ID]: 6,
-};
-
-const DEFAULT_ASSET_DECIMALS = 6;
 
 /**
  * Ethereum mainnet chain ID. The approval transaction must be submitted on
@@ -168,9 +145,9 @@ export function useInvestViewModel(
     args: [address as `0x${string}`],
     query: { enabled: !!address },
   });
-  const tokenBalances: Record<string, bigint | undefined> = {
-    [USDC_ASSET_ID]: usdcBalanceRaw,
-    [USDT_ASSET_ID]: usdtBalanceRaw,
+  const tokenBalances: Record<AssetId, bigint | undefined> = {
+    [USDC]: usdcBalanceRaw,
+    [USDT]: usdtBalanceRaw,
   };
 
   const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
@@ -198,10 +175,7 @@ export function useInvestViewModel(
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
-      balance: formatTokenBalance(
-        tokenBalances[a.id.toString()],
-        a.id.toString()
-      ),
+      balance: formatTokenBalance(tokenBalances[a.id], a.id),
     })),
     selectedAssetId,
     amountInput,
@@ -300,11 +274,11 @@ export function useInvestViewModel(
 
 function formatTokenBalance(
   balanceRaw: bigint | undefined,
-  assetId: string
+  assetId: AssetId
 ): string | null {
   if (balanceRaw === undefined) return null;
-  const decimals = ASSET_DECIMALS[assetId] ?? DEFAULT_ASSET_DECIMALS;
-  const value = Number(balanceRaw) / 10 ** decimals;
+  const d = decimals(assetId);
+  const value = Number(balanceRaw) / 10 ** d;
   return value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -384,9 +358,8 @@ function validateSubmit(
     return 'COINLIST_SPENDER_ADDRESS is not configured. Set the funding contract address in useInvestViewModel.tsx.';
   }
 
-  const assetIdStr = selectedAssetId.toString();
-  if (!ASSET_CONTRACT_ADDRESS[assetIdStr]) {
-    return `Asset "${assetIdStr}" has no configured ERC-20 contract address. Add it to ASSET_CONTRACT_ADDRESS in useInvestViewModel.tsx.`;
+  if (!ASSET_CONTRACT_ADDRESS[selectedAssetId]) {
+    return `Asset "${selectedAssetId}" has no configured ERC-20 contract address. Add it to ASSET_CONTRACT_ADDRESS in useInvestViewModel.tsx.`;
   }
 
   const amount = parseFloat(amountInput.trim());
@@ -434,19 +407,20 @@ async function sendApprovalTransaction(
   wagmiConfig: Config,
   selectedAssetId: AssetId,
   amountInput: string
-): Promise<`0x${string}`> {
-  const assetIdStr = selectedAssetId.toString();
-  const tokenAddress = ASSET_CONTRACT_ADDRESS[assetIdStr];
-  const decimals = ASSET_DECIMALS[assetIdStr] ?? DEFAULT_ASSET_DECIMALS;
+): Promise<TxHash> {
+  const tokenAddress = ASSET_CONTRACT_ADDRESS[selectedAssetId];
 
   // This should have been caught by validateSubmit, but guard anyway.
   if (!tokenAddress) {
     throw new Error(
-      `No ERC-20 contract address configured for asset "${assetIdStr}".`
+      `No ERC-20 contract address configured for asset "${selectedAssetId}".`
     );
   }
 
-  const approvalAmount = parseUnits(amountInput.trim(), decimals);
+  const approvalAmount = parseUnits(
+    amountInput.trim(),
+    decimals(selectedAssetId)
+  );
 
   // This call opens the MetaMask (or other wallet) popup. The user must
   // confirm before the promise resolves with the transaction hash.
@@ -462,5 +436,5 @@ async function sendApprovalTransaction(
   // participation, so we must confirm before calling createParticipation.
   await waitForTransactionReceipt(wagmiConfig, { hash: txHash });
 
-  return txHash;
+  return TxHash(txHash);
 }
