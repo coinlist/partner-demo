@@ -28,8 +28,9 @@ export default async function InvestPage({ params, searchParams }: Props) {
   }
 
   const option: OfferOption | undefined =
-    offerDetail.options.find((o: OfferOption) => o.id.toString() === optionId) ??
-    offerDetail.options[0];
+    offerDetail.options.find(
+      (o: OfferOption) => o.id.toString() === optionId
+    ) ?? offerDetail.options[0];
 
   if (!option) {
     redirect(ROUTES.OFFER_DETAILS(OfferId(id)));
