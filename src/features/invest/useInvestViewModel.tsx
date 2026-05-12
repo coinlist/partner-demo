@@ -226,7 +226,7 @@ export function useInvestViewModel(
         openAppKit();
         break;
       case 'ON_DISCONNECT_WALLET':
-        disconnect();
+        void disconnect();
         break;
       case 'ON_ASSET_SELECT':
         setSelectedAssetId(event.assetId);
