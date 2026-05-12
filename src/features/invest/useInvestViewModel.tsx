@@ -25,37 +25,18 @@ import {
 } from 'wagmi';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
-import { ASSET_CONTRACT_ADDRESS, decimals, USDC, USDT } from '@/types/coinlist';
+import {
+  assetContract,
+  decimals,
+  fundingContract,
+  USDC,
+  USDT,
+} from '@/types/coinlist';
 import {
   TxHash,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from '@/types/erc20';
-
-// ─── Configuration ────────────────────────────────────────────────────────────
-
-/**
- * Funding contract: The CoinList smart contract that receives ERC-20 approvals for this offer.
- *
- * When a user invests, their wallet signs an ERC-20 approve(spender, amount)
- * transaction giving this contract permission to later pull their funds via
- * transferFrom(). No money moves at signing time — the user is only granting
- * an allowance. CoinList collects the funds when the offer closes.
- *
- * This address is offer-specific and provided by CoinList when the offer is
- * set up. You can find it in the raw offer API response under the `contracts`
- * array, in the entry where action === "funding" on the Ethereum chain.
- *
- * TODO: Replace with the actual funding contract address for your offer.
- *
- * TESTING: The address below is a dummy used for local testing only. It is a
- * valid Ethereum address with no deployed code, so the ERC-20 approve() call
- * will succeed on-chain and MetaMask will show the real signing flow, but the
- * CoinList backend will reject createParticipation because it won't find an
- * allowance on its real contract. Replace before going live.
- */
-const FUNDING_CONTRACT_ADDRESS =
-  '0xc671659c6dD68f1339e8aA9dbf633ec23589f16a' as `0x${string}`;
 
 /**
  * Ethereum mainnet chain ID. The approval transaction must be submitted on
@@ -194,11 +175,7 @@ export function useInvestViewModel(
     // Guard: these should be impossible if the UI is wired correctly
     if (!isConnected || !address || !selectedAssetId) return;
 
-    const validationError = validateSubmit(
-      amountInput,
-      selectedAssetId,
-      ethBalance?.value
-    );
+    const validationError = validateSubmit(amountInput, ethBalance?.value);
     if (validationError) {
       setSubmitState('error');
       setSubmitError(validationError);
@@ -347,21 +324,8 @@ function deriveSidebar(
  */
 function validateSubmit(
   amountInput: string,
-  selectedAssetId: AssetId,
   ethBalanceWei: bigint | undefined
 ): string | null {
-  // Catch misconfiguration early so devs see a clear error instead of a
-  // silent on-chain approval to the zero address.
-  if (
-    FUNDING_CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000'
-  ) {
-    return 'COINLIST_SPENDER_ADDRESS is not configured. Set the funding contract address in useInvestViewModel.tsx.';
-  }
-
-  if (!ASSET_CONTRACT_ADDRESS[selectedAssetId]) {
-    return `Asset "${selectedAssetId}" has no configured ERC-20 contract address. Add it to ASSET_CONTRACT_ADDRESS in useInvestViewModel.tsx.`;
-  }
-
   const amount = parseFloat(amountInput.trim());
   if (!amountInput.trim() || Number.isNaN(amount) || amount <= 0) {
     return 'Please enter a valid amount greater than zero.';
@@ -408,14 +372,7 @@ async function sendApprovalTransaction(
   selectedAssetId: AssetId,
   amountInput: string
 ): Promise<TxHash> {
-  const tokenAddress = ASSET_CONTRACT_ADDRESS[selectedAssetId];
-
-  // This should have been caught by validateSubmit, but guard anyway.
-  if (!tokenAddress) {
-    throw new Error(
-      `No ERC-20 contract address configured for asset "${selectedAssetId}".`
-    );
-  }
+  const tokenAddress = assetContract(selectedAssetId);
 
   const approvalAmount = parseUnits(
     amountInput.trim(),
@@ -428,7 +385,7 @@ async function sendApprovalTransaction(
     address: tokenAddress,
     abi: erc20Abi,
     functionName: 'approve',
-    args: [FUNDING_CONTRACT_ADDRESS, approvalAmount],
+    args: [fundingContract(selectedAssetId), approvalAmount],
   });
 
   // Wait until the approval is included in a block. The CoinList backend
