@@ -1,6 +1,7 @@
 import { AssetId } from '@coinlist-co/react/shared';
 import {
-  Erc20ContractAddress,
+  ContractAddress,
+  type Erc20ContractAddress,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from '@/types/erc20';
@@ -52,13 +53,11 @@ export function decimals(asset: AssetId): number {
   return d;
 }
 
-const FUNDING_CONTRACT_ADDRESS: Record<AssetId, Erc20ContractAddress> = {
-  [TEST_ASSET]: Erc20ContractAddress(
-    '0xc671659c6dD68f1339e8aA9dbf633ec23589f16a'
-  ),
+const FUNDING_CONTRACT_ADDRESS: Record<AssetId, ContractAddress> = {
+  [TEST_ASSET]: ContractAddress('0xc671659c6dD68f1339e8aA9dbf633ec23589f16a'),
 };
 
-export function fundingContract(asset: AssetId): Erc20ContractAddress {
+export function fundingContract(asset: AssetId): ContractAddress {
   const c = FUNDING_CONTRACT_ADDRESS[asset];
   if (!c) {
     throw new Error(

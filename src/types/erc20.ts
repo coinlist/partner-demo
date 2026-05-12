@@ -1,5 +1,8 @@
 import type { Newtype } from '@/types/newtype';
 
+export type ContractAddress = Newtype<`0x${string}`, 'ContractAddress'>;
+export const ContractAddress = (value: string) => value as ContractAddress;
+
 export type Erc20ContractAddress = Newtype<
   `0x${string}`,
   'Erc20ContractAddress'
