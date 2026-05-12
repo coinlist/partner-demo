@@ -358,8 +358,9 @@ async function ensureMainnet(
  * Submits the ERC-20 approve transaction to the user's wallet (triggering
  * the MetaMask popup) and waits for it to be mined before returning the hash.
  *
- * This does NOT transfer funds. It grants COINLIST_SPENDER_ADDRESS permission
- * to pull up to `amountInput` tokens from the wallet later via transferFrom().
+ * This does NOT transfer funds. It grants the asset-specific CoinList funding
+ * contract (`fundingContract(selectedAssetId)`) permission to pull up to
+ * `amountInput` tokens from the wallet later via transferFrom().
  */
 async function sendApprovalTransaction(
   writeContract: (params: {
