@@ -54,7 +54,7 @@ export function decimals(asset: AssetId): number {
 }
 
 const FUNDING_CONTRACT_ADDRESS: Record<AssetId, ContractAddress> = {
-  [TEST_ASSET]: ContractAddress('0xc671659c6dD68f1339e8aA9dbf633ec23589f16a'),
+  [TEST_ASSET]: ContractAddress('0x97E0211F8cB0b5D659bF6667055f47527eCbAfB0'),
 };
 
 export function fundingContract(asset: AssetId): ContractAddress {
