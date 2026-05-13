@@ -24,7 +24,10 @@ function formatCountdown(endsAt: Date): string {
 
 export function InvestView({ state, onEvent }: Props) {
   const isConnected = state.walletState.type === 'CONNECTED';
-  const canSubmit = isConnected && state.amountInput.length > 0 && !isSubmitting(state.submitState);
+  const canSubmit =
+    isConnected &&
+    state.amountInput.length > 0 &&
+    !isSubmitting(state.submitState);
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -264,10 +267,14 @@ function isSubmitting(state: SubmitStateUi): boolean {
 
 function submitLabel(state: SubmitStateUi): string {
   switch (state) {
-    case 'awaiting_wallet': return 'Approve in wallet…';
-    case 'confirming_tx': return 'Waiting for confirmation…';
-    case 'recording': return 'Recording commitment…';
-    default: return 'Sign & Commit';
+    case 'awaiting_wallet':
+      return 'Approve in wallet…';
+    case 'confirming_tx':
+      return 'Waiting for confirmation…';
+    case 'recording':
+      return 'Recording commitment…';
+    default:
+      return 'Sign & Commit';
   }
 }
 
