@@ -68,7 +68,7 @@ export type InvestUiState = {
     code: string;
     balance: string | null;
   }[];
-  selectedAssetId: AssetId | null;
+  selectedPayWithAssetId: AssetId | null;
   amountInput: string;
   tokenEquivalent: string | null;
   saleAgreementUrl: string | null;
@@ -131,7 +131,9 @@ export function useInvestViewModel(
     [USDT]: usdtBalanceRaw,
   };
 
-  const [selectedAssetId, setSelectedAssetId] = useState<AssetId | null>(
+  const investAssetId: AssetId = offerDetail.asset.id;
+
+  const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
     offerDetail.fundingAssets[0]?.id ?? null
   );
   const [amountInput, setAmountInput] = useState('');
@@ -158,7 +160,7 @@ export function useInvestViewModel(
       code: a.code.toString(),
       balance: formatTokenBalance(tokenBalances[a.id], a.id),
     })),
-    selectedAssetId,
+    selectedPayWithAssetId: payWithAssetId,
     amountInput,
     tokenEquivalent: deriveTokenEquivalent(
       amountInput,
@@ -173,7 +175,7 @@ export function useInvestViewModel(
 
   const handleSignAndCommit = async () => {
     // Guard: these should be impossible if the UI is wired correctly
-    if (!isConnected || !address || !selectedAssetId) return;
+    if (!isConnected || !address || !payWithAssetId) return;
 
     const validationError = validateSubmit(amountInput, ethBalance?.value);
     if (validationError) {
@@ -191,7 +193,8 @@ export function useInvestViewModel(
       const approvalTxHash = await sendApprovalTransaction(
         writeContract,
         wagmiConfig,
-        selectedAssetId,
+        investAssetId,
+        payWithAssetId,
         amountInput
       );
 
@@ -201,7 +204,7 @@ export function useInvestViewModel(
         chain: ETHEREUM_CHAIN,
         walletAddress: WalletAddress(address),
         amount: amountInput,
-        assetId: selectedAssetId,
+        assetId: payWithAssetId,
         approvalTransactionHash: approvalTxHash,
       });
 
@@ -229,7 +232,7 @@ export function useInvestViewModel(
         void disconnect();
         break;
       case 'ON_ASSET_SELECT':
-        setSelectedAssetId(event.assetId);
+        setPayWithAssetId(event.assetId);
         setSubmitState('idle');
         setSubmitError(null);
         break;
@@ -359,7 +362,7 @@ async function ensureMainnet(
  * the MetaMask popup) and waits for it to be mined before returning the hash.
  *
  * This does NOT transfer funds. It grants the asset-specific CoinList funding
- * contract (`fundingContract(selectedAssetId)`) permission to pull up to
+ * contract (`fundingContract(investAssetId)`) permission to pull up to
  * `amountInput` tokens from the wallet later via transferFrom().
  */
 async function sendApprovalTransaction(
@@ -370,23 +373,22 @@ async function sendApprovalTransaction(
     args: readonly [`0x${string}`, bigint];
   }) => Promise<`0x${string}`>,
   wagmiConfig: Config,
-  selectedAssetId: AssetId,
+  investAssetId: AssetId,
+  payWithAssetId: AssetId,
   amountInput: string
 ): Promise<TxHash> {
-  const tokenAddress = assetContract(selectedAssetId);
-
   const approvalAmount = parseUnits(
     amountInput.trim(),
-    decimals(selectedAssetId)
+    decimals(payWithAssetId)
   );
 
   // This call opens the MetaMask (or other wallet) popup. The user must
   // confirm before the promise resolves with the transaction hash.
   const txHash = await writeContract({
-    address: tokenAddress,
+    address: assetContract(payWithAssetId),
     abi: erc20Abi,
     functionName: 'approve',
-    args: [fundingContract(selectedAssetId), approvalAmount],
+    args: [fundingContract(investAssetId), approvalAmount],
   });
 
   // Wait until the approval is included in a block. The CoinList backend
