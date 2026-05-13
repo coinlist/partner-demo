@@ -72,7 +72,7 @@ export type InvestUiState = {
   amountInput: string;
   tokenEquivalent: string | null;
   saleAgreementUrl: string | null;
-  submitState: 'idle' | 'submitting' | 'error' | 'success';
+  submitState: SubmitStateUi;
   submitError: string | null;
   sidebar: {
     tokenName: string;
@@ -84,6 +84,14 @@ export type InvestUiState = {
     minimumPurchaseUsd: string | null;
   };
 };
+
+export type SubmitStateUi =
+  | 'idle'
+  | 'awaiting_wallet'
+  | 'confirming_tx'
+  | 'recording'
+  | 'error'
+  | 'success';
 
 export type InvestUiEvent =
   | { type: 'ON_BACK_CLICK' }
@@ -137,9 +145,7 @@ export function useInvestViewModel(
     offerDetail.fundingAssets[0]?.id ?? null
   );
   const [amountInput, setAmountInput] = useState('');
-  const [submitState, setSubmitState] = useState<
-    'idle' | 'submitting' | 'error' | 'success'
-  >('idle');
+  const [submitState, setSubmitState] = useState<SubmitStateUi>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [, setNow] = useState(new Date());
 
@@ -184,7 +190,7 @@ export function useInvestViewModel(
       return;
     }
 
-    setSubmitState('submitting');
+    setSubmitState('awaiting_wallet');
     setSubmitError(null);
 
     try {
@@ -195,9 +201,11 @@ export function useInvestViewModel(
         wagmiConfig,
         investAssetId,
         payWithAssetId,
-        amountInput
+        amountInput,
+        () => setSubmitState('confirming_tx')
       );
 
+      setSubmitState('recording');
       await coinlist.createParticipation({
         offerId,
         offerOptionId: option.id,
@@ -375,7 +383,8 @@ async function sendApprovalTransaction(
   wagmiConfig: Config,
   investAssetId: AssetId,
   payWithAssetId: AssetId,
-  amountInput: string
+  amountInput: string,
+  onTransactionSubmitted: () => void
 ): Promise<TxHash> {
   const approvalAmount = parseUnits(
     amountInput.trim(),
@@ -390,6 +399,10 @@ async function sendApprovalTransaction(
     functionName: 'approve',
     args: [fundingContract(investAssetId), approvalAmount],
   });
+
+  // Wallet confirmed — transaction is now broadcast. Signal the caller so the
+  // UI can update to "waiting for block confirmation" before we poll the chain.
+  onTransactionSubmitted();
 
   // Wait until the approval is included in a block. The CoinList backend
   // verifies on-chain that the allowance exists before recording the
