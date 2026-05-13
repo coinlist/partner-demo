@@ -8,8 +8,7 @@ import {
 
 export const USDC = AssetId('usd-coin');
 export const USDT = AssetId('2dc8ccb2-d36d-43bb-894e-d45022418d51');
-export const TEST_ASSET = AssetId('n2p22foyyqqfksa83lmjpiwu');
-export const ZAMA_TEST = AssetId('2dc8ccb2-d36d-43bb-894e-d45022418d51');
+export const TEST_ASSET = AssetId('0d65ce98-7890-4fb8-ac8d-5a921a0ba366');
 
 /**
  * ERC-20 contract addresses on Ethereum mainnet, keyed by CoinList asset ID.
@@ -56,7 +55,6 @@ export function decimals(asset: AssetId): number {
 
 const FUNDING_CONTRACT_ADDRESS: Record<AssetId, ContractAddress> = {
   [TEST_ASSET]: ContractAddress('0xc671659c6dD68f1339e8aA9dbf633ec23589f16a'),
-  [ZAMA_TEST]: ContractAddress('0xc671659c6dD68f1339e8aA9dbf633ec23589f16a'),
 };
 
 export function fundingContract(asset: AssetId): ContractAddress {
