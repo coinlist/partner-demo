@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronRight, Wallet, X } from 'lucide-react';
 import type {
   InvestUiEvent,
   InvestUiState,
+  SubmitStateUi,
 } from '@/features/invest/useInvestViewModel';
 
 interface Props {
@@ -26,7 +27,7 @@ export function InvestView({ state, onEvent }: Props) {
   const canSubmit =
     isConnected &&
     state.amountInput.length > 0 &&
-    state.submitState !== 'submitting';
+    !isSubmitting(state.submitState);
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -166,9 +167,7 @@ export function InvestView({ state, onEvent }: Props) {
                 : 'cursor-not-allowed bg-zinc-300 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-500'
             }`}
           >
-            {state.submitState === 'submitting'
-              ? 'Submitting…'
-              : 'Sign & Commit'}
+            {submitLabel(state.submitState)}
           </button>
 
           {state.submitState === 'error' && state.submitError && (
@@ -253,6 +252,30 @@ export function InvestView({ state, onEvent }: Props) {
       </div>
     </div>
   );
+}
+
+function isSubmitting(state: SubmitStateUi): boolean {
+  switch (state) {
+    case 'awaiting_wallet':
+    case 'confirming_tx':
+    case 'recording':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function submitLabel(state: SubmitStateUi): string {
+  switch (state) {
+    case 'awaiting_wallet':
+      return 'Approve in wallet…';
+    case 'confirming_tx':
+      return 'Waiting for confirmation…';
+    case 'recording':
+      return 'Recording commitment…';
+    default:
+      return 'Sign & Commit';
+  }
 }
 
 function SidebarRow({ label, value }: { label: string; value: string }) {
