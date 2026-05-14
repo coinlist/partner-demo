@@ -9,7 +9,7 @@ import {
   WalletAddress,
 } from '@coinlist-co/react/shared';
 import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
-import { waitForTransactionReceipt } from '@wagmi/core';
+import { readContract, waitForTransactionReceipt } from '@wagmi/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { erc20Abi, formatEther, parseUnits } from 'viem';
@@ -34,6 +34,8 @@ import {
   USDT,
 } from '@/types/coinlist';
 import {
+  ContractAddress,
+  Erc20ContractAddress,
   TxHash,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
@@ -112,29 +114,29 @@ export function useInvestViewModel(
   const { coinlist } = useCoinList();
   const { showToast } = useToast();
   const { open: openAppKit } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
+  const { address: walletAddress, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
   const chainId = useChainId();
   const { mutateAsync: switchChain } = useSwitchChain();
   const { mutateAsync: disconnect } = useDisconnect();
   const { mutateAsync: writeContract } = useWriteContract();
   const { data: ethBalance } = useBalance({
-    address: address as `0x${string}` | undefined,
-    query: { enabled: !!address },
+    address: walletAddress as `0x${string}` | undefined,
+    query: { enabled: !!walletAddress },
   });
   const { data: usdcBalanceRaw } = useReadContract({
     address: USDC_CONTRACT_ADDRESS,
     abi: erc20Abi,
     functionName: 'balanceOf',
-    args: [address as `0x${string}`],
-    query: { enabled: !!address },
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress },
   });
   const { data: usdtBalanceRaw } = useReadContract({
     address: USDT_CONTRACT_ADDRESS,
     abi: erc20Abi,
     functionName: 'balanceOf',
-    args: [address as `0x${string}`],
-    query: { enabled: !!address },
+    args: [walletAddress as `0x${string}`],
+    query: { enabled: !!walletAddress },
   });
   const tokenBalances: Record<AssetId, bigint | undefined> = {
     [USDC]: usdcBalanceRaw,
@@ -162,7 +164,11 @@ export function useInvestViewModel(
   const state: InvestUiState = {
     backLabel: 'Back to deal page',
     endsAt: offerDetail.endsAt,
-    walletState: deriveWalletState(isConnected, address, ethBalance?.value),
+    walletState: deriveWalletState(
+      isConnected,
+      walletAddress,
+      ethBalance?.value
+    ),
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
@@ -183,7 +189,7 @@ export function useInvestViewModel(
 
   const handleSignAndCommit = async () => {
     // Guard: these should be impossible if the UI is wired correctly
-    if (!isConnected || !address || !payWithAssetId) return;
+    if (!isConnected || !walletAddress || !payWithAssetId) return;
 
     const validationError = validateSubmit({
       amountInput,
@@ -202,21 +208,22 @@ export function useInvestViewModel(
     try {
       await ensureMainnet(chainId, switchChain);
 
-      const approvalTxHash = await sendApprovalTransaction(
+      const approvalTxHash = await sendApprovalTransaction({
         writeContract,
         wagmiConfig,
         investAssetId,
         payWithAssetId,
         amountInput,
-        () => setSubmitState('confirming_tx')
-      );
+        walletAddress: WalletAddress(walletAddress),
+        onTransactionSubmitted: () => setSubmitState('confirming_tx'),
+      });
 
       setSubmitState('recording');
       await coinlist.createParticipation({
         offerId,
         offerOptionId: option.id,
         chain: ETHEREUM_CHAIN,
-        walletAddress: WalletAddress(address),
+        walletAddress: WalletAddress(walletAddress),
         amount: amountInput,
         assetId: payWithAssetId,
         approvalTransactionHash: approvalTxHash,
@@ -389,31 +396,62 @@ async function ensureMainnet(
  * contract (`fundingContract(investAssetId)`) permission to pull up to
  * `amountInput` tokens from the wallet later via transferFrom().
  */
-async function sendApprovalTransaction(
-  writeContract: (params: {
-    address: `0x${string}`;
-    abi: typeof erc20Abi;
-    functionName: 'approve';
-    args: readonly [`0x${string}`, bigint];
-  }) => Promise<`0x${string}`>,
-  wagmiConfig: Config,
-  investAssetId: AssetId,
-  payWithAssetId: AssetId,
-  amountInput: string,
-  onTransactionSubmitted: () => void
-): Promise<TxHash> {
+type WriteContractFn = (params: {
+  address: Erc20ContractAddress;
+  abi: typeof erc20Abi;
+  functionName: 'approve';
+  args: readonly [ContractAddress, bigint];
+}) => Promise<`0x${string}`>;
+
+async function sendApprovalTransaction({
+  writeContract,
+  wagmiConfig,
+  investAssetId,
+  payWithAssetId,
+  amountInput,
+  walletAddress,
+  onTransactionSubmitted,
+}: {
+  writeContract: WriteContractFn;
+  wagmiConfig: Config;
+  investAssetId: AssetId;
+  payWithAssetId: AssetId;
+  amountInput: string;
+  walletAddress: WalletAddress;
+  onTransactionSubmitted: () => void;
+}): Promise<TxHash> {
+  const tokenContract = assetContract(payWithAssetId);
+  const spender = fundingContract(investAssetId);
   const approvalAmount = parseUnits(
     amountInput.trim(),
     decimals(payWithAssetId)
   );
 
+  // Some tokens (notably USDT) revert if you try to change a non-zero
+  // allowance to another non-zero value. Reset to 0 first when needed.
+  const currentAllowance = await readContract(wagmiConfig, {
+    address: tokenContract,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [walletAddress as `0x${string}`, spender],
+  });
+  if (currentAllowance > BigInt(0)) {
+    const resetTxHash = await writeContract({
+      address: tokenContract,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [spender, BigInt(0)],
+    });
+    await waitForTransactionReceipt(wagmiConfig, { hash: resetTxHash });
+  }
+
   // This call opens the MetaMask (or other wallet) popup. The user must
   // confirm before the promise resolves with the transaction hash.
   const txHash = await writeContract({
-    address: assetContract(payWithAssetId),
+    address: tokenContract,
     abi: erc20Abi,
     functionName: 'approve',
-    args: [fundingContract(investAssetId), approvalAmount],
+    args: [spender, approvalAmount],
   });
 
   // Wallet confirmed — transaction is now broadcast. Signal the caller so the
