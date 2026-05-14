@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { requiredEnv } from '@/lib/env';
 
-export const ETHEREUM_CHAIN = Blockchain('ethereum');
+export const ETHEREUM_CHAIN = Blockchain('ethereum_mainnet');
 
 const projectId = requiredEnv(
   'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID',
