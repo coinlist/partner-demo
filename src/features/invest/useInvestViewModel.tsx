@@ -23,6 +23,7 @@ import {
   useSwitchChain,
   useWriteContract,
 } from 'wagmi';
+import { useToast } from '@/components/toast/useToast';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -37,7 +38,6 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from '@/types/erc20';
-import { useToast } from '@/components/toast/useToast';
 
 /**
  * Ethereum mainnet chain ID. The approval transaction must be submitted on
