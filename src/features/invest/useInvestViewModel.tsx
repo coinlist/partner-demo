@@ -23,6 +23,7 @@ import {
   useSwitchChain,
   useWriteContract,
 } from 'wagmi';
+import { useToast } from '@/components/toast/useToast';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -109,6 +110,7 @@ export function useInvestViewModel(
 ): { state: InvestUiState; onEvent: (event: InvestUiEvent) => void } {
   const router = useRouter();
   const { coinlist } = useCoinList();
+  const { showToast } = useToast();
   const { open: openAppKit } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
@@ -217,6 +219,7 @@ export function useInvestViewModel(
       });
 
       setSubmitState('success');
+      showToast('Participation recorded', 'success');
       router.push(ROUTES.OFFER_DETAILS(offerId));
     } catch (err: unknown) {
       setSubmitState('error');
