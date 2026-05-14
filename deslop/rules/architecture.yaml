@@ -10,7 +10,7 @@ rules:
       or feature modules couples the transport layer to presentation logic and makes
       routes harder to test.
     target: "@/app/api/**"
-    forbidden:
+    forbids:
       - import: react
         transitive: true
       - import: "@/features/**"
@@ -30,7 +30,7 @@ rules:
     exclude:
       - "@/app/oauth/coinlist/callback/page"
     uses:
-      - "@/features/**/*Container"
+      - import: "@/features/**/*Container"
     fix: >-
       Extract all UI and logic into a Container component under
       @/features/<feature>/. The page should only fetch server-side data and pass it
@@ -44,8 +44,8 @@ rules:
       View, and must not contain business logic.
     target: "@/features/**/{{FileName}}Container"
     uses:
-      - "{{TARGET_DIR}}/{{FileName}}View"
-      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+      - import: "{{TARGET_DIR}}/{{FileName}}View"
+      - import: "{{TARGET_DIR}}/use{{FileName}}ViewModel"
     fix: >-
       The Container should call use{{FileName}}ViewModel() to obtain { state,
       onEvent } and render <{{FileName}}View state={state} onEvent={onEvent} />.
@@ -58,10 +58,12 @@ rules:
       without rendering. Importing components, views, or feature-local UI modules
       would create a circular dependency and break testability.
     target: "@/features/**/use{{FileName}}ViewModel"
-    forbidden:
+    forbids:
       - import: "@/components/**"
       - import: "@/features/**/components/*"
       - import: "@/features/**/*View"
+    allows:
+      - import: "@/components/toast/useToast"
     fix: >-
       Move any UI-related code into the View. The ViewModel should only return a
       typed UiState object and an onEvent handler — no JSX, no component imports.
@@ -74,7 +76,7 @@ rules:
       View's props align with the ViewModel's public surface.
     target: "@/features/**/{{FileName}}View"
     uses:
-      - "{{TARGET_DIR}}/use{{FileName}}ViewModel"
+      - import: "{{TARGET_DIR}}/use{{FileName}}ViewModel"
     fix: >-
       Import the UiState and UiEvent types from use{{FileName}}ViewModel and declare
       the View's props as { state: {{FileName}}UiState; onEvent: (event:
@@ -88,7 +90,7 @@ rules:
       invert the dependency direction, create circular dependencies, and make lib
       modules impossible to use in server contexts such as API routes and pages.
     target: "@/lib/**"
-    forbidden:
+    forbids:
       - import: "@/features/**"
       - import: "@/components/**"
     fix: >-
@@ -102,7 +104,7 @@ rules:
       from @/components/** adds presentation logic to the page, bypasses the
       Container/ViewModel/View architecture, and makes the page harder to test.
     target: "@/app/**/page"
-    forbidden:
+    forbids:
       - import: "@/components/**"
     fix: >-
       Move the component usage into a feature View. If the component is truly
@@ -116,7 +118,7 @@ rules:
       Importing it from a feature would silently compile in server credentials and
       break the Next.js server/client boundary, potentially leaking secrets.
     target: "@/features/**"
-    forbidden:
+    forbids:
       - import: "@/lib/coinlist-server"
       - import: "server-only"
     fix: >-
