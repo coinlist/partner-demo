@@ -37,6 +37,7 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from '@/types/erc20';
+import { useToast } from '@/components/toast/useToast';
 
 /**
  * Ethereum mainnet chain ID. The approval transaction must be submitted on
@@ -109,6 +110,7 @@ export function useInvestViewModel(
 ): { state: InvestUiState; onEvent: (event: InvestUiEvent) => void } {
   const router = useRouter();
   const { coinlist } = useCoinList();
+  const { showToast } = useToast();
   const { open: openAppKit } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
@@ -217,6 +219,7 @@ export function useInvestViewModel(
       });
 
       setSubmitState('success');
+      showToast('Participation recorded', 'success');
       router.push(ROUTES.OFFER_DETAILS(offerId));
     } catch (err: unknown) {
       setSubmitState('error');
