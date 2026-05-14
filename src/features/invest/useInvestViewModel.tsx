@@ -185,7 +185,11 @@ export function useInvestViewModel(
     // Guard: these should be impossible if the UI is wired correctly
     if (!isConnected || !address || !payWithAssetId) return;
 
-    const validationError = validateSubmit(amountInput, ethBalance?.value);
+    const validationError = validateSubmit({
+      amountInput,
+      ethBalanceWei: ethBalance?.value,
+      minimumPurchaseUsd: option.minimumPurchaseUsd,
+    });
     if (validationError) {
       setSubmitState('error');
       setSubmitError(validationError);
@@ -336,13 +340,22 @@ function deriveSidebar(
  * Validates all prerequisites before attempting the on-chain approval.
  * Returns a user-facing error string, or null if everything is valid.
  */
-function validateSubmit(
-  amountInput: string,
-  ethBalanceWei: bigint | undefined
-): string | null {
+function validateSubmit({
+  amountInput,
+  ethBalanceWei,
+  minimumPurchaseUsd,
+}: {
+  amountInput: string;
+  ethBalanceWei: bigint | undefined;
+  minimumPurchaseUsd: number | null;
+}): string | null {
   const amount = parseFloat(amountInput.trim());
   if (!amountInput.trim() || Number.isNaN(amount) || amount <= 0) {
     return 'Please enter a valid amount greater than zero.';
+  }
+
+  if (minimumPurchaseUsd != null && amount < minimumPurchaseUsd) {
+    return `Amount must be at least $${minimumPurchaseUsd.toLocaleString()}.`;
   }
 
   // Warn early if the wallet lacks ETH to pay gas. The approve tx will
