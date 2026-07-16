@@ -6,6 +6,13 @@ This is a demo website demonstrating the integration with CoinList using the
 We recommend reading [the official CoinList documentation](https://docs.coinlist.co/) while
 exploring the source code.
 
+> **Pre-release note:** this branch pins a local SDK build via
+> `file:coinlist-co-react-0.7.0.tgz` because `@coinlist-co/react@0.7.0` (the
+> external-wallet UI) isn't published yet.
+>
+> **TODO: publish `@coinlist-co/react@0.7.0`, switch this dependency back to a
+> registry range (`^0.7.0`), and `git rm` the tarball BEFORE merging this branch.**
+
 ## Running locally
 
 1. Provide the environment variables

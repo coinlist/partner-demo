@@ -2,6 +2,7 @@
 
 import { RequirementsChecklist } from '@coinlist-co/react';
 import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
+import { useAppKit } from '@reown/appkit/react';
 import { ArrowLeft } from 'lucide-react';
 import { OfferBanner } from '@/features/offer/components/OfferBanner';
 import { OfferFaq } from '@/features/offer/components/OfferFaq';
@@ -17,6 +18,7 @@ import type {
   OfferUiState,
   ParticipationsUiState,
 } from '@/features/offer/useOfferViewModel';
+import { useWalletAdapter } from '@/features/offer/useWalletAdapter';
 
 export interface Props {
   state: OfferUiState;
@@ -170,6 +172,8 @@ function SidebarContent({
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
 }) {
+  const wallet = useWalletAdapter();
+  const { open: openAppKit } = useAppKit();
   return (
     <>
       <OfferSidebarCard
@@ -214,6 +218,8 @@ function SidebarContent({
           title="Requirements"
           description="Complete these steps to participate in the token sale."
           onContinue={onContinue}
+          wallet={wallet}
+          onRequestConnect={() => openAppKit()}
         />
       ) : null}
       <OfferParticipations state={participationsState} />
