@@ -24,6 +24,7 @@ import {
   useWriteContract,
 } from 'wagmi';
 import { useToast } from '@/components/toast/useToast';
+import { DEMO_CHAIN_ID } from '@/lib/chain';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -40,12 +41,6 @@ import {
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
 } from '@/types/erc20';
-
-/**
- * Ethereum mainnet chain ID. The approval transaction must be submitted on
- * this chain regardless of what network the user's wallet is currently on.
- */
-const ETHEREUM_MAINNET_CHAIN_ID = 1;
 
 /**
  * Minimum ETH balance required to pay gas for the ERC-20 approve transaction.
@@ -206,7 +201,7 @@ export function useInvestViewModel(
     setSubmitError(null);
 
     try {
-      await ensureMainnet(chainId, switchChain);
+      await ensureChain(chainId, switchChain);
 
       const approvalTxHash = await sendApprovalTransaction({
         writeContract,
@@ -375,17 +370,18 @@ function validateSubmit({
 }
 
 /**
- * Ensures the user's wallet is on Ethereum mainnet before an on-chain
- * transaction is submitted. If the wallet is on a different chain, this
- * triggers the wallet's native "Switch Network" prompt (e.g. the MetaMask
- * network-switch dialog). Throws if the user rejects the switch.
+ * Ensures the user's wallet is on the demo's configured chain
+ * ({@link DEMO_CHAIN_ID}) before an on-chain transaction is submitted. If the
+ * wallet is on a different chain, this triggers the wallet's native "Switch
+ * Network" prompt (e.g. the MetaMask network-switch dialog). Throws if the user
+ * rejects the switch.
  */
-async function ensureMainnet(
+async function ensureChain(
   currentChainId: number,
   switchChain: (params: { chainId: number }) => Promise<unknown>
 ): Promise<void> {
-  if (currentChainId === ETHEREUM_MAINNET_CHAIN_ID) return;
-  await switchChain({ chainId: ETHEREUM_MAINNET_CHAIN_ID });
+  if (currentChainId === DEMO_CHAIN_ID) return;
+  await switchChain({ chainId: DEMO_CHAIN_ID });
 }
 
 /**

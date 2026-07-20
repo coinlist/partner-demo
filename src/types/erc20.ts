@@ -1,3 +1,9 @@
+import {
+  TOKEN_REGISTRY,
+  USDC_SYMBOL,
+  USDT_SYMBOL,
+} from '@coinlist-co/react/shared';
+import { DEMO_CHAIN } from '@/lib/chain';
 import type { Newtype } from '@/types/newtype';
 
 export type ContractAddress = Newtype<`0x${string}`, 'ContractAddress'>;
@@ -13,9 +19,12 @@ export const Erc20ContractAddress = (value: string) =>
 export type TxHash = Newtype<`0x${string}`, 'TxHash'>;
 export const TxHash = (value: string) => value as TxHash;
 
+// Resolved from the SDK's token registry for the demo's active chain
+// ({@link DEMO_CHAIN}), so a sepolia build approves the sepolia USDC/USDT
+// rather than the hardcoded mainnet addresses.
 export const USDC_CONTRACT_ADDRESS = Erc20ContractAddress(
-  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+  TOKEN_REGISTRY.contractAddress(USDC_SYMBOL, DEMO_CHAIN)
 );
 export const USDT_CONTRACT_ADDRESS = Erc20ContractAddress(
-  '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+  TOKEN_REGISTRY.contractAddress(USDT_SYMBOL, DEMO_CHAIN)
 );

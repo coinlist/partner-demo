@@ -11,8 +11,7 @@ import {
 import { signMessage } from '@wagmi/core';
 import { useCallback, useMemo } from 'react';
 import { useConfig } from 'wagmi';
-
-const DEMO_CHAIN: EthereumChain = 'ethereum_mainnet';
+import { DEMO_CHAIN } from '@/lib/chain';
 
 /**
  * The demo's EVM wallet, as consumed by the app.
@@ -47,7 +46,7 @@ export interface UseEvmWalletResult {
  * routes through here, so the rest of the app never imports AppKit or wagmi
  * directly and the SDK stays wallet-stack agnostic.
  *
- * Scope is the connect-wallet / ownership-signature lifecycle — the on-chain
+ * Scope is the connect-wallet / ownership-signature lifecycle. On-chain
  * participation writes live in the invest flow and aren't part of this
  * abstraction.
  */
