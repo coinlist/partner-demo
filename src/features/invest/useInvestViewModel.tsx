@@ -115,12 +115,17 @@ export function useInvestViewModel(
   const { mutateAsync: switchChain } = useSwitchChain();
   const { mutateAsync: disconnect } = useDisconnect();
   const { mutateAsync: writeContract } = useWriteContract();
+  // Pin every read to DEMO_CHAIN_ID so the token addresses (from DEMO_CHAIN) and
+  // the network they're read on stay on the same chain, regardless of which
+  // chain the wallet is currently connected to.
   const { data: ethBalance } = useBalance({
     address: walletAddress as `0x${string}` | undefined,
+    chainId: DEMO_CHAIN_ID,
     query: { enabled: !!walletAddress },
   });
   const { data: usdcBalanceRaw } = useReadContract({
     address: USDC_CONTRACT_ADDRESS,
+    chainId: DEMO_CHAIN_ID,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [walletAddress as `0x${string}`],
@@ -128,6 +133,7 @@ export function useInvestViewModel(
   });
   const { data: usdtBalanceRaw } = useReadContract({
     address: USDT_CONTRACT_ADDRESS,
+    chainId: DEMO_CHAIN_ID,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: [walletAddress as `0x${string}`],

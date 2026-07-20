@@ -25,7 +25,7 @@ export interface UseEvmWalletResult {
   /** Connected account (branded), or `null` when no wallet is connected. */
   readonly address: EvmWalletAddress | null;
   readonly isConnected: boolean;
-  /** The EVM chain the ownership signature is proven on. Mainnet for the demo. */
+  /** The EVM chain the ownership signature is proven on (see {@link DEMO_CHAIN}). */
   readonly chain: EthereumChain;
   /** Opens the AppKit modal to connect (or switch) a wallet. */
   connect: () => void;
