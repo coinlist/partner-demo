@@ -2,6 +2,7 @@
 
 import { RequirementsChecklist } from '@coinlist-co/react';
 import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
+import { useAppKit } from '@reown/appkit/react';
 import { ArrowLeft } from 'lucide-react';
 import { OfferBanner } from '@/features/offer/components/OfferBanner';
 import { OfferFaq } from '@/features/offer/components/OfferFaq';
@@ -11,6 +12,7 @@ import { OfferMilestones } from '@/features/offer/components/OfferMilestones';
 import { OfferParticipations } from '@/features/offer/components/OfferParticipations';
 import { OfferSidebarCard } from '@/features/offer/components/OfferSidebarCard';
 import { OfferTerms } from '@/features/offer/components/OfferTerms';
+import { useExternalWallet } from '@/features/offer/useExternalWallet';
 import type {
   OfferUiEvent,
   OfferUiOption,
@@ -170,6 +172,8 @@ function SidebarContent({
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
 }) {
+  const wallet = useExternalWallet();
+  const { open: openAppKit } = useAppKit();
   return (
     <>
       <OfferSidebarCard
@@ -214,6 +218,8 @@ function SidebarContent({
           title="Requirements"
           description="Complete these steps to participate in the token sale."
           onContinue={onContinue}
+          wallet={wallet}
+          onRequestConnect={() => openAppKit()}
         />
       ) : null}
       <OfferParticipations state={participationsState} />

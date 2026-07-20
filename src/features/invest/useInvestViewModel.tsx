@@ -34,8 +34,8 @@ import {
   USDT,
 } from '@/types/coinlist';
 import {
-  ContractAddress,
-  Erc20ContractAddress,
+  type ContractAddress,
+  type Erc20ContractAddress,
   TxHash,
   USDC_CONTRACT_ADDRESS,
   USDT_CONTRACT_ADDRESS,
@@ -214,7 +214,7 @@ export function useInvestViewModel(
         investAssetId,
         payWithAssetId,
         amountInput,
-        walletAddress: WalletAddress(walletAddress),
+        walletAddress: WalletAddress(walletAddress as `0x${string}`),
         onTransactionSubmitted: () => setSubmitState('confirming_tx'),
       });
 
@@ -223,7 +223,7 @@ export function useInvestViewModel(
         offerId,
         offerOptionId: option.id,
         chain: ETHEREUM_CHAIN,
-        walletAddress: WalletAddress(walletAddress),
+        walletAddress: WalletAddress(walletAddress as `0x${string}`),
         amount: amountInput,
         assetId: payWithAssetId,
         approvalTransactionHash: approvalTxHash,
