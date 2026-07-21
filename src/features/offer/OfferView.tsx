@@ -17,6 +17,7 @@ import type {
   OfferUiState,
   ParticipationsUiState,
 } from '@/features/offer/useOfferViewModel';
+import { useEvmWallet } from '@/lib/evm-wallet';
 
 export interface Props {
   state: OfferUiState;
@@ -170,6 +171,7 @@ function SidebarContent({
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
 }) {
+  const { connectWallet, connect } = useEvmWallet();
   return (
     <>
       <OfferSidebarCard
@@ -214,6 +216,8 @@ function SidebarContent({
           title="Requirements"
           description="Complete these steps to participate in the token sale."
           onContinue={onContinue}
+          wallet={connectWallet}
+          onRequestConnect={connect}
         />
       ) : null}
       <OfferParticipations state={participationsState} />

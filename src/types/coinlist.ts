@@ -53,7 +53,11 @@ export function decimals(asset: AssetId): number {
   return d;
 }
 
+// Spender contract each offer's participation approve targets, keyed by the
+// offer's sale asset. Chain-specific and not part of the offer response, so add
+// an entry per supported offer with an address on the build's `DEMO_CHAIN`.
 const FUNDING_CONTRACT_ADDRESS: Record<AssetId, ContractAddress> = {
+  // SDK demo offer, Ethereum mainnet.
   [TEST_ASSET]: ContractAddress('0x97E0211F8cB0b5D659bF6667055f47527eCbAfB0'),
 };
 
