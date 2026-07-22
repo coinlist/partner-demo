@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local-only internal engineering notes (not for the public repo)
+docs/notes/
+
 # env files
 .env
 .env.local
