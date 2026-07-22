@@ -49,8 +49,15 @@ export interface UseEvmWalletResult {
  * Scope is the connect-wallet / ownership-signature lifecycle. On-chain
  * participation writes live in the invest flow and aren't part of this
  * abstraction.
+ *
+ * `chain` is the EVM chain the ownership signature is proven on and defaults to
+ * {@link DEMO_CHAIN}. The Superstate swap flow runs on Sepolia rather than the
+ * demo chain, so it passes {@link SWAP_CHAIN} to keep its wallet lifecycle on
+ * this seam instead of reaching for AppKit/wagmi directly.
  */
-export function useEvmWallet(): UseEvmWalletResult {
+export function useEvmWallet(
+  chain: EthereumChain = DEMO_CHAIN
+): UseEvmWalletResult {
   const wagmiConfig = useConfig();
   const { address, isConnected } = useAppKitAccount();
   const { open } = useAppKit();
@@ -73,17 +80,17 @@ export function useEvmWallet(): UseEvmWalletResult {
       address: evmAddress,
       // Wallet-connect uses the SDK's strict EthereumChain vocab, distinct from
       // the participation flow's Blockchain brand.
-      chain: DEMO_CHAIN,
+      chain,
       // Bare delegation to the connected account; the SDK catches rejections
       // and classifies them into a typed ConnectWalletErrorCode.
       signMessage: (message: string) => signMessage(wagmiConfig, { message }),
     };
-  }, [evmAddress, wagmiConfig]);
+  }, [evmAddress, wagmiConfig, chain]);
 
   return {
     address: evmAddress,
     isConnected,
-    chain: DEMO_CHAIN,
+    chain,
     connect,
     disconnect,
     connectWallet,

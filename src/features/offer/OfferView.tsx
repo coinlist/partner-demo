@@ -17,6 +17,7 @@ import type {
   OfferUiState,
   ParticipationsUiState,
 } from '@/features/offer/useOfferViewModel';
+import { isSwapOffer } from '@/features/swap/constants';
 import { useEvmWallet } from '@/lib/evm-wallet';
 
 export interface Props {
@@ -95,6 +96,7 @@ export function OfferView({ state, onEvent }: Props) {
                 options={state.options}
                 selectedOptionId={state.selectedOptionId}
                 participationsState={state.participationsState}
+                showParticipations={state.showParticipations}
                 onOptionSelect={(optionId) =>
                   onEvent({ type: 'ON_OPTION_SELECT', optionId })
                 }
@@ -140,6 +142,7 @@ export function OfferView({ state, onEvent }: Props) {
               options={state.options}
               selectedOptionId={state.selectedOptionId}
               participationsState={state.participationsState}
+              showParticipations={state.showParticipations}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
@@ -159,6 +162,7 @@ function SidebarContent({
   options,
   selectedOptionId,
   participationsState,
+  showParticipations,
   onOptionSelect,
   onContinue,
 }: {
@@ -168,6 +172,7 @@ function SidebarContent({
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
   participationsState: ParticipationsUiState;
+  showParticipations: boolean;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
 }) {
@@ -175,7 +180,7 @@ function SidebarContent({
   return (
     <>
       <OfferSidebarCard
-        statusText="Token Sale"
+        statusText={isSwapOffer(offerId) ? 'Swap' : 'Token Sale'}
         tokenCode={tokenCode}
         tokenPriceUsd={tokenPriceUsd != null ? Number(tokenPriceUsd) : null}
       />
@@ -220,7 +225,9 @@ function SidebarContent({
           onRequestConnect={connect}
         />
       ) : null}
-      <OfferParticipations state={participationsState} />
+      {showParticipations ? (
+        <OfferParticipations state={participationsState} />
+      ) : null}
     </>
   );
 }
