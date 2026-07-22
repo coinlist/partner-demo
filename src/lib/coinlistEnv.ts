@@ -13,6 +13,18 @@ import { requiredEnv } from '@/lib/env';
  * `COINLIST_CLIENT_SECRET` is deliberately absent. It stays in `coinlist-server.ts`
  * behind `server-only` so it can't reach the browser bundle.
  */
+const apiBaseUrl = process.env.NEXT_PUBLIC_COINLIST_BASE_URL;
+const webBaseUrl = process.env.NEXT_PUBLIC_COINLIST_WEB_URL;
+
+// Both hosts belong to the same environment. Setting one alone points OAuth and
+// data calls at different environments, which surfaces as a confusing auth
+// failure rather than a config error, so fail loudly instead.
+if (Boolean(apiBaseUrl) !== Boolean(webBaseUrl)) {
+  throw new Error(
+    'Set NEXT_PUBLIC_COINLIST_BASE_URL and NEXT_PUBLIC_COINLIST_WEB_URL together, or neither'
+  );
+}
+
 export const coinlistEnv = {
   clientId: ClientId(
     requiredEnv(
@@ -26,6 +38,6 @@ export const coinlistEnv = {
       process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI
     )
   ),
-  apiBaseUrl: process.env.NEXT_PUBLIC_COINLIST_BASE_URL,
-  webBaseUrl: process.env.NEXT_PUBLIC_COINLIST_WEB_URL,
+  apiBaseUrl,
+  webBaseUrl,
 } as const;
