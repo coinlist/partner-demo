@@ -6,20 +6,11 @@ import type {
   InvestUiState,
   SubmitStateUi,
 } from '@/features/invest/useInvestViewModel';
+import { formatCountdown } from '@/lib/countdown';
 
 interface Props {
   state: InvestUiState;
   onEvent: (event: InvestUiEvent) => void;
-}
-
-function formatCountdown(endsAt: Date): string {
-  const diff = endsAt.getTime() - Date.now();
-  if (diff <= 0) return 'Ended';
-  const totalSeconds = Math.floor(diff / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${days}D ${hours}H ${minutes}M`;
 }
 
 export function InvestView({ state, onEvent }: Props) {

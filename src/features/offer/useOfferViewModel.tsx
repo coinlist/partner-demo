@@ -7,12 +7,14 @@ import {
   useParticipations,
 } from '@coinlist-co/react';
 import {
+  type OfferDetail,
   OfferId,
   type OfferOptionId,
   type ParticipationStatus,
 } from '@coinlist-co/react/shared';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { isSwapOffer } from '@/features/swap/constants';
 import { ROUTES } from '@/lib/routes';
 
 export type OfferUiLink = {
@@ -85,6 +87,7 @@ export type OfferUiState =
       tokenCode: string;
       tokenPriceUsd: string | null;
       participationsState: ParticipationsUiState;
+      showParticipations: boolean;
     };
 
 export type OfferUiEvent =
@@ -100,20 +103,35 @@ export type OfferUiEvent =
     }
   | {
       type: 'ON_INVEST_CLICK';
+    }
+  | {
+      type: 'ON_SWAP_BACK';
     };
+
+export type OfferSwapState = {
+  active: boolean;
+  offerDetail: OfferDetail | null;
+};
 
 export function useOfferViewModel(): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
+  swap: OfferSwapState;
 } {
   const params = useParams<{ id: string | string[] }>();
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
+  const [showSwap, setShowSwap] = useState(false);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
-  const { participationsState } = useParticipations(offerId);
+  // Swap offers never surface participations, so skip the fetch entirely by
+  // seeding the hook with empty pre-fetched data.
+  const { participationsState } = useParticipations(
+    offerId,
+    isSwapOffer(offerId) ? { data: [] } : undefined
+  );
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
@@ -121,6 +139,9 @@ export function useOfferViewModel(): {
     selectedOptionId,
     participationsState
   );
+
+  const offerDetail =
+    offerDetailsState.type === 'CONTENT' ? offerDetailsState.offerDetail : null;
 
   const onEvent = (event: OfferUiEvent) => {
     switch (event.type) {
@@ -134,22 +155,32 @@ export function useOfferViewModel(): {
         setSelectedOptionId(event.optionId);
         break;
       case 'ON_INVEST_CLICK': {
+        // Swap offers open the in-page swap flow; all others route to the
+        // standard participation flow.
+        if (isSwapOffer(offerId)) {
+          setShowSwap(true);
+          break;
+        }
         const resolvedOptionId =
-          selectedOptionId ??
-          (offerDetailsState.type === 'CONTENT'
-            ? (offerDetailsState.offerDetail.options[0]?.id ?? null)
-            : null);
+          selectedOptionId ?? offerDetail?.options[0]?.id ?? null;
         if (resolvedOptionId) {
           router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
         }
         break;
       }
+      case 'ON_SWAP_BACK':
+        setShowSwap(false);
+        break;
     }
   };
 
   return {
     state,
     onEvent,
+    swap: {
+      active: showSwap && offerDetail !== null,
+      offerDetail,
+    },
   };
 }
 
@@ -256,6 +287,9 @@ function mapOfferUiState(
         tokenCode: offerDetailsState.offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
         participationsState,
+        // Swap offers use the in-page swap flow and do not surface
+        // participations, so the panel is hidden for them.
+        showParticipations: !isSwapOffer(OfferId(routeOfferId)),
       };
     }
   }
