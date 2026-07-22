@@ -2,8 +2,7 @@
 
 import type { ClientConfig } from '@coinlist-co/react';
 import { CoinListProvider } from '@coinlist-co/react';
-import { ClientId, RedirectUri } from '@coinlist-co/react/shared';
-import { requiredEnv } from '@/lib/env';
+import { coinlistEnv } from '@/lib/coinlistEnv';
 
 export function DemoCoinListProvider({
   children,
@@ -11,18 +10,12 @@ export function DemoCoinListProvider({
   children: React.ReactNode;
 }) {
   const config: ClientConfig = {
-    clientId: ClientId(
-      requiredEnv(
-        'NEXT_PUBLIC_COINLIST_CLIENT_ID',
-        process.env.NEXT_PUBLIC_COINLIST_CLIENT_ID
-      )
-    ),
-    redirectUri: RedirectUri(
-      requiredEnv(
-        'NEXT_PUBLIC_COINLIST_REDIRECT_URI',
-        process.env.NEXT_PUBLIC_COINLIST_REDIRECT_URI
-      )
-    ),
+    clientId: coinlistEnv.clientId,
+    redirectUri: coinlistEnv.redirectUri,
+    // API host for the client's own data calls (offers, offer details,
+    // requirements); web host for OAuth authorize + handleRequirement redirects.
+    baseUrl: coinlistEnv.apiBaseUrl,
+    coinlistBaseUrl: coinlistEnv.webBaseUrl,
     getAccessToken: async () => {
       const res = await fetch('/api/coinlist/oauth/access-token', {
         credentials: 'include',

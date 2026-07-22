@@ -69,3 +69,8 @@ node_modules/
 .output.txt
 
 temp/
+
+# Claude Code local settings: already ignored via global gitignore, but listed
+# here too so biome's `useIgnoreFile` (which only reads the project .gitignore)
+# skips it. The harness rewrites this file and its formatting isn't ours to lint.
+.claude/settings.local.json
