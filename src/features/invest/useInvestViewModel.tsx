@@ -15,8 +15,8 @@ import { useEffect, useState } from 'react';
 import { erc20Abi, formatEther, parseUnits } from 'viem';
 import {
   type Config,
+  useAccount,
   useBalance,
-  useChainId,
   useConfig,
   useDisconnect,
   useReadContract,
@@ -24,7 +24,7 @@ import {
   useWriteContract,
 } from 'wagmi';
 import { useToast } from '@/components/toast/useToast';
-import { DEMO_CHAIN_ID } from '@/lib/chain';
+import { DEMO_CHAIN_ID, DEMO_CHAIN_NAME } from '@/lib/chain';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
 import {
@@ -66,6 +66,8 @@ export type InvestUiState = {
     code: string;
     balance: string | null;
   }[];
+  /** Null when the wallet is already on the chain the offer funds on. */
+  chainSwitch: { targetChainName: string; isSwitching: boolean } | null;
   selectedPayWithAssetId: AssetId | null;
   amountInput: string;
   tokenEquivalent: string | null;
@@ -97,6 +99,7 @@ export type InvestUiEvent =
   | { type: 'ON_DISCONNECT_WALLET' }
   | { type: 'ON_ASSET_SELECT'; assetId: AssetId }
   | { type: 'ON_AMOUNT_CHANGE'; value: string }
+  | { type: 'ON_SWITCH_CHAIN' }
   | { type: 'ON_SIGN_AND_COMMIT' };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -111,8 +114,18 @@ export function useInvestViewModel(
   const { open: openAppKit } = useAppKit();
   const { address: walletAddress, isConnected } = useAppKitAccount();
   const wagmiConfig = useConfig();
-  const chainId = useChainId();
-  const { mutateAsync: switchChain } = useSwitchChain();
+  // NOT `useChainId()`: that reads wagmi's *config* chain, which it refuses to
+  // update to a chain outside `config.chains` (see the `isChainConfigured`
+  // guard in @wagmi/core's createConfig). Since the AppKit adapter is built
+  // with a single network, `useChainId()` is a constant and can never report
+  // the mismatch we're looking for. `useAccount()` reports the connector's
+  // actual chain, unconstrained by config.
+  const { chainId: walletChainId } = useAccount();
+  const {
+    switchChain,
+    switchChainAsync,
+    isPending: isSwitchingChain,
+  } = useSwitchChain();
   const { mutateAsync: disconnect } = useDisconnect();
   const { mutateAsync: writeContract } = useWriteContract();
   // Pin every read to DEMO_CHAIN_ID so the token addresses (from DEMO_CHAIN) and
@@ -161,7 +174,6 @@ export function useInvestViewModel(
 
   const offerId: OfferId = offerDetail.id;
   const tokenCode = offerDetail.asset.code.toString();
-
   const state: InvestUiState = {
     backLabel: 'Back to deal page',
     endsAt: offerDetail.endsAt,
@@ -175,6 +187,10 @@ export function useInvestViewModel(
       code: a.code.toString(),
       balance: formatTokenBalance(tokenBalances[a.id], a.id),
     })),
+    chainSwitch:
+      isConnected && walletChainId !== DEMO_CHAIN_ID
+        ? { targetChainName: DEMO_CHAIN_NAME, isSwitching: isSwitchingChain }
+        : null,
     selectedPayWithAssetId: payWithAssetId,
     amountInput,
     tokenEquivalent: deriveTokenEquivalent(
@@ -207,7 +223,12 @@ export function useInvestViewModel(
     setSubmitError(null);
 
     try {
-      await ensureChain(chainId, switchChain);
+      // Backstop for the race where the wallet leaves the demo chain between
+      // the CTA rendering as "Sign & Commit" and this handler running. Throws
+      // if the user rejects the switch, aborting the submit.
+      if (walletChainId !== DEMO_CHAIN_ID) {
+        await switchChainAsync({ chainId: DEMO_CHAIN_ID });
+      }
 
       const approvalTxHash = await sendApprovalTransaction({
         writeContract,
@@ -243,6 +264,11 @@ export function useInvestViewModel(
     }
   };
 
+  const clearSubmit = () => {
+    setSubmitState('idle');
+    setSubmitError(null);
+  };
+
   const onEvent = (event: InvestUiEvent) => {
     switch (event.type) {
       case 'ON_BACK_CLICK':
@@ -256,13 +282,17 @@ export function useInvestViewModel(
         break;
       case 'ON_ASSET_SELECT':
         setPayWithAssetId(event.assetId);
-        setSubmitState('idle');
-        setSubmitError(null);
+        clearSubmit();
         break;
       case 'ON_AMOUNT_CHANGE':
         setAmountInput(event.value);
-        setSubmitState('idle');
-        setSubmitError(null);
+        clearSubmit();
+        break;
+      case 'ON_SWITCH_CHAIN':
+        // `switchChain` is the non-throwing variant, so a wallet-side rejection
+        // settles into `isSwitchingChain` rather than an unhandled rejection.
+        switchChain({ chainId: DEMO_CHAIN_ID });
+        clearSubmit();
         break;
       case 'ON_SIGN_AND_COMMIT':
         void handleSignAndCommit();
@@ -373,21 +403,6 @@ function validateSubmit({
   }
 
   return null;
-}
-
-/**
- * Ensures the user's wallet is on the demo's configured chain
- * ({@link DEMO_CHAIN_ID}) before an on-chain transaction is submitted. If the
- * wallet is on a different chain, this triggers the wallet's native "Switch
- * Network" prompt (e.g. the MetaMask network-switch dialog). Throws if the user
- * rejects the switch.
- */
-async function ensureChain(
-  currentChainId: number,
-  switchChain: (params: { chainId: number }) => Promise<unknown>
-): Promise<void> {
-  if (currentChainId === DEMO_CHAIN_ID) return;
-  await switchChain({ chainId: DEMO_CHAIN_ID });
 }
 
 /**

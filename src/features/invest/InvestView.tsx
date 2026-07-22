@@ -28,6 +28,18 @@ export function InvestView({ state, onEvent }: Props) {
     isConnected &&
     state.amountInput.length > 0 &&
     !isSubmitting(state.submitState);
+  // A submit already in flight outranks the network prompt: the wallet can
+  // leave the demo chain mid-approval, and the button must keep reporting the
+  // transaction rather than flipping to a switch it won't perform.
+  const chainSwitch = isSubmitting(state.submitState)
+    ? null
+    : state.chainSwitch;
+  const ctaEnabled = chainSwitch ? !chainSwitch.isSwitching : canSubmit;
+  const ctaLabel = !chainSwitch
+    ? submitLabel(state.submitState)
+    : chainSwitch.isSwitching
+      ? 'Confirm in wallet…'
+      : `Switch to ${chainSwitch.targetChainName}`;
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -159,15 +171,21 @@ export function InvestView({ state, onEvent }: Props) {
           {/* Sign & Commit */}
           <button
             type="button"
-            onClick={() => onEvent({ type: 'ON_SIGN_AND_COMMIT' })}
-            disabled={!canSubmit}
+            onClick={() =>
+              onEvent(
+                chainSwitch
+                  ? { type: 'ON_SWITCH_CHAIN' }
+                  : { type: 'ON_SIGN_AND_COMMIT' }
+              )
+            }
+            disabled={!ctaEnabled}
             className={`mt-4 w-full rounded-2xl py-4 text-sm font-semibold transition ${
-              canSubmit
+              ctaEnabled
                 ? 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'
                 : 'cursor-not-allowed bg-zinc-300 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-500'
             }`}
           >
-            {submitLabel(state.submitState)}
+            {ctaLabel}
           </button>
 
           {state.submitState === 'error' && state.submitError && (
