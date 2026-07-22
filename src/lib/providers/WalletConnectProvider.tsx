@@ -27,6 +27,14 @@ createAppKit({
   adapters: [wagmiAdapter],
   networks: [APPKIT_NETWORK],
   projectId,
+  // A wallet reconnecting on some other chain must not block browsing. Without
+  // this, AppKit auto-opens its "Switch Network" modal on page load and makes
+  // the close button a no-op, so a mainnet-connected wallet can't even read the
+  // offer page. Both wallet flows cope without the gate: the invest flow pins
+  // balance reads to DEMO_CHAIN_ID and prompts the switch right before the tx,
+  // and the ownership signature (`evm-wallet.ts`) is a `personal_sign`, which
+  // is chain-independent.
+  allowUnsupportedChain: true,
   metadata: {
     name: 'CoinList Partner Demo',
     description: 'Demo of the CoinList Partner SDK.',

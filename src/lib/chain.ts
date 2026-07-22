@@ -42,3 +42,6 @@ export const APPKIT_NETWORK = APPKIT_NETWORKS[DEMO_CHAIN];
 
 /** Numeric EVM chain id (1 mainnet, 11155111 sepolia) for {@link DEMO_CHAIN}. */
 export const DEMO_CHAIN_ID = getChainId(DEMO_CHAIN);
+
+/** Human-readable network name ("Ethereum", "Sepolia") for UI copy. */
+export const DEMO_CHAIN_NAME = APPKIT_NETWORK.name;
