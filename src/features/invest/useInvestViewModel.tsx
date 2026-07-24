@@ -2,6 +2,8 @@
 
 import { useCoinList } from '@coinlist-co/react';
 import {
+  type Asset,
+  type AssetCode,
   type AssetId,
   type OfferDetail,
   type OfferId,
@@ -27,13 +29,7 @@ import { useToast } from '@/components/toast/useToast';
 import { DEMO_CHAIN_ID } from '@/lib/chain';
 import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
 import { ROUTES } from '@/lib/routes';
-import {
-  assetContract,
-  decimals,
-  fundingContract,
-  USDC,
-  USDT,
-} from '@/types/coinlist';
+import { assetContract, fundingContract, USDC, USDT } from '@/types/coinlist';
 import {
   type ContractAddress,
   type Erc20ContractAddress,
@@ -139,16 +135,17 @@ export function useInvestViewModel(
     args: [walletAddress as `0x${string}`],
     query: { enabled: !!walletAddress },
   });
-  const tokenBalances: Record<AssetId, bigint | undefined> = {
+  const tokenBalances: Record<AssetCode, bigint | undefined> = {
     [USDC]: usdcBalanceRaw,
     [USDT]: usdtBalanceRaw,
   };
 
-  const investAssetId: AssetId = offerDetail.asset.id;
-
   const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
     offerDetail.fundingAssets[0]?.id ?? null
   );
+  // The API takes an asset id, the chain takes a contract address and decimals.
+  const payWithAsset =
+    offerDetail.fundingAssets.find((a) => a.id === payWithAssetId) ?? null;
   const [amountInput, setAmountInput] = useState('');
   const [submitState, setSubmitState] = useState<SubmitStateUi>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -173,7 +170,7 @@ export function useInvestViewModel(
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
-      balance: formatTokenBalance(tokenBalances[a.id], a.id),
+      balance: formatTokenBalance(tokenBalances[a.code], a.fractionalDigits),
     })),
     selectedPayWithAssetId: payWithAssetId,
     amountInput,
@@ -190,7 +187,17 @@ export function useInvestViewModel(
 
   const handleSignAndCommit = async () => {
     // Guard: these should be impossible if the UI is wired correctly
-    if (!isConnected || !walletAddress || !payWithAssetId) return;
+    if (!isConnected || !walletAddress) return;
+
+    // Not silent: `payWithAssetId` is selection state while `payWithAsset` is
+    // resolved from `offerDetail.fundingAssets`, so a refetch that drops the
+    // selected asset leaves a set id with no asset behind it. Returning here
+    // without a message would render Sign & Commit dead with no explanation.
+    if (!payWithAsset) {
+      setSubmitState('error');
+      setSubmitError('No funding asset selected. Reload and try again.');
+      return;
+    }
 
     const validationError = validateSubmit({
       amountInput,
@@ -212,8 +219,8 @@ export function useInvestViewModel(
       const approvalTxHash = await sendApprovalTransaction({
         writeContract,
         wagmiConfig,
-        investAssetId,
-        payWithAssetId,
+        offerId,
+        payWithAsset,
         amountInput,
         walletAddress: WalletAddress(walletAddress as `0x${string}`),
         onTransactionSubmitted: () => setSubmitState('confirming_tx'),
@@ -226,7 +233,7 @@ export function useInvestViewModel(
         chain: ETHEREUM_CHAIN,
         walletAddress: WalletAddress(walletAddress as `0x${string}`),
         amount: amountInput,
-        assetId: payWithAssetId,
+        assetId: payWithAsset.id,
         approvalTransactionHash: approvalTxHash,
       });
 
@@ -277,11 +284,10 @@ export function useInvestViewModel(
 
 function formatTokenBalance(
   balanceRaw: bigint | undefined,
-  assetId: AssetId
+  fractionalDigits: number
 ): string | null {
   if (balanceRaw === undefined) return null;
-  const d = decimals(assetId);
-  const value = Number(balanceRaw) / 10 ** d;
+  const value = Number(balanceRaw) / 10 ** fractionalDigits;
   return value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -394,8 +400,8 @@ async function ensureChain(
  * Submits the ERC-20 approve transaction to the user's wallet (triggering
  * the MetaMask popup) and waits for it to be mined before returning the hash.
  *
- * This does NOT transfer funds. It grants the asset-specific CoinList funding
- * contract (`fundingContract(investAssetId)`) permission to pull up to
+ * This does NOT transfer funds. It grants the offer's CoinList funding
+ * contract (`fundingContract(offerId)`) permission to pull up to
  * `amountInput` tokens from the wallet later via transferFrom().
  */
 type WriteContractFn = (params: {
@@ -408,25 +414,25 @@ type WriteContractFn = (params: {
 async function sendApprovalTransaction({
   writeContract,
   wagmiConfig,
-  investAssetId,
-  payWithAssetId,
+  offerId,
+  payWithAsset,
   amountInput,
   walletAddress,
   onTransactionSubmitted,
 }: {
   writeContract: WriteContractFn;
   wagmiConfig: Config;
-  investAssetId: AssetId;
-  payWithAssetId: AssetId;
+  offerId: OfferId;
+  payWithAsset: Asset;
   amountInput: string;
   walletAddress: WalletAddress;
   onTransactionSubmitted: () => void;
 }): Promise<TxHash> {
-  const tokenContract = assetContract(payWithAssetId);
-  const spender = fundingContract(investAssetId);
+  const tokenContract = assetContract(payWithAsset.code);
+  const spender = fundingContract(offerId);
   const approvalAmount = parseUnits(
     amountInput.trim(),
-    decimals(payWithAssetId)
+    payWithAsset.fractionalDigits
   );
 
   // Some tokens (notably USDT) revert if you try to change a non-zero
