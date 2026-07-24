@@ -14,7 +14,6 @@ import {
 } from '@coinlist-co/react/shared';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { isSwapOffer } from '@/features/swap/constants';
 import { ROUTES } from '@/lib/routes';
 
 export type OfferUiLink = {
@@ -74,12 +73,13 @@ export type OfferUiState =
       options: OfferUiOption[];
       selectedOptionId: OfferOptionId | null;
       name: string;
+      statusText: string;
       tagline: string | null;
       bannerUrl: string | null;
       logoUrl: string | null;
       about: string | null;
       startsAt: Date;
-      endsAt: Date;
+      endsAt: Date | null;
       links: OfferUiLink[];
       terms: OfferUiTerm[];
       milestones: OfferUiMilestone[];
@@ -126,12 +126,10 @@ export function useOfferViewModel(): {
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
-  // Swap offers never surface participations, so skip the fetch entirely by
-  // seeding the hook with empty pre-fetched data.
-  const { participationsState } = useParticipations(
-    offerId,
-    isSwapOffer(offerId) ? { data: [] } : undefined
-  );
+  // Swap offers never surface participations, but the offer type isn't known
+  // until the detail loads, so we always fetch here; the panel stays hidden for
+  // swap offers (see `showParticipations`), and the result is simply unused.
+  const { participationsState } = useParticipations(offerId);
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
@@ -157,7 +155,7 @@ export function useOfferViewModel(): {
       case 'ON_INVEST_CLICK': {
         // Swap offers open the in-page swap flow; all others route to the
         // standard participation flow.
-        if (isSwapOffer(offerId)) {
+        if (offerDetail?.type === 'swap') {
           setShowSwap(true);
           break;
         }
@@ -240,7 +238,9 @@ function mapOfferUiState(
         isAuthError: offerDetailsState.reason === 'not-authenticated',
       };
     case 'CONTENT': {
-      const options = offerDetailsState.offerDetail.options.map((opt) => ({
+      const offerDetail = offerDetailsState.offerDetail;
+      const isSwap = offerDetail.type === 'swap';
+      const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
         priceUsd: opt.priceUsd,
@@ -252,44 +252,45 @@ function mapOfferUiState(
         offerId: OfferId(routeOfferId),
         options,
         selectedOptionId: resolvedOptionId,
-        name: offerDetailsState.offerDetail.name,
-        tagline: offerDetailsState.offerDetail.tagline,
-        bannerUrl: offerDetailsState.offerDetail.bannerUrl,
-        logoUrl: offerDetailsState.offerDetail.logoUrl,
-        about: offerDetailsState.offerDetail.about,
-        startsAt: offerDetailsState.offerDetail.startsAt,
-        endsAt: offerDetailsState.offerDetail.endsAt,
-        links: offerDetailsState.offerDetail.links
+        name: offerDetail.name,
+        statusText: isSwap ? 'Swap' : 'Token Sale',
+        tagline: offerDetail.tagline,
+        bannerUrl: offerDetail.bannerUrl,
+        logoUrl: offerDetail.logoUrl,
+        about: offerDetail.about,
+        startsAt: offerDetail.startsAt,
+        endsAt: offerDetail.endsAt,
+        links: offerDetail.links
           .filter((link) => Boolean(link.label && link.url))
           .map((link) => ({
             label: link.label ?? '',
             url: link.url ?? '',
           })),
-        terms: offerDetailsState.offerDetail.terms
+        terms: offerDetail.terms
           .filter((term) => Boolean(term.key && term.value))
           .map((term) => ({
             key: term.key ?? '',
             value: term.value ?? '',
           })),
-        milestones: offerDetailsState.offerDetail.milestones
+        milestones: offerDetail.milestones
           .filter((milestone) => Boolean(milestone.name && milestone.schedule))
           .map((milestone) => ({
             name: milestone.name ?? '',
             schedule: milestone.schedule ?? '',
             status: milestone.status,
           })),
-        faqs: offerDetailsState.offerDetail.faqs
+        faqs: offerDetail.faqs
           .filter((faq) => Boolean(faq.question && faq.answer))
           .map((faq) => ({
             question: faq.question ?? '',
             answer: faq.answer ?? '',
           })),
-        tokenCode: offerDetailsState.offerDetail.asset.code,
+        tokenCode: offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
         participationsState,
         // Swap offers use the in-page swap flow and do not surface
         // participations, so the panel is hidden for them.
-        showParticipations: !isSwapOffer(OfferId(routeOfferId)),
+        showParticipations: !isSwap,
       };
     }
   }

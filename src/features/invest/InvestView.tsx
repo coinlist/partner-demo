@@ -32,10 +32,12 @@ export function InvestView({ state, onEvent }: Props) {
           <ArrowLeft size={16} />
           {state.backLabel}
         </button>
-        <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-          <span className="h-2 w-2 rounded-full bg-green-500" />
-          Ends in {formatCountdown(state.endsAt)}
-        </div>
+        {state.endsAt && (
+          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+            <span className="h-2 w-2 rounded-full bg-green-500" />
+            Ends in {formatCountdown(state.endsAt)}
+          </div>
+        )}
       </div>
 
       {/* Two-column layout */}

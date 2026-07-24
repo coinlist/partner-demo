@@ -86,7 +86,7 @@ export type SwapUiState =
   | {
       type: 'CONTENT';
       step: SwapStep;
-      endsAt: Date;
+      endsAt: Date | null;
       authorize: {
         status: StepStatus;
         connectedAddress: string | null;
