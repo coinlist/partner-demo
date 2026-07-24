@@ -6,9 +6,8 @@ import { mainnet, sepolia } from '@reown/appkit/networks';
  * Single source of truth for which chain the demo runs on.
  *
  * Selected via `NEXT_PUBLIC_CHAIN` so it's a *local* override: set
- * `NEXT_PUBLIC_CHAIN=ethereum_sepolia` in `.env.local` when testing against a
- * backend that only accepts testnet chains. Unset = `ethereum_mainnet`, the
- * production default.
+ * `NEXT_PUBLIC_CHAIN=ethereum_mainnet` for a build that serves mainnet offers.
+ * Unset = `ethereum_sepolia`, matching the offers the demo ships with.
  */
 const APPKIT_NETWORKS = {
   ethereum_mainnet: mainnet,
@@ -19,11 +18,13 @@ const ALLOWED_CHAINS = Object.keys(APPKIT_NETWORKS) as EthereumChain[];
 
 function resolveDemoChain(): EthereumChain {
   const value = process.env.NEXT_PUBLIC_CHAIN;
-  // Unset = intentional production default.
-  if (!value) return 'ethereum_mainnet';
+  // Unset defaults to a testnet: the demo currently serves only Sepolia
+  // offers, and FUNDING_CONTRACT_ADDRESS holds only Sepolia spenders, so a
+  // mainnet default would turn a forgotten env var into a real approve on the
+  // wrong chain. Serving a mainnet offer means keying that map by chain too.
+  if (!value) return 'ethereum_sepolia';
   // Set-but-invalid is a config mistake worth failing loudly on, rather than
-  // silently sending traffic for the wrong chain (e.g. a mainnet fallback that
-  // then 500s against a testnet-only backend — the very bug this override fixes).
+  // silently sending traffic for the wrong chain.
   if ((ALLOWED_CHAINS as string[]).includes(value)) {
     return value as EthereumChain;
   }
