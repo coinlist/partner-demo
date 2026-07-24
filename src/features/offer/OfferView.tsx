@@ -17,7 +17,6 @@ import type {
   OfferUiState,
   ParticipationsUiState,
 } from '@/features/offer/useOfferViewModel';
-import { isSwapOffer } from '@/features/swap/constants';
 import { useEvmWallet } from '@/lib/evm-wallet';
 
 export interface Props {
@@ -90,6 +89,7 @@ export function OfferView({ state, onEvent }: Props) {
           <div className="space-y-6">
             <div className="lg:hidden space-y-6">
               <SidebarContent
+                statusText={state.statusText}
                 tokenCode={state.tokenCode}
                 tokenPriceUsd={state.tokenPriceUsd}
                 offerId={state.offerId}
@@ -136,6 +136,7 @@ export function OfferView({ state, onEvent }: Props) {
 
           <div className="hidden lg:block space-y-6">
             <SidebarContent
+              statusText={state.statusText}
               tokenCode={state.tokenCode}
               tokenPriceUsd={state.tokenPriceUsd}
               offerId={state.offerId}
@@ -156,6 +157,7 @@ export function OfferView({ state, onEvent }: Props) {
 }
 
 function SidebarContent({
+  statusText,
   tokenCode,
   tokenPriceUsd,
   offerId,
@@ -166,6 +168,7 @@ function SidebarContent({
   onOptionSelect,
   onContinue,
 }: {
+  statusText: string;
   tokenCode: string;
   tokenPriceUsd: string | null;
   offerId: OfferId;
@@ -180,7 +183,7 @@ function SidebarContent({
   return (
     <>
       <OfferSidebarCard
-        statusText={isSwapOffer(offerId) ? 'Swap' : 'Token Sale'}
+        statusText={statusText}
         tokenCode={tokenCode}
         tokenPriceUsd={tokenPriceUsd != null ? Number(tokenPriceUsd) : null}
       />

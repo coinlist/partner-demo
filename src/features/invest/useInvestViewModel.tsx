@@ -53,7 +53,7 @@ const MIN_ETH_FOR_GAS_LABEL = '0.001 ETH';
 
 export type InvestUiState = {
   backLabel: string;
-  endsAt: Date;
+  endsAt: Date | null;
   walletState:
     | { type: 'DISCONNECTED' }
     | {
@@ -220,7 +220,7 @@ export function useInvestViewModel(
       });
 
       setSubmitState('recording');
-      await coinlist.createParticipation({
+      await coinlist.tokenSale.createParticipation({
         offerId,
         offerOptionId: option.id,
         chain: ETHEREUM_CHAIN,
