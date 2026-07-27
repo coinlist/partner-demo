@@ -1,13 +1,13 @@
-import { AssetCode, OfferId } from '@coinlist-co/react/shared';
 import {
-  ContractAddress,
-  type Erc20ContractAddress,
-  USDC_CONTRACT_ADDRESS,
-  USDT_CONTRACT_ADDRESS,
-} from '@/types/erc20';
-
-export const USDC = AssetCode('USDC');
-export const USDT = AssetCode('USDT');
+  type Asset,
+  type EthereumChain,
+  EvmContractAddress,
+  OfferId,
+  type StablecoinSymbol,
+  TOKEN_REGISTRY,
+  USDC_SYMBOL,
+  USDT_SYMBOL,
+} from '@coinlist-co/react/shared';
 
 const SEPOLIA_SWAP_OFFER = OfferId('019f8b35-cdfa-7279-8527-4575870843df');
 const SEPOLIA_TOKEN_SALE_OFFER = OfferId(
@@ -15,32 +15,42 @@ const SEPOLIA_TOKEN_SALE_OFFER = OfferId(
 );
 
 /**
- * ERC-20 contract addresses for the demo's active chain, keyed by CoinList
- * asset code.
+ * Funding stablecoins the demo can pay with, keyed by the asset's on-chain
+ * ticker (`Asset.code`) rather than CoinList's opaque asset UUID. Keying by
+ * ticker means every offer paying in USDC/USDT works with no per-offer edits —
+ * the offer's own funding-asset id is irrelevant.
  *
- * The code is the `code` field on each entry in OfferDetail.fundingAssets.
- * Keyed by code and not `id`, because ids are CoinList database identifiers:
- * USDC's changed from the legacy "usd-coin" slug to a UUID when the backend
- * moved asset references onto Postgres record ids, breaking every lookup here.
- * A code is unique and immutable once its asset exists, enforced backend-side
- * in `Frontline.Assets.Asset`, so it survives that class of migration. Casing
- * is convention rather than constraint, so these keys assume upper case.
- *
- * Add entries here for any additional funding assets your offer supports.
+ * Add an entry to support another stablecoin the SDK's token registry knows.
  */
-const ASSET_CONTRACT_ADDRESS: Record<AssetCode, Erc20ContractAddress> = {
-  [USDC]: USDC_CONTRACT_ADDRESS,
-  [USDT]: USDT_CONTRACT_ADDRESS,
+const PAYMENT_SYMBOL_BY_CODE: Record<string, StablecoinSymbol> = {
+  USDC: USDC_SYMBOL,
+  USDT: USDT_SYMBOL,
 };
 
-export function assetContract(code: AssetCode): Erc20ContractAddress {
-  const c = ASSET_CONTRACT_ADDRESS[code];
-  if (!c) {
+/** The SDK stablecoin symbol for a funding asset, derived from its ticker. */
+export function paymentSymbol(asset: Asset): StablecoinSymbol {
+  const symbol = PAYMENT_SYMBOL_BY_CODE[asset.code.toString()];
+  if (!symbol) {
     throw new Error(
-      `No ASSET_CONTRACT_ADDRESS configured for asset: "${code}"`
+      `Unsupported funding asset "${asset.code}" (${asset.id}). Supported: ${Object.keys(
+        PAYMENT_SYMBOL_BY_CODE
+      ).join(', ')}.`
     );
   }
-  return c;
+  return symbol;
+}
+
+/**
+ * ERC-20 contract for a funding asset on the given chain, from the SDK's token
+ * registry — so a Sepolia build approves the Sepolia USDC/USDT rather than the
+ * mainnet addresses. Decimals aren't needed here: read them straight off
+ * `Asset.fractionalDigits`.
+ */
+export function paymentTokenAddress(
+  asset: Asset,
+  chain: EthereumChain
+): EvmContractAddress {
+  return TOKEN_REGISTRY.contractAddress(paymentSymbol(asset), chain);
 }
 
 // Spender contract each offer's participation approve targets, keyed by offer:
@@ -53,20 +63,21 @@ export function assetContract(code: AssetCode): Erc20ContractAddress {
 // it with `DEMO_CHAIN`, matching how the backend already models it as
 // `{offer_id, chain, contract}`:
 //
-//   Record<EthereumChain, Record<OfferId, ContractAddress>>
+//   Record<EthereumChain, Record<OfferId, EvmContractAddress>>
 //
 // The asset side needs no change either way: TOKEN_REGISTRY already resolves
 // USDC and USDT per chain.
-const FUNDING_CONTRACT_ADDRESS: Record<OfferId, ContractAddress> = {
-  [SEPOLIA_SWAP_OFFER]: ContractAddress(
+const FUNDING_CONTRACT_ADDRESS: Record<OfferId, EvmContractAddress> = {
+  [SEPOLIA_SWAP_OFFER]: EvmContractAddress(
     '0x27E8CE9Ca1A1E98Bc4009F08Dc596bFcf88aCED1'
   ),
-  [SEPOLIA_TOKEN_SALE_OFFER]: ContractAddress(
+  [SEPOLIA_TOKEN_SALE_OFFER]: EvmContractAddress(
     '0xAdE1da4D09479cc51D53884A3B5Ae15656f34FcC'
   ),
 };
 
-export function fundingContract(offerId: OfferId): ContractAddress {
+/** The `approve()` spender contract for a sale, keyed by offer id. */
+export function fundingContract(offerId: OfferId): EvmContractAddress {
   const c = FUNDING_CONTRACT_ADDRESS[offerId];
   if (!c) {
     throw new Error(
