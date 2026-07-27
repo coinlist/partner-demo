@@ -7,13 +7,14 @@ import type {
 } from '@coinlist-co/react';
 import { useCoinList, useSwapTokenBalances } from '@coinlist-co/react';
 import {
+  type AmountParseErrorReason,
   type Asset,
   AssetDecimals,
   type AssetId,
-  BlockchainAmount,
   type OfferDetail,
   type OfferId,
   type OfferOption,
+  parseBlockchainAmount,
   type StablecoinSymbol,
 } from '@coinlist-co/react/shared';
 import { useRouter } from 'next/navigation';
@@ -199,6 +200,19 @@ export function useInvestViewModel(
       return;
     }
 
+    // Parse the entered amount into a `BlockchainAmount` at the token's
+    // decimals. This also enforces token-precision limits that `validateSubmit`
+    // (a numeric-range check) doesn't cover, e.g. more decimals than the token.
+    const parsedAmount = parseBlockchainAmount(
+      amountInput,
+      AssetDecimals(payWithAsset.fractionalDigits)
+    );
+    if (!parsedAmount.valid) {
+      setSubmitState('error');
+      setSubmitError(amountParseErrorMessage(parsedAmount.reason));
+      return;
+    }
+
     setSubmitState('checking_allowance');
     setSubmitError(null);
 
@@ -211,7 +225,6 @@ export function useInvestViewModel(
       walletClient,
       config: wagmiConfig,
     });
-    const paymentDecimals = payWithAsset.fractionalDigits;
 
     const result = await coinlist.tokenSale.executeTokenSale({
       wallet,
@@ -221,10 +234,7 @@ export function useInvestViewModel(
       paymentTokenAddress: paymentTokenAddress(payWithAsset, DEMO_CHAIN),
       fundingContractAddress: fundingContract(offerId),
       chain: DEMO_CHAIN,
-      amount: BlockchainAmount({
-        raw: parseUnits(amountInput.trim(), paymentDecimals),
-        decimals: AssetDecimals(paymentDecimals),
-      }),
+      amount: parsedAmount.amount,
       onProgress: (phase) => setSubmitState(phaseToSubmitState(phase)),
     });
 
@@ -448,4 +458,26 @@ function walletErrorMessage(cause: WalletError, action: string): string {
 
 function shortenHash(hash: string): string {
   return hash.length > 12 ? `${hash.slice(0, 8)}…${hash.slice(-4)}` : hash;
+}
+
+/**
+ * Maps a typed {@link AmountParseErrorReason} from `parseBlockchainAmount` to a
+ * user-facing message. Most of these are already caught by `validateSubmit`;
+ * `too-many-decimals` is the one this parse adds on top.
+ */
+function amountParseErrorMessage(reason: AmountParseErrorReason): string {
+  switch (reason.type) {
+    case 'empty':
+      return 'Please enter an amount.';
+    case 'negative':
+      return 'Please enter an amount greater than zero.';
+    case 'invalid-format':
+      return 'Please enter a valid amount.';
+    case 'too-many-decimals':
+      return `This token supports at most ${reason.maxDecimals} decimal places.`;
+    default: {
+      const _exhaustive: never = reason;
+      return _exhaustive;
+    }
+  }
 }
