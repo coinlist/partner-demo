@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { DealFlowHeader } from '@/components/DealFlowHeader';
 import { AmountStep } from '@/features/swap/components/AmountStep';
 import { AuthorizeStep } from '@/features/swap/components/AuthorizeStep';
 import { OrderConfirmedDialog } from '@/features/swap/components/OrderConfirmedDialog';
@@ -11,7 +11,6 @@ import type {
   SwapUiEvent,
   SwapUiState,
 } from '@/features/swap/useSwapViewModel';
-import { formatCountdown } from '@/lib/countdown';
 
 interface Props {
   state: SwapUiState;
@@ -21,22 +20,11 @@ interface Props {
 export function SwapView({ state, onEvent }: Props) {
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
-      <div className="mx-auto mb-8 flex w-full max-w-5xl items-center justify-between">
-        <button
-          type="button"
-          onClick={() => onEvent({ type: 'ON_BACK' })}
-          className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          <ArrowLeft size={16} />
-          Back to deal page
-        </button>
-        {state.type === 'CONTENT' && state.endsAt && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-            <span className="h-2 w-2 rounded-full bg-green-500" />
-            Ends in {formatCountdown(state.endsAt)}
-          </div>
-        )}
-      </div>
+      <DealFlowHeader
+        backLabel="Back to deal page"
+        onBack={() => onEvent({ type: 'ON_BACK' })}
+        endsAt={state.type === 'CONTENT' ? state.endsAt : null}
+      />
 
       {state.type === 'ERROR' ? (
         <div className="mx-auto w-full max-w-5xl rounded-2xl border border-zinc-200 bg-white p-8 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">

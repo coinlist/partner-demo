@@ -1,12 +1,12 @@
 'use client';
 
-import { ArrowLeft, ChevronRight, Wallet, X } from 'lucide-react';
+import { ChevronRight, Wallet, X } from 'lucide-react';
+import { DealFlowHeader } from '@/components/DealFlowHeader';
 import type {
   InvestUiEvent,
   InvestUiState,
   SubmitStateUi,
 } from '@/features/invest/useInvestViewModel';
-import { formatCountdown } from '@/lib/countdown';
 
 interface Props {
   state: InvestUiState;
@@ -23,22 +23,11 @@ export function InvestView({ state, onEvent }: Props) {
   return (
     <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       {/* Top row */}
-      <div className="mx-auto mb-8 flex w-full max-w-5xl items-center justify-between">
-        <button
-          type="button"
-          onClick={() => onEvent({ type: 'ON_BACK_CLICK' })}
-          className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          <ArrowLeft size={16} />
-          {state.backLabel}
-        </button>
-        {state.endsAt && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-            <span className="h-2 w-2 rounded-full bg-green-500" />
-            Ends in {formatCountdown(state.endsAt)}
-          </div>
-        )}
-      </div>
+      <DealFlowHeader
+        backLabel={state.backLabel}
+        onBack={() => onEvent({ type: 'ON_BACK_CLICK' })}
+        endsAt={state.endsAt}
+      />
 
       {/* Two-column layout */}
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_300px]">
@@ -249,6 +238,9 @@ export function InvestView({ state, onEvent }: Props) {
 
 function isSubmitting(state: SubmitStateUi): boolean {
   switch (state) {
+    case 'checking_allowance':
+    case 'resetting_allowance':
+    case 'confirming_reset':
     case 'awaiting_wallet':
     case 'confirming_tx':
     case 'recording':
@@ -260,6 +252,12 @@ function isSubmitting(state: SubmitStateUi): boolean {
 
 function submitLabel(state: SubmitStateUi): string {
   switch (state) {
+    case 'checking_allowance':
+      return 'Checking allowance…';
+    case 'resetting_allowance':
+      return 'Reset allowance in wallet…';
+    case 'confirming_reset':
+      return 'Confirming reset…';
     case 'awaiting_wallet':
       return 'Approve in wallet…';
     case 'confirming_tx':

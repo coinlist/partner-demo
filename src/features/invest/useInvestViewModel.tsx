@@ -1,42 +1,36 @@
 'use client';
 
-import { useCoinList } from '@coinlist-co/react';
+import type {
+  TokenSaleExecutionError,
+  TokenSaleExecutionPhase,
+  WalletError,
+} from '@coinlist-co/react';
+import { useCoinList, useSwapTokenBalances } from '@coinlist-co/react';
 import {
   type Asset,
-  type AssetCode,
+  AssetDecimals,
   type AssetId,
+  BlockchainAmount,
   type OfferDetail,
   type OfferId,
   type OfferOption,
-  WalletAddress,
+  type StablecoinSymbol,
 } from '@coinlist-co/react/shared';
-import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
-import { readContract, waitForTransactionReceipt } from '@wagmi/core';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { erc20Abi, formatEther, parseUnits } from 'viem';
-import {
-  type Config,
-  useBalance,
-  useChainId,
-  useConfig,
-  useDisconnect,
-  useReadContract,
-  useSwitchChain,
-  useWriteContract,
-} from 'wagmi';
+import { formatEther, parseUnits } from 'viem';
+import { useBalance, useConfig, useWalletClient } from 'wagmi';
 import { useToast } from '@/components/toast/useToast';
-import { DEMO_CHAIN_ID } from '@/lib/chain';
-import { ETHEREUM_CHAIN } from '@/lib/providers/WalletConnectProvider';
+import { DEMO_CHAIN, DEMO_CHAIN_ID } from '@/lib/chain';
+import { ZERO_WALLET_ADDRESS } from '@/lib/constants';
+import { useEvmWallet } from '@/lib/evm-wallet';
 import { ROUTES } from '@/lib/routes';
-import { assetContract, fundingContract, USDC, USDT } from '@/types/coinlist';
+import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
 import {
-  type ContractAddress,
-  type Erc20ContractAddress,
-  TxHash,
-  USDC_CONTRACT_ADDRESS,
-  USDT_CONTRACT_ADDRESS,
-} from '@/types/erc20';
+  fundingContract,
+  paymentSymbol,
+  paymentTokenAddress,
+} from '@/types/coinlist';
 
 /**
  * Minimum ETH balance required to pay gas for the ERC-20 approve transaction.
@@ -81,6 +75,9 @@ export type InvestUiState = {
 
 export type SubmitStateUi =
   | 'idle'
+  | 'checking_allowance'
+  | 'resetting_allowance'
+  | 'confirming_reset'
   | 'awaiting_wallet'
   | 'confirming_tx'
   | 'recording'
@@ -104,47 +101,40 @@ export function useInvestViewModel(
   const router = useRouter();
   const { coinlist } = useCoinList();
   const { showToast } = useToast();
-  const { open: openAppKit } = useAppKit();
-  const { address: walletAddress, isConnected } = useAppKitAccount();
+  // The demo's wallet seam: connect/disconnect + account state. On-chain writes
+  // go through the SDK's `EvmWallet`, built below from the wagmi wallet client.
+  const { address, isConnected, connect, disconnect } = useEvmWallet();
+  const { data: walletClient } = useWalletClient();
   const wagmiConfig = useConfig();
-  const chainId = useChainId();
-  const { mutateAsync: switchChain } = useSwitchChain();
-  const { mutateAsync: disconnect } = useDisconnect();
-  const { mutateAsync: writeContract } = useWriteContract();
-  // Pin every read to DEMO_CHAIN_ID so the token addresses (from DEMO_CHAIN) and
-  // the network they're read on stay on the same chain, regardless of which
-  // chain the wallet is currently connected to.
+
+  // Pin the ETH balance read to DEMO_CHAIN_ID so it reflects the chain the sale
+  // runs on regardless of which chain the wallet is currently connected to.
+  // Native ETH isn't an ERC-20, so it stays on wagmi rather than coinlist.erc20.
   const { data: ethBalance } = useBalance({
-    address: walletAddress as `0x${string}` | undefined,
+    address: address ?? undefined,
     chainId: DEMO_CHAIN_ID,
-    query: { enabled: !!walletAddress },
+    query: { enabled: !!address },
   });
-  const { data: usdcBalanceRaw } = useReadContract({
-    address: USDC_CONTRACT_ADDRESS,
-    chainId: DEMO_CHAIN_ID,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: [walletAddress as `0x${string}`],
-    query: { enabled: !!walletAddress },
+
+  // ERC-20 (USDC/USDT) balances via the SDK. `useSwapTokenBalances` is keyed by
+  // stablecoin symbol, so we derive each funding asset's symbol from its ticker.
+  const fundingSymbols = offerDetail.fundingAssets.map(paymentSymbol) as [
+    StablecoinSymbol,
+    ...StablecoinSymbol[],
+  ];
+  const { balances } = useSwapTokenBalances({
+    address: address ?? ZERO_WALLET_ADDRESS,
+    chain: DEMO_CHAIN,
+    assets: fundingSymbols,
+    enabled: !!address && fundingSymbols.length > 0,
   });
-  const { data: usdtBalanceRaw } = useReadContract({
-    address: USDT_CONTRACT_ADDRESS,
-    chainId: DEMO_CHAIN_ID,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: [walletAddress as `0x${string}`],
-    query: { enabled: !!walletAddress },
-  });
-  const tokenBalances: Record<AssetCode, bigint | undefined> = {
-    [USDC]: usdcBalanceRaw,
-    [USDT]: usdtBalanceRaw,
-  };
 
   const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
     offerDetail.fundingAssets[0]?.id ?? null
   );
-  // The API takes an asset id, the chain takes a contract address and decimals.
-  const payWithAsset =
+  // The selected funding asset carries everything the sale needs — its ticker
+  // (→ SDK symbol + ERC-20 address) and decimals — so resolve it from the id.
+  const payWithAsset: Asset | null =
     offerDetail.fundingAssets.find((a) => a.id === payWithAssetId) ?? null;
   const [amountInput, setAmountInput] = useState('');
   const [submitState, setSubmitState] = useState<SubmitStateUi>('idle');
@@ -162,15 +152,14 @@ export function useInvestViewModel(
   const state: InvestUiState = {
     backLabel: 'Back to deal page',
     endsAt: offerDetail.endsAt,
-    walletState: deriveWalletState(
-      isConnected,
-      walletAddress,
-      ethBalance?.value
-    ),
+    walletState: deriveWalletState(isConnected, address, ethBalance?.value),
     fundingAssets: offerDetail.fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
-      balance: formatTokenBalance(tokenBalances[a.code], a.fractionalDigits),
+      balance: formatTokenBalance(
+        balances.get(paymentSymbol(a)) ?? undefined,
+        a.fractionalDigits
+      ),
     })),
     selectedPayWithAssetId: payWithAssetId,
     amountInput,
@@ -186,8 +175,8 @@ export function useInvestViewModel(
   };
 
   const handleSignAndCommit = async () => {
-    // Guard: these should be impossible if the UI is wired correctly
-    if (!isConnected || !walletAddress) return;
+    // Guard: these should be impossible if the UI is wired correctly.
+    if (!isConnected || !address || !walletClient) return;
 
     // Not silent: `payWithAssetId` is selection state while `payWithAsset` is
     // resolved from `offerDetail.fundingAssets`, so a refetch that drops the
@@ -210,44 +199,44 @@ export function useInvestViewModel(
       return;
     }
 
-    setSubmitState('awaiting_wallet');
+    setSubmitState('checking_allowance');
     setSubmitError(null);
 
-    try {
-      await ensureChain(chainId, switchChain);
+    // The SDK's `executeTokenSale` drives the whole flow over an `EvmWallet`:
+    // it reads the allowance, resets a stale non-zero allowance (USDT-style
+    // tokens), submits + confirms the approve, and records the participation.
+    // Chain switching is handled inside the wallet adapter.
+    const wallet = buildEvmWallet({
+      address,
+      walletClient,
+      config: wagmiConfig,
+    });
+    const paymentDecimals = payWithAsset.fractionalDigits;
 
-      const approvalTxHash = await sendApprovalTransaction({
-        writeContract,
-        wagmiConfig,
-        offerId,
-        payWithAsset,
-        amountInput,
-        walletAddress: WalletAddress(walletAddress as `0x${string}`),
-        onTransactionSubmitted: () => setSubmitState('confirming_tx'),
-      });
+    const result = await coinlist.tokenSale.executeTokenSale({
+      wallet,
+      offerId,
+      offerOptionId: option.id,
+      assetId: payWithAsset.id,
+      paymentTokenAddress: paymentTokenAddress(payWithAsset, DEMO_CHAIN),
+      fundingContractAddress: fundingContract(offerId),
+      chain: DEMO_CHAIN,
+      amount: BlockchainAmount({
+        raw: parseUnits(amountInput.trim(), paymentDecimals),
+        decimals: AssetDecimals(paymentDecimals),
+      }),
+      onProgress: (phase) => setSubmitState(phaseToSubmitState(phase)),
+    });
 
-      setSubmitState('recording');
-      await coinlist.tokenSale.createParticipation({
-        offerId,
-        offerOptionId: option.id,
-        chain: ETHEREUM_CHAIN,
-        walletAddress: WalletAddress(walletAddress as `0x${string}`),
-        amount: amountInput,
-        assetId: payWithAsset.id,
-        approvalTransactionHash: approvalTxHash,
-      });
-
+    if (result.type === 'success') {
       setSubmitState('success');
       showToast('Participation recorded', 'success');
       router.push(ROUTES.OFFER_DETAILS(offerId));
-    } catch (err: unknown) {
-      setSubmitState('error');
-      setSubmitError(
-        err instanceof Error
-          ? err.message
-          : 'An error occurred. Please try again.'
-      );
+      return;
     }
+
+    setSubmitState('error');
+    setSubmitError(executionErrorMessage(result.error));
   };
 
   const onEvent = (event: InvestUiEvent) => {
@@ -256,7 +245,7 @@ export function useInvestViewModel(
         router.push(ROUTES.OFFER_DETAILS(offerId));
         break;
       case 'ON_CONNECT_WALLET':
-        openAppKit();
+        connect();
         break;
       case 'ON_DISCONNECT_WALLET':
         void disconnect();
@@ -284,10 +273,10 @@ export function useInvestViewModel(
 
 function formatTokenBalance(
   balanceRaw: bigint | undefined,
-  fractionalDigits: number
+  decimals: number
 ): string | null {
   if (balanceRaw === undefined) return null;
-  const value = Number(balanceRaw) / 10 ** fractionalDigits;
+  const value = Number(balanceRaw) / 10 ** decimals;
   return value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -296,7 +285,7 @@ function formatTokenBalance(
 
 function deriveWalletState(
   isConnected: boolean,
-  address: string | undefined,
+  address: string | null,
   ethBalanceWei: bigint | undefined
 ): InvestUiState['walletState'] {
   if (!isConnected || !address) return { type: 'DISCONNECTED' };
@@ -382,94 +371,81 @@ function validateSubmit({
 }
 
 /**
- * Ensures the user's wallet is on the demo's configured chain
- * ({@link DEMO_CHAIN_ID}) before an on-chain transaction is submitted. If the
- * wallet is on a different chain, this triggers the wallet's native "Switch
- * Network" prompt (e.g. the MetaMask network-switch dialog). Throws if the user
- * rejects the switch.
+ * Maps a {@link TokenSaleExecutionPhase} emitted by the SDK's `executeTokenSale`
+ * to the UI's submit state. The reset phases only occur for USDT-style tokens
+ * that hold a stale non-zero allowance.
  */
-async function ensureChain(
-  currentChainId: number,
-  switchChain: (params: { chainId: number }) => Promise<unknown>
-): Promise<void> {
-  if (currentChainId === DEMO_CHAIN_ID) return;
-  await switchChain({ chainId: DEMO_CHAIN_ID });
+function phaseToSubmitState(phase: TokenSaleExecutionPhase): SubmitStateUi {
+  switch (phase) {
+    case 'checking-allowance':
+      return 'checking_allowance';
+    case 'resetting-allowance':
+      return 'resetting_allowance';
+    case 'confirming-allowance-reset':
+      return 'confirming_reset';
+    case 'approving':
+      return 'awaiting_wallet';
+    case 'confirming-approval':
+      return 'confirming_tx';
+    case 'recording-participation':
+      return 'recording';
+    default: {
+      const _exhaustive: never = phase;
+      return _exhaustive;
+    }
+  }
 }
 
 /**
- * Submits the ERC-20 approve transaction to the user's wallet (triggering
- * the MetaMask popup) and waits for it to be mined before returning the hash.
- *
- * This does NOT transfer funds. It grants the offer's CoinList funding
- * contract (`fundingContract(offerId)`) permission to pull up to
- * `amountInput` tokens from the wallet later via transferFrom().
+ * Turns the SDK's step-tagged {@link TokenSaleExecutionError} into a
+ * user-facing message. Each step the flow can fail at gets its own message so
+ * the user knows which of the two wallet prompts they rejected, whether an
+ * approval reverted on-chain, or whether only the final recording failed.
  */
-type WriteContractFn = (params: {
-  address: Erc20ContractAddress;
-  abi: typeof erc20Abi;
-  functionName: 'approve';
-  args: readonly [ContractAddress, bigint];
-}) => Promise<`0x${string}`>;
-
-async function sendApprovalTransaction({
-  writeContract,
-  wagmiConfig,
-  offerId,
-  payWithAsset,
-  amountInput,
-  walletAddress,
-  onTransactionSubmitted,
-}: {
-  writeContract: WriteContractFn;
-  wagmiConfig: Config;
-  offerId: OfferId;
-  payWithAsset: Asset;
-  amountInput: string;
-  walletAddress: WalletAddress;
-  onTransactionSubmitted: () => void;
-}): Promise<TxHash> {
-  const tokenContract = assetContract(payWithAsset.code);
-  const spender = fundingContract(offerId);
-  const approvalAmount = parseUnits(
-    amountInput.trim(),
-    payWithAsset.fractionalDigits
-  );
-
-  // Some tokens (notably USDT) revert if you try to change a non-zero
-  // allowance to another non-zero value. Reset to 0 first when needed.
-  const currentAllowance = await readContract(wagmiConfig, {
-    address: tokenContract,
-    abi: erc20Abi,
-    functionName: 'allowance',
-    args: [walletAddress as `0x${string}`, spender],
-  });
-  if (currentAllowance > BigInt(0)) {
-    const resetTxHash = await writeContract({
-      address: tokenContract,
-      abi: erc20Abi,
-      functionName: 'approve',
-      args: [spender, BigInt(0)],
-    });
-    await waitForTransactionReceipt(wagmiConfig, { hash: resetTxHash });
+function executionErrorMessage(error: TokenSaleExecutionError): string {
+  switch (error.step) {
+    case 'allowance-check':
+      return "We couldn't read your current token allowance. Please try again.";
+    case 'allowance-reset':
+      return walletErrorMessage(
+        error.cause,
+        'resetting your existing allowance'
+      );
+    case 'allowance-reset-reverted':
+      return 'The allowance reset transaction failed on-chain. Please try again.';
+    case 'approval':
+      return walletErrorMessage(error.cause, 'approving the token');
+    case 'approval-reverted':
+      return 'The approval transaction failed on-chain. Please try again.';
+    case 'participation':
+      return `Your approval went through (tx ${shortenHash(error.approvalTxHash)}), but we couldn't record your commitment. Please contact support.`;
+    default: {
+      const _exhaustive: never = error;
+      return _exhaustive;
+    }
   }
+}
 
-  // This call opens the MetaMask (or other wallet) popup. The user must
-  // confirm before the promise resolves with the transaction hash.
-  const txHash = await writeContract({
-    address: tokenContract,
-    abi: erc20Abi,
-    functionName: 'approve',
-    args: [spender, approvalAmount],
-  });
+/** Maps a classified {@link WalletError} to a user-facing message. */
+function walletErrorMessage(cause: WalletError, action: string): string {
+  switch (cause.type) {
+    case 'user_rejected':
+      return 'You rejected the request in your wallet.';
+    case 'insufficient_funds':
+      return 'Your wallet has insufficient funds to cover the transaction fee.';
+    case 'contract_reverted':
+      return `The transaction reverted: ${cause.reason}`;
+    case 'timeout':
+      return 'The transaction is taking longer than expected to confirm. Check your wallet and try again.';
+    case 'unknown':
+      return `Something went wrong while ${action}. Please try again.`;
+    default: {
+      const _exhaustive: never = cause;
+      return _exhaustive;
+    }
+  }
+}
 
-  // Wallet confirmed — transaction is now broadcast. Signal the caller so the
-  // UI can update to "waiting for block confirmation" before we poll the chain.
-  onTransactionSubmitted();
-
-  // Wait until the approval is included in a block. The CoinList backend
-  // verifies on-chain that the allowance exists before recording the
-  // participation, so we must confirm before calling createParticipation.
-  await waitForTransactionReceipt(wagmiConfig, { hash: txHash });
-
-  return TxHash(txHash);
+function shortenHash(hash: string): string {
+  return hash.length > 12 ? `${hash.slice(0, 8)}…${hash.slice(-4)}` : hash;
 }

@@ -20,7 +20,7 @@ import {
   DEFAULT_AMOUNT_TO_COMPUTE_PRICE,
   DEFAULT_SLIPPAGE_BPS,
   type Erc20Asset,
-  EvmWalletAddress,
+  type EvmWalletAddress,
   formatAmount,
   formatBpsAsPercent,
   formatRawAmount,
@@ -46,8 +46,9 @@ import {
   SWAP_CHAIN,
   SWAP_CONTRACT_ADDRESS,
 } from '@/features/swap/constants';
-import { buildEvmWallet } from '@/features/swap/wagmiEvmWallet';
+import { ZERO_WALLET_ADDRESS } from '@/lib/constants';
 import { useEvmWallet } from '@/lib/evm-wallet';
+import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -221,7 +222,7 @@ export function useSwapViewModel({
     confirmedAmount === null ? probeQuote.quote : orderQuote.quote;
 
   const { balances, isLoading: balancesLoading } = useSwapTokenBalances({
-    address: address ?? EvmWalletAddress(ZERO_ADDRESS),
+    address: address ?? ZERO_WALLET_ADDRESS,
     chain: SWAP_CHAIN,
     assets: [INPUT_SYMBOL],
     enabled: isConnected && !!address,
@@ -542,7 +543,6 @@ export function useSwapViewModel({
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 const GENERIC_ERROR = 'Something went wrong. Please try again.';
 
 function minimumRaw(minimumPurchaseUsd: number): bigint {
