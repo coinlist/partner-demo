@@ -17,7 +17,7 @@ export function OfferFaq({ faqs }: { faqs: OfferFaqItem[] }) {
             <summary className="cursor-pointer text-sm font-medium text-zinc-900 dark:text-zinc-100">
               {faq.question}
             </summary>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
               {faq.answer}
             </p>
           </details>
