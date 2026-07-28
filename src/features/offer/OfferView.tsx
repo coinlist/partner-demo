@@ -114,7 +114,8 @@ export function OfferView({ state, onEvent }: Props) {
                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
                   About
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                {/* pre-line keeps the author's line breaks from the admin textarea */}
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-zinc-600 dark:text-zinc-300">
                   {state.about ?? 'No description available yet.'}
                 </p>
               </div>
