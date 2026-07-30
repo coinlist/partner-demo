@@ -70,6 +70,11 @@ node_modules/
 
 temp/
 
+# Nix / direnv
+.direnv/
+result
+result-*
+
 # Claude Code local settings: already ignored via global gitignore, but listed
 # here too so biome's `useIgnoreFile` (which only reads the project .gitignore)
 # skips it. The harness rewrites this file and its formatting isn't ours to lint.

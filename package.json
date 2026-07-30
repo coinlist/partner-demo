@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "deslop": "deslop check .",
+    "deslop:baseline": "deslop baseline .",
     "lint": "biome check .",
     "lint:fix": "deslop fix . && biome check . --write --unsafe",
     "typecheck": "tsc --noEmit",
@@ -29,7 +30,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.14",
-    "@ivy-apps/deslop": "^0.7.1",
+    "@ivy-apps/deslop": "^0.8.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
