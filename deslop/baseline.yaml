@@ -1,4 +1,0 @@
-# To silence a rule violation add:
-# - {rulebookId}#{ruleId}#{moduleId}
-# Example:
-# - arch#view-uses-viewmodel-state-event#@/features/settings/SettingsView
