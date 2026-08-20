@@ -4,7 +4,7 @@ import { cookiesSessionStore } from '@/lib/session-store';
 
 export async function GET(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
-  const token = await coinListServer(store).accessToken();
+  const token = await coinListServer(store).auth.getAccessToken();
   if (token == null) {
     return applyCookies(new NextResponse(null, { status: 204 }));
   }

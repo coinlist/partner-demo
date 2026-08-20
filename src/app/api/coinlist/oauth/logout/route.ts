@@ -4,6 +4,6 @@ import { cookiesSessionStore } from '@/lib/session-store';
 
 export async function POST(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
-  await coinListServer(store).logout();
+  await coinListServer(store).auth.logout();
   return applyCookies(NextResponse.json({ ok: true }));
 }

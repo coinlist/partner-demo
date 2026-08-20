@@ -14,8 +14,8 @@ import { mainnet, sepolia } from 'viem/chains';
 
 /**
  * Maps the SDK's `EthereumChain` to the viem chain the wallet must be on. The
- * swap flows tell the adapter which chain each transaction targets; the adapter
- * switches the wallet there before signing.
+ * SDK's flows tell the adapter which chain each transaction targets; the
+ * adapter switches the wallet there before signing.
  */
 const CHAINS: Record<EthereumChain, Chain> = {
   ethereum_mainnet: mainnet,

@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
   }
 
   const { store, applyCookies } = cookiesSessionStore(request);
-  await coinListServer(store).completeOAuth(
-    AuthorizationCode(code),
-    CodeVerifier(codeVerifier)
-  );
+  await coinListServer(store).auth.completeOAuth({
+    code: AuthorizationCode(code),
+    codeVerifier: CodeVerifier(codeVerifier),
+  });
 
   return applyCookies(NextResponse.json({ ok: true }));
 }

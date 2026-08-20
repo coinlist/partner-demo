@@ -1,17 +1,20 @@
 'use client';
 
+import { OfferCheckoutContainer } from '@/features/checkout/OfferCheckoutContainer';
 import { OfferView } from '@/features/offer/OfferView';
 import { useOfferViewModel } from '@/features/offer/useOfferViewModel';
-import { SwapContainer } from '@/features/swap/SwapContainer';
 
 export function OfferContainer() {
-  const { state, onEvent, swap } = useOfferViewModel();
+  const { state, onEvent, checkout } = useOfferViewModel();
 
-  if (swap.active && swap.offerDetail) {
+  // The checkout takes over the whole page rather than rendering beside the
+  // offer, and unmounting the offer view is what stops its requests while it
+  // is off screen.
+  if (checkout.type === 'OPEN') {
     return (
-      <SwapContainer
-        offerDetail={swap.offerDetail}
-        onBack={() => onEvent({ type: 'ON_SWAP_BACK' })}
+      <OfferCheckoutContainer
+        offerDetail={checkout.offerDetail}
+        onBack={() => onEvent({ type: 'ON_CHECKOUT_BACK' })}
       />
     );
   }

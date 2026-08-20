@@ -46,14 +46,16 @@ export interface UseEvmWalletResult {
  * routes through here, so the rest of the app never imports AppKit or wagmi
  * directly and the SDK stays wallet-stack agnostic.
  *
- * Scope is the connect-wallet / ownership-signature lifecycle. On-chain
- * participation writes live in the invest flow and aren't part of this
- * abstraction.
+ * Scope is the connect-wallet / ownership-signature lifecycle only. Spending
+ * from a wallet is a different contract: the invest flow and the SDK's
+ * checkout both need a full `EvmWallet` that can approve, broadcast and await
+ * a receipt, which is what {@link buildEvmWallet} and
+ * {@link useCheckoutWallets} provide.
  *
- * `chain` is the EVM chain the ownership signature is proven on and defaults to
- * {@link DEMO_CHAIN}. The Superstate swap flow runs on Sepolia rather than the
- * demo chain, so it passes {@link SWAP_CHAIN} to keep its wallet lifecycle on
- * this seam instead of reaching for AppKit/wagmi directly.
+ * `chain` is the EVM chain the ownership signature is proven on and defaults
+ * to {@link DEMO_CHAIN}. It is a parameter rather than a constant so a flow
+ * running on a different chain can still prove ownership through this seam
+ * instead of reaching for AppKit/wagmi directly.
  */
 export function useEvmWallet(
   chain: EthereumChain = DEMO_CHAIN

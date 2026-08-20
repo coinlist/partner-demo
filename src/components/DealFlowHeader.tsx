@@ -9,7 +9,7 @@ interface DealFlowHeaderProps {
 }
 
 /**
- * Top bar shared by the invest and swap flows: a "back to deal" button and,
+ * Top bar shared by the invest and checkout flows: a "back to deal" button and,
  * when the offer has an end date, an "Ends in …" countdown badge. Both flows
  * render this identically; only the back label and handler differ.
  */

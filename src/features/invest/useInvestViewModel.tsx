@@ -5,7 +5,11 @@ import type {
   TokenSaleExecutionPhase,
   WalletError,
 } from '@coinlist-co/react';
-import { useCoinList, useSwapTokenBalances } from '@coinlist-co/react';
+import {
+  executeTokenSale,
+  useCoinList,
+  useErc20TokenBalances,
+} from '@coinlist-co/react';
 import {
   type AmountParseErrorReason,
   type Asset,
@@ -117,13 +121,13 @@ export function useInvestViewModel(
     query: { enabled: !!address },
   });
 
-  // ERC-20 (USDC/USDT) balances via the SDK. `useSwapTokenBalances` is keyed by
+  // ERC-20 (USDC/USDT) balances via the SDK. `useErc20TokenBalances` is keyed by
   // stablecoin symbol, so we derive each funding asset's symbol from its ticker.
   const fundingSymbols = offerDetail.fundingAssets.map(paymentSymbol) as [
     StablecoinSymbol,
     ...StablecoinSymbol[],
   ];
-  const { balances } = useSwapTokenBalances({
+  const { balances } = useErc20TokenBalances({
     address: address ?? ZERO_WALLET_ADDRESS,
     chain: DEMO_CHAIN,
     assets: fundingSymbols,
@@ -226,7 +230,9 @@ export function useInvestViewModel(
       config: wagmiConfig,
     });
 
-    const result = await coinlist.tokenSale.executeTokenSale({
+    const result = await executeTokenSale({
+      erc20: coinlist.erc20,
+      tokenSale: coinlist.tokenSale,
       wallet,
       offerId,
       offerOptionId: option.id,
@@ -475,6 +481,8 @@ function amountParseErrorMessage(reason: AmountParseErrorReason): string {
       return 'Please enter a valid amount.';
     case 'too-many-decimals':
       return `This token supports at most ${reason.maxDecimals} decimal places.`;
+    case 'overflow':
+      return 'Please enter a smaller amount.';
     default: {
       const _exhaustive: never = reason;
       return _exhaustive;

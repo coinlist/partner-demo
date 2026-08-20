@@ -1,6 +1,6 @@
 'use client';
 
-import { CoinListSignInCard } from '@coinlist-co/react';
+import { CoinListSignInCardContainer } from '@coinlist-co/react';
 import { ErrorBanner } from '@/components/ErrorBanner';
 import type { LoginUiState } from '@/features/login/useLoginViewModel';
 
@@ -13,7 +13,7 @@ export function LoginView({ state }: Props) {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
       <div className="flex w-full max-w-md flex-col gap-4">
         {state.oauthError && <ErrorBanner message={state.oauthError} />}
-        <CoinListSignInCard />
+        <CoinListSignInCardContainer />
       </div>
     </div>
   );
