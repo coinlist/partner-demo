@@ -160,18 +160,35 @@ export function useOfferViewModel(): {
         setSelectedOptionId(event.optionId);
         break;
       case 'ON_INVEST_CLICK': {
-        // Token sales route to their own page, because the SDK ships no
-        // token-sale flow yet and the demo's lives at /offer/[id]/invest.
-        // Everything else the SDK's CheckoutContainer handles in-page, so it
-        // does not matter which provider the offer belongs to.
-        if (offerDetail && offerDetail.type !== 'coinlist::token_sale') {
-          setCheckoutOpen(true);
-          break;
-        }
-        const resolvedOptionId =
-          selectedOptionId ?? offerDetail?.options[0]?.id ?? null;
-        if (resolvedOptionId) {
-          router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
+        // Nothing to invest in until the detail loads, and the button is only
+        // reachable from the loaded view anyway.
+        if (!offerDetail) break;
+
+        // Where each kind of offer is bought. Matched rather than tested for
+        // "not a token sale", so a new offer type CoinList adds is a compile
+        // error here instead of silently opening a checkout the SDK may not
+        // serve yet.
+        switch (offerDetail.type) {
+          case 'coinlist::token_sale': {
+            // The SDK ships no token-sale flow yet; the demo's own lives at
+            // /offer/[id]/invest.
+            const resolvedOptionId =
+              selectedOptionId ?? offerDetail.options[0]?.id ?? null;
+            if (resolvedOptionId) {
+              router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
+            }
+            break;
+          }
+          case 'superstate::swap':
+          case 'ondo::swap':
+            // Both are swaps the SDK's CheckoutContainer handles in-page, so
+            // it does not matter which provider the offer belongs to.
+            setCheckoutOpen(true);
+            break;
+          default: {
+            const exhaustive: never = offerDetail.type;
+            return exhaustive;
+          }
         }
         break;
       }
