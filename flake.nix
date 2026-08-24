@@ -18,6 +18,7 @@
             pkgs.nodejs_24
             pkgs.typescript
             pkgs.typescript-language-server
+            pkgs.just
           ];
         };
       });
