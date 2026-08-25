@@ -15,6 +15,7 @@ import {
   type Asset,
   AssetDecimals,
   type AssetId,
+  type EvmContractAddress,
   type OfferDetail,
   type OfferId,
   type OfferOption,
@@ -222,6 +223,26 @@ export function useInvestViewModel(
       return;
     }
 
+    // Both accessors throw when this build has no entry for the offer or the
+    // asset, and `executeTokenSale` evaluates them as arguments. Resolving them
+    // here keeps that throw on the error path: inside the call it would escape
+    // an async handler nothing awaits, leaving `submitState` on
+    // `checking_allowance` with the spinner up and no message to read.
+    let paymentToken: EvmContractAddress;
+    let fundingContractAddress: EvmContractAddress;
+    try {
+      paymentToken = paymentTokenAddress(payWithAsset, DEMO_CHAIN);
+      fundingContractAddress = fundingContract(offerId);
+    } catch (error) {
+      setSubmitState('error');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'This offer is not configured for participation.'
+      );
+      return;
+    }
+
     setSubmitState('checking_allowance');
     setSubmitError(null);
 
@@ -242,8 +263,8 @@ export function useInvestViewModel(
       offerId,
       offerOptionId: option.id,
       assetId: payWithAsset.id,
-      paymentTokenAddress: paymentTokenAddress(payWithAsset, DEMO_CHAIN),
-      fundingContractAddress: fundingContract(offerId),
+      paymentTokenAddress: paymentToken,
+      fundingContractAddress,
       chain: DEMO_CHAIN,
       amount: parsedAmount.amount,
       onProgress: (phase) => setSubmitState(phaseToSubmitState(phase)),
