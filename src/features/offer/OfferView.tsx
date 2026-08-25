@@ -1,6 +1,6 @@
 'use client';
 
-import { RequirementsChecklist } from '@coinlist-co/react';
+import { RequirementsChecklistContainer } from '@coinlist-co/react';
 import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
 import { ArrowLeft } from 'lucide-react';
 import { OfferBanner } from '@/features/offer/components/OfferBanner';
@@ -219,11 +219,11 @@ function SidebarContent({
         </div>
       ) : null}
       {selectedOptionId ? (
-        <RequirementsChecklist
+        <RequirementsChecklistContainer
           offerId={offerId}
           optionId={selectedOptionId}
           title="Requirements"
-          description="Complete these steps to participate in the token sale."
+          description="Complete these steps to participate in this offer."
           onContinue={onContinue}
           wallet={connectWallet}
           onRequestConnect={connect}

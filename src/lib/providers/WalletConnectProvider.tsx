@@ -19,11 +19,12 @@ const projectId = requiredEnv(
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 );
 
-// The participation flow runs on the env-driven demo chain (mainnet by
-// default; see `@/lib/chain`); the Superstate swap flow always runs on Sepolia.
-// Both networks are registered so a single AppKit connection can serve either —
-// each flow switches the wallet to the chain it needs. Dedupe in case the demo
-// chain is already Sepolia.
+// The participation flow runs on the env-driven demo chain (Sepolia unless
+// `NEXT_PUBLIC_CHAIN` names mainnet; see `@/lib/chain`); the SDK's checkout
+// providers ship Sepolia-only contracts today. Both networks are registered
+// so a single AppKit connection can serve either - each flow switches the
+// wallet to the chain it needs.
+// Dedupe in case the demo chain is already Sepolia.
 const networks =
   APPKIT_NETWORK === sepolia
     ? ([sepolia] as const)

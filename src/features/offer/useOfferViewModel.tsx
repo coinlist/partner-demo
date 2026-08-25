@@ -10,6 +10,7 @@ import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
+  type OfferType,
   type ParticipationStatus,
 } from '@coinlist-co/react/shared';
 import { useParams, useRouter } from 'next/navigation';
@@ -105,28 +106,34 @@ export type OfferUiEvent =
       type: 'ON_INVEST_CLICK';
     }
   | {
-      type: 'ON_SWAP_BACK';
+      type: 'ON_CHECKOUT_BACK';
     };
 
-export type OfferSwapState = {
-  active: boolean;
-  offerDetail: OfferDetail | null;
-};
+/**
+ * Whether the checkout has taken over the page, and the offer it is buying.
+ *
+ * A union rather than `{ active: boolean; offerDetail: OfferDetail | null }`,
+ * so "open with nothing to buy" cannot be built: the checkout can only open
+ * once the offer has loaded.
+ */
+export type OfferCheckoutState =
+  | { type: 'CLOSED' }
+  | { type: 'OPEN'; offerDetail: OfferDetail };
 
 export function useOfferViewModel(): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
-  swap: OfferSwapState;
+  checkout: OfferCheckoutState;
 } {
   const params = useParams<{ id: string | string[] }>();
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
-  const [showSwap, setShowSwap] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
-  // Swap offers never surface participations, but the offer type isn't known
+  // Only token sales surface participations, but the offer type isn't known
   // until the detail loads, so we always fetch here; the panel stays hidden for
   // swap offers (see `showParticipations`), and the result is simply unused.
   const { participationsState } = useParticipations(offerId);
@@ -153,21 +160,40 @@ export function useOfferViewModel(): {
         setSelectedOptionId(event.optionId);
         break;
       case 'ON_INVEST_CLICK': {
-        // Swap offers open the in-page swap flow; all others route to the
-        // standard participation flow.
-        if (offerDetail?.type === 'swap') {
-          setShowSwap(true);
-          break;
-        }
-        const resolvedOptionId =
-          selectedOptionId ?? offerDetail?.options[0]?.id ?? null;
-        if (resolvedOptionId) {
-          router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
+        // Nothing to invest in until the detail loads, and the button is only
+        // reachable from the loaded view anyway.
+        if (!offerDetail) break;
+
+        // Where each kind of offer is bought. Matched rather than tested for
+        // "not a token sale", so a new offer type CoinList adds is a compile
+        // error here instead of silently opening a checkout the SDK may not
+        // serve yet.
+        switch (offerDetail.type) {
+          case 'coinlist::token_sale': {
+            // The SDK ships no token-sale flow yet; the demo's own lives at
+            // /offer/[id]/invest.
+            const resolvedOptionId =
+              selectedOptionId ?? offerDetail.options[0]?.id ?? null;
+            if (resolvedOptionId) {
+              router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
+            }
+            break;
+          }
+          case 'superstate::swap':
+          case 'ondo::swap':
+            // Both are swaps the SDK's CheckoutContainer handles in-page, so
+            // it does not matter which provider the offer belongs to.
+            setCheckoutOpen(true);
+            break;
+          default: {
+            const exhaustive: never = offerDetail.type;
+            return exhaustive;
+          }
         }
         break;
       }
-      case 'ON_SWAP_BACK':
-        setShowSwap(false);
+      case 'ON_CHECKOUT_BACK':
+        setCheckoutOpen(false);
         break;
     }
   };
@@ -175,10 +201,10 @@ export function useOfferViewModel(): {
   return {
     state,
     onEvent,
-    swap: {
-      active: showSwap && offerDetail !== null,
-      offerDetail,
-    },
+    checkout:
+      checkoutOpen && offerDetail
+        ? { type: 'OPEN', offerDetail }
+        : { type: 'CLOSED' },
   };
 }
 
@@ -239,7 +265,7 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      const isSwap = offerDetail.type === 'swap';
+      const isTokenSale = offerDetail.type === 'coinlist::token_sale';
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -253,7 +279,7 @@ function mapOfferUiState(
         options,
         selectedOptionId: resolvedOptionId,
         name: offerDetail.name,
-        statusText: isSwap ? 'Swap' : 'Token Sale',
+        statusText: offerStatusText(offerDetail.type),
         tagline: offerDetail.tagline,
         bannerUrl: offerDetail.bannerUrl,
         logoUrl: offerDetail.logoUrl,
@@ -288,10 +314,32 @@ function mapOfferUiState(
         tokenCode: offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
         participationsState,
-        // Swap offers use the in-page swap flow and do not surface
-        // participations, so the panel is hidden for them.
-        showParticipations: !isSwap,
+        // Participations are a token-sale concept: a swap settles on-chain in
+        // one transaction, so there is nothing for CoinList to record.
+        showParticipations: isTokenSale,
       };
+    }
+  }
+}
+
+/**
+ * What the sidebar calls this kind of offer.
+ *
+ * An exhaustive switch rather than a token-sale/other ternary, so a new offer
+ * type CoinList adds is a compile error here instead of quietly labelling
+ * itself as something it is not.
+ */
+function offerStatusText(type: OfferType): string {
+  switch (type) {
+    case 'coinlist::token_sale':
+      return 'Token Sale';
+    case 'superstate::swap':
+      return 'Superstate Swap';
+    case 'ondo::swap':
+      return 'Ondo Swap';
+    default: {
+      const exhaustive: never = type;
+      return exhaustive;
     }
   }
 }

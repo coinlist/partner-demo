@@ -20,9 +20,9 @@ export default async function InvestPage({ params, searchParams }: Props) {
 
   let offerDetail: OfferDetail;
   try {
-    offerDetail = await coinListServer(
-      readOnlySessionStore()
-    ).fetchOfferDetails(OfferId(id));
+    offerDetail = await coinListServer(readOnlySessionStore()).offers.get(
+      OfferId(id)
+    );
   } catch {
     redirect(ROUTES.OFFER_DETAILS(OfferId(id)));
   }

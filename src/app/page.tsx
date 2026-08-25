@@ -5,8 +5,8 @@ import { readOnlySessionStore } from '@/lib/session-store';
 
 export default async function HomePage() {
   const coinlist = coinListServer(readOnlySessionStore());
-  if (await coinlist.accessToken()) {
-    const offers = await coinlist.fetchOffers().catch(() => undefined);
+  if (await coinlist.auth.getAccessToken()) {
+    const offers = await coinlist.offers.list().catch(() => undefined);
     return <HomeContainer offers={offers} />;
   } else {
     return <LoginContainer />;

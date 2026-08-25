@@ -43,7 +43,7 @@ export function useSettingsViewModel(): {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('logout failed');
-      coinlist.logout();
+      coinlist.auth.logout();
       router.replace(ROUTES.ROOT);
     } catch {
       setLogoutError('Could not sign out. Try again.');

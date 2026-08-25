@@ -5,12 +5,17 @@ import type {
   TokenSaleExecutionPhase,
   WalletError,
 } from '@coinlist-co/react';
-import { useCoinList, useSwapTokenBalances } from '@coinlist-co/react';
+import {
+  executeTokenSale,
+  useCoinList,
+  useErc20TokenBalances,
+} from '@coinlist-co/react';
 import {
   type AmountParseErrorReason,
   type Asset,
   AssetDecimals,
   type AssetId,
+  type EvmContractAddress,
   type OfferDetail,
   type OfferId,
   type OfferOption,
@@ -117,13 +122,18 @@ export function useInvestViewModel(
     query: { enabled: !!address },
   });
 
-  // ERC-20 (USDC/USDT) balances via the SDK. `useSwapTokenBalances` is keyed by
+  // Only the funding assets the demo can actually pay with - the rest are
+  // dropped, so an offer that also accepts an unsupported coin still funds
+  // through the ones it does.
+  const fundingAssets = supportedFundingAssets(offerDetail.fundingAssets);
+
+  // ERC-20 (USDC/USDT) balances via the SDK. `useErc20TokenBalances` is keyed by
   // stablecoin symbol, so we derive each funding asset's symbol from its ticker.
-  const fundingSymbols = offerDetail.fundingAssets.map(paymentSymbol) as [
+  const fundingSymbols = fundingAssets.map(paymentSymbol) as [
     StablecoinSymbol,
     ...StablecoinSymbol[],
   ];
-  const { balances } = useSwapTokenBalances({
+  const { balances } = useErc20TokenBalances({
     address: address ?? ZERO_WALLET_ADDRESS,
     chain: DEMO_CHAIN,
     assets: fundingSymbols,
@@ -131,12 +141,12 @@ export function useInvestViewModel(
   });
 
   const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
-    offerDetail.fundingAssets[0]?.id ?? null
+    fundingAssets[0]?.id ?? null
   );
   // The selected funding asset carries everything the sale needs — its ticker
   // (→ SDK symbol + ERC-20 address) and decimals — so resolve it from the id.
   const payWithAsset: Asset | null =
-    offerDetail.fundingAssets.find((a) => a.id === payWithAssetId) ?? null;
+    fundingAssets.find((a) => a.id === payWithAssetId) ?? null;
   const [amountInput, setAmountInput] = useState('');
   const [submitState, setSubmitState] = useState<SubmitStateUi>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -154,7 +164,7 @@ export function useInvestViewModel(
     backLabel: 'Back to deal page',
     endsAt: offerDetail.endsAt,
     walletState: deriveWalletState(isConnected, address, ethBalance?.value),
-    fundingAssets: offerDetail.fundingAssets.map((a) => ({
+    fundingAssets: fundingAssets.map((a) => ({
       assetId: a.id,
       code: a.code.toString(),
       balance: formatTokenBalance(
@@ -172,7 +182,7 @@ export function useInvestViewModel(
     saleAgreementUrl: option.saleAgreementUrl,
     submitState,
     submitError,
-    sidebar: deriveSidebar(offerDetail, option, tokenCode),
+    sidebar: deriveSidebar(offerDetail, option, tokenCode, fundingAssets),
   };
 
   const handleSignAndCommit = async () => {
@@ -180,7 +190,7 @@ export function useInvestViewModel(
     if (!isConnected || !address || !walletClient) return;
 
     // Not silent: `payWithAssetId` is selection state while `payWithAsset` is
-    // resolved from `offerDetail.fundingAssets`, so a refetch that drops the
+    // resolved from the supported funding assets, so a refetch that drops the
     // selected asset leaves a set id with no asset behind it. Returning here
     // without a message would render Sign & Commit dead with no explanation.
     if (!payWithAsset) {
@@ -213,6 +223,26 @@ export function useInvestViewModel(
       return;
     }
 
+    // Both accessors throw when this build has no entry for the offer or the
+    // asset, and `executeTokenSale` evaluates them as arguments. Resolving them
+    // here keeps that throw on the error path: inside the call it would escape
+    // an async handler nothing awaits, leaving `submitState` on
+    // `checking_allowance` with the spinner up and no message to read.
+    let paymentToken: EvmContractAddress;
+    let fundingContractAddress: EvmContractAddress;
+    try {
+      paymentToken = paymentTokenAddress(payWithAsset, DEMO_CHAIN);
+      fundingContractAddress = fundingContract(offerId);
+    } catch (error) {
+      setSubmitState('error');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'This offer is not configured for participation.'
+      );
+      return;
+    }
+
     setSubmitState('checking_allowance');
     setSubmitError(null);
 
@@ -226,13 +256,15 @@ export function useInvestViewModel(
       config: wagmiConfig,
     });
 
-    const result = await coinlist.tokenSale.executeTokenSale({
+    const result = await executeTokenSale({
+      erc20: coinlist.erc20,
+      tokenSale: coinlist.tokenSale,
       wallet,
       offerId,
       offerOptionId: option.id,
       assetId: payWithAsset.id,
-      paymentTokenAddress: paymentTokenAddress(payWithAsset, DEMO_CHAIN),
-      fundingContractAddress: fundingContract(offerId),
+      paymentTokenAddress: paymentToken,
+      fundingContractAddress,
       chain: DEMO_CHAIN,
       amount: parsedAmount.amount,
       onProgress: (phase) => setSubmitState(phaseToSubmitState(phase)),
@@ -281,6 +313,25 @@ export function useInvestViewModel(
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
 
+/**
+ * The offer's funding assets narrowed to the ones the demo can pay with.
+ *
+ * `paymentSymbol` throws on a ticker the demo has no entry for, which used to
+ * take the whole invest page down mid-render. Dropping those assets keeps the
+ * flow usable for every coin that is supported; an offer funded solely in
+ * unsupported coins ends up with an empty picker and a disabled submit.
+ */
+function supportedFundingAssets(assets: readonly Asset[]): Asset[] {
+  return assets.filter((asset) => {
+    try {
+      paymentSymbol(asset);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
 function formatTokenBalance(
   balanceRaw: bigint | undefined,
   decimals: number
@@ -325,7 +376,8 @@ function deriveTokenEquivalent(
 function deriveSidebar(
   offerDetail: OfferDetail,
   option: OfferOption,
-  tokenCode: string
+  tokenCode: string,
+  fundingAssets: Asset[]
 ): InvestUiState['sidebar'] {
   return {
     tokenName: offerDetail.name,
@@ -339,9 +391,9 @@ function deriveSidebar(
       option.totalTokenSupply != null
         ? `${option.totalTokenSupply.toLocaleString()} ${tokenCode}`
         : null,
-    purchaseOptions: offerDetail.fundingAssets
-      .map((a) => a.code.toString())
-      .join(', '),
+    // The coins the user can actually pick, not everything the offer lists: a
+    // row naming a coin the picker dropped would contradict it.
+    purchaseOptions: fundingAssets.map((a) => a.code.toString()).join(', '),
     minimumPurchaseUsd:
       option.minimumPurchaseUsd != null
         ? `Minimum: $${option.minimumPurchaseUsd}`
@@ -475,6 +527,8 @@ function amountParseErrorMessage(reason: AmountParseErrorReason): string {
       return 'Please enter a valid amount.';
     case 'too-many-decimals':
       return `This token supports at most ${reason.maxDecimals} decimal places.`;
+    case 'overflow':
+      return 'Please enter a smaller amount.';
     default: {
       const _exhaustive: never = reason;
       return _exhaustive;

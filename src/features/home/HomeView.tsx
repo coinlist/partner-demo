@@ -1,6 +1,6 @@
 'use client';
 
-import { OffersGrid } from '@coinlist-co/react';
+import { OffersGridContainer } from '@coinlist-co/react';
 import type { Offer } from '@coinlist-co/react/shared';
 import { Settings } from 'lucide-react';
 import type {
@@ -27,7 +27,7 @@ export function HomeView({ state, onEvent }: Props) {
         <SettingsButton onClick={onSettingsClick} />
       </div>
       <div className="mt-4 flex flex-1 items-center justify-center sm:mt-6">
-        <OffersGrid
+        <OffersGridContainer
           data={state.preloadedOffers}
           onOfferClick={onOfferClick}
           className="justify-items-center"

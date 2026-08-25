@@ -14,7 +14,7 @@ export const config = {
 export async function proxy(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
   try {
-    await coinListServer(store).accessToken();
+    await coinListServer(store).auth.getAccessToken();
   } catch {
     return NextResponse.next(); // degrade gracefully
   }
