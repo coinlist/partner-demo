@@ -11,6 +11,7 @@ import {
   OfferId,
   type OfferOptionId,
   type OfferType,
+  type OrderBookSide,
   type ParticipationStatus,
 } from '@coinlist-co/react/shared';
 import { useParams, useRouter } from 'next/navigation';
@@ -89,6 +90,15 @@ export type OfferUiState =
       tokenPriceUsd: string | null;
       participationsState: ParticipationsUiState;
       showParticipations: boolean;
+      /**
+       * Whether the sidebar offers a "Sell" button. Ondo is the only provider
+       * whose offers can be sold today, and the only checkout the SDK serves
+       * both directions of.
+       *
+       * Decided here rather than by handing the View the offer type, so the
+       * View renders what it is given instead of interpreting the domain.
+       */
+      showSell: boolean;
     };
 
 export type OfferUiEvent =
@@ -106,19 +116,24 @@ export type OfferUiEvent =
       type: 'ON_INVEST_CLICK';
     }
   | {
+      type: 'ON_SELL_CLICK';
+    }
+  | {
       type: 'ON_CHECKOUT_BACK';
     };
 
 /**
- * Whether the checkout has taken over the page, and the offer it is buying.
+ * Whether the checkout has taken over the page, the offer it is trading and
+ * which way round.
  *
  * A union rather than `{ active: boolean; offerDetail: OfferDetail | null }`,
- * so "open with nothing to buy" cannot be built: the checkout can only open
- * once the offer has loaded.
+ * so "open with nothing to trade" cannot be built: the checkout can only open
+ * once the offer has loaded. `side` rides along for the same reason - an open
+ * checkout always has a direction, and the SDK reads it once at mount.
  */
 export type OfferCheckoutState =
   | { type: 'CLOSED' }
-  | { type: 'OPEN'; offerDetail: OfferDetail };
+  | { type: 'OPEN'; offerDetail: OfferDetail; side: OrderBookSide };
 
 export function useOfferViewModel(): {
   state: OfferUiState;
@@ -129,7 +144,10 @@ export function useOfferViewModel(): {
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  // The direction the open checkout is running, or `null` when it is closed.
+  // One piece of state rather than a boolean beside a side, so "open with no
+  // direction" is unrepresentable.
+  const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
@@ -183,7 +201,7 @@ export function useOfferViewModel(): {
           case 'ondo::swap':
             // Both are swaps the SDK's CheckoutContainer handles in-page, so
             // it does not matter which provider the offer belongs to.
-            setCheckoutOpen(true);
+            setCheckoutSide('buy');
             break;
           default: {
             const exhaustive: never = offerDetail.type;
@@ -192,8 +210,17 @@ export function useOfferViewModel(): {
         }
         break;
       }
+      case 'ON_SELL_CLICK':
+        // Reachable only from an Ondo offer's sidebar (`showSell`), and only
+        // once the detail has loaded - the same guard the buy path makes.
+        // Deliberately not routed through the requirements checklist: selling
+        // liquidates a holding the user already has.
+        if (!offerDetail) break;
+
+        setCheckoutSide('sell');
+        break;
       case 'ON_CHECKOUT_BACK':
-        setCheckoutOpen(false);
+        setCheckoutSide(null);
         break;
     }
   };
@@ -202,8 +229,8 @@ export function useOfferViewModel(): {
     state,
     onEvent,
     checkout:
-      checkoutOpen && offerDetail
-        ? { type: 'OPEN', offerDetail }
+      checkoutSide && offerDetail
+        ? { type: 'OPEN', offerDetail, side: checkoutSide }
         : { type: 'CLOSED' },
   };
 }
@@ -266,6 +293,7 @@ function mapOfferUiState(
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
       const isTokenSale = offerDetail.type === 'coinlist::token_sale';
+      const isOndoSwap = offerDetail.type === 'ondo::swap';
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -317,6 +345,9 @@ function mapOfferUiState(
         // Participations are a token-sale concept: a swap settles on-chain in
         // one transaction, so there is nothing for CoinList to record.
         showParticipations: isTokenSale,
+        // Superstate's checkout is buy-only and a token sale has no sell side
+        // at all, so Ondo is the only offer that gets the button.
+        showSell: isOndoSwap,
       };
     }
   }
