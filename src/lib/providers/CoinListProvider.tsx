@@ -4,6 +4,7 @@ import type { ClientConfig } from '@coinlist-co/react';
 import { CoinListProvider } from '@coinlist-co/react';
 import { useMemo } from 'react';
 import { coinlistEnv } from '@/lib/coinlistEnv';
+import { demoSdkClientLogger } from '@/lib/sdk-client-logger';
 
 export function DemoCoinListProvider({
   children,
@@ -18,6 +19,12 @@ export function DemoCoinListProvider({
     () => ({
       clientId: coinlistEnv.clientId,
       redirectUri: coinlistEnv.redirectUri,
+      // `debug` in development, absent in production. Built inside the memo so
+      // one logger lives as long as the client does - the SDK re-reads
+      // `logger.level()` before every call, so a fresh instance per render
+      // would be waste rather than a bug, but it would also mint a new config
+      // identity and unmount the tree below.
+      logger: demoSdkClientLogger(),
       // API host for the client's own data calls (offers, offer details,
       // requirements); web host for OAuth authorize + handleRequirement redirects.
       baseUrl: coinlistEnv.apiBaseUrl,
