@@ -9,7 +9,7 @@ import {
 import { ClientSecret } from '@coinlist-co/react/shared';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 import { requiredEnv } from '@/lib/env';
-import { UNREDACTED_LOGGING_ALLOWED } from '@/lib/sdk-debug-logging';
+import { UNREDACTED_LOGGING_ALLOWED } from '@/lib/sdk-logging';
 
 export function coinListServer(sessionStore: SessionStore): CoinListServer {
   return createCoinListServer({
