@@ -71,6 +71,12 @@ export function useCheckoutWallets(): CheckoutWalletSelection {
     () => ({
       embedded: NO_EMBEDDED_WALLETS,
       external,
+      // Always `null`: the demo has a single connected wallet and no notion of
+      // a position that would say which wallet holds the asset, so it has
+      // nothing to settle on ahead of the user. A host that does know - a sell
+      // page reached from a holding - passes that wallet here instead, and the
+      // Ondo sell checkout then skips its wallet step and opens on the amount.
+      preselected: null,
       connectExternal,
       disconnectExternal,
     }),

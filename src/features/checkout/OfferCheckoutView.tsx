@@ -36,7 +36,14 @@ export function OfferCheckoutView({ state, onEvent }: Props) {
       />
 
       <div className="mx-auto w-full min-w-0 max-w-5xl">
+        {/*
+          The SDK reads the trade direction once, when this mounts, so a change
+          has to remount rather than re-render. Opening the checkout already
+          mounts it fresh; the key keeps that true if it ever renders beside
+          the offer instead of replacing it.
+        */}
         <CheckoutContainer
+          key={`${state.offerDetail.id}:${state.chain}:${state.side}`}
           offer={state.offerDetail}
           chain={state.chain}
           wallets={state.wallets}

@@ -1,9 +1,10 @@
 'use client';
 
 import type { ClientConfig } from '@coinlist-co/react';
-import { CoinListProvider } from '@coinlist-co/react';
+import { CoinListProvider, pinoClientLogger } from '@coinlist-co/react';
 import { useMemo } from 'react';
 import { coinlistEnv } from '@/lib/coinlistEnv';
+import { UNREDACTED_LOGGING_ALLOWED } from '@/lib/sdk-logging';
 
 export function DemoCoinListProvider({
   children,
@@ -18,6 +19,15 @@ export function DemoCoinListProvider({
     () => ({
       clientId: coinlistEnv.clientId,
       redirectUri: coinlistEnv.redirectUri,
+      // The browser half of the SDK's logging seam; the server half is wired
+      // in `coinlist-server.ts` under the same rule. `undefined` rather than a
+      // quieter logger because `PinoLoggerOptions` is a union that rejects
+      // `{ isDev: false, level: 'debug' }`. Inside the memo so one logger lives
+      // as long as the client does - a fresh one per render would mint a new
+      // config identity and unmount the tree below.
+      logger: UNREDACTED_LOGGING_ALLOWED
+        ? pinoClientLogger({ isDev: true, level: 'debug' })
+        : undefined,
       // API host for the client's own data calls (offers, offer details,
       // requirements); web host for OAuth authorize + handleRequirement redirects.
       baseUrl: coinlistEnv.apiBaseUrl,

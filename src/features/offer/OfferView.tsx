@@ -97,10 +97,12 @@ export function OfferView({ state, onEvent }: Props) {
                 selectedOptionId={state.selectedOptionId}
                 participationsState={state.participationsState}
                 showParticipations={state.showParticipations}
+                showSell={state.showSell}
                 onOptionSelect={(optionId) =>
                   onEvent({ type: 'ON_OPTION_SELECT', optionId })
                 }
                 onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
+                onSell={() => onEvent({ type: 'ON_SELL_CLICK' })}
               />
             </div>
 
@@ -145,10 +147,12 @@ export function OfferView({ state, onEvent }: Props) {
               selectedOptionId={state.selectedOptionId}
               participationsState={state.participationsState}
               showParticipations={state.showParticipations}
+              showSell={state.showSell}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
               onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
+              onSell={() => onEvent({ type: 'ON_SELL_CLICK' })}
             />
           </div>
         </div>
@@ -166,8 +170,10 @@ function SidebarContent({
   selectedOptionId,
   participationsState,
   showParticipations,
+  showSell,
   onOptionSelect,
   onContinue,
+  onSell,
 }: {
   statusText: string;
   tokenCode: string;
@@ -177,8 +183,10 @@ function SidebarContent({
   selectedOptionId: OfferOptionId | null;
   participationsState: ParticipationsUiState;
   showParticipations: boolean;
+  showSell: boolean;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
+  onSell: () => void;
 }) {
   const { connectWallet, connect } = useEvmWallet();
   return (
@@ -231,6 +239,20 @@ function SidebarContent({
       ) : null}
       {showParticipations ? (
         <OfferParticipations state={participationsState} />
+      ) : null}
+      {/*
+        Last in the sidebar, and deliberately outside the requirements
+        checklist: buying is gated on the checklist's own Continue, but selling
+        liquidates a holding the user already has, so it is always available.
+      */}
+      {showSell ? (
+        <button
+          type="button"
+          onClick={onSell}
+          className="mt-2 w-full rounded-full border border-zinc-200 bg-white px-5 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          Sell
+        </button>
       ) : null}
     </>
   );
