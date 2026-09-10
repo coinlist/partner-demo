@@ -1,6 +1,6 @@
 import type { EthereumChain } from '@coinlist-co/react/shared';
 import { getChainId } from '@coinlist-co/react/shared';
-import { mainnet, sepolia } from '@reown/appkit/networks';
+import { base, baseSepolia, mainnet, sepolia } from '@reown/appkit/networks';
 
 /**
  * Single source of truth for which chain the demo runs on.
@@ -12,6 +12,8 @@ import { mainnet, sepolia } from '@reown/appkit/networks';
 const APPKIT_NETWORKS = {
   ethereum_mainnet: mainnet,
   ethereum_sepolia: sepolia,
+  base_mainnet: base,
+  base_sepolia: baseSepolia,
 } satisfies Record<EthereumChain, unknown>;
 
 const ALLOWED_CHAINS = Object.keys(APPKIT_NETWORKS) as EthereumChain[];

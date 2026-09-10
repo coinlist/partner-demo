@@ -71,6 +71,10 @@ export function useCheckoutWallets(): CheckoutWalletSelection {
     () => ({
       embedded: NO_EMBEDDED_WALLETS,
       external,
+      // The demo never knows the wallet up front: it is reached from an offer
+      // list, not from a position, so there is nothing to settle on and the
+      // user picks. Only the Ondo sell checkout honours a preset today.
+      preselected: null,
       connectExternal,
       disconnectExternal,
     }),

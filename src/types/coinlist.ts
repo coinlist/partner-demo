@@ -49,7 +49,18 @@ export function paymentTokenAddress(
   asset: Asset,
   chain: EthereumChain
 ): EvmContractAddress {
-  return TOKEN_REGISTRY.contractAddress(paymentSymbol(asset), chain);
+  const symbol = paymentSymbol(asset);
+  if (symbol === USDC_SYMBOL) return TOKEN_REGISTRY.usdcAddress(chain);
+
+  // USDT is the only stablecoin the registry can answer `null` for: it is not
+  // deployed on every chain the SDK models. USDC is, so it has no such branch.
+  const usdt = TOKEN_REGISTRY.usdtAddress(chain);
+  if (!usdt) {
+    throw new Error(
+      `No USDT contract on ${chain}. Fund this offer with USDC, or serve it on a chain where USDT exists.`
+    );
+  }
+  return usdt;
 }
 
 // Spender contract each token sale's participation approve targets, keyed by

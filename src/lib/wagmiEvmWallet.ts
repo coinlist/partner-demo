@@ -10,7 +10,7 @@ import {
   waitForTransactionReceipt,
 } from '@wagmi/core';
 import { type Chain, encodeFunctionData, type WalletClient } from 'viem';
-import { mainnet, sepolia } from 'viem/chains';
+import { base, baseSepolia, mainnet, sepolia } from 'viem/chains';
 
 /**
  * Maps the SDK's `EthereumChain` to the viem chain the wallet must be on. The
@@ -20,6 +20,8 @@ import { mainnet, sepolia } from 'viem/chains';
 const CHAINS: Record<EthereumChain, Chain> = {
   ethereum_mainnet: mainnet,
   ethereum_sepolia: sepolia,
+  base_mainnet: base,
+  base_sepolia: baseSepolia,
 };
 
 /**

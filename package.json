@@ -15,7 +15,7 @@
     "fix": "npm run lint:fix"
   },
   "dependencies": {
-    "@coinlist-co/react": "^0.11.0",
+    "@coinlist-co/react": "0.11.1-rc.7d4bd03",
     "@reown/appkit": "^1.8.19",
     "@reown/appkit-adapter-wagmi": "^1.8.19",
     "@tanstack/react-query": "^5.100.9",
