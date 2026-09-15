@@ -1,6 +1,20 @@
 import type { EthereumChain } from '@coinlist-co/react/shared';
 import { getChainId } from '@coinlist-co/react/shared';
 import { base, baseSepolia, mainnet, sepolia } from '@reown/appkit/networks';
+import type { Chain } from 'viem';
+
+/**
+ * The wagmi/viem chain object for each chain the SDK models. AppKit re-exports
+ * `viem/chains` verbatim, so one map serves both AppKit and the wallet adapter.
+ */
+export const CHAINS = {
+  ethereum_mainnet: mainnet,
+  ethereum_sepolia: sepolia,
+  base_mainnet: base,
+  base_sepolia: baseSepolia,
+} satisfies Record<EthereumChain, Chain>;
+
+const ALLOWED_CHAINS = Object.keys(CHAINS) as EthereumChain[];
 
 /**
  * Single source of truth for which chain the demo runs on.
@@ -9,15 +23,6 @@ import { base, baseSepolia, mainnet, sepolia } from '@reown/appkit/networks';
  * `NEXT_PUBLIC_CHAIN=ethereum_mainnet` for a build that serves mainnet offers.
  * Unset = `ethereum_sepolia`, matching the offers the demo ships with.
  */
-const APPKIT_NETWORKS = {
-  ethereum_mainnet: mainnet,
-  ethereum_sepolia: sepolia,
-  base_mainnet: base,
-  base_sepolia: baseSepolia,
-} satisfies Record<EthereumChain, unknown>;
-
-const ALLOWED_CHAINS = Object.keys(APPKIT_NETWORKS) as EthereumChain[];
-
 function resolveDemoChain(): EthereumChain {
   const value = process.env.NEXT_PUBLIC_CHAIN;
   // Unset defaults to a testnet: the demo currently serves only Sepolia
@@ -41,7 +46,7 @@ function resolveDemoChain(): EthereumChain {
 export const DEMO_CHAIN: EthereumChain = resolveDemoChain();
 
 /** The Reown AppKit / wagmi network object for {@link DEMO_CHAIN}. */
-export const APPKIT_NETWORK = APPKIT_NETWORKS[DEMO_CHAIN];
+export const APPKIT_NETWORK = CHAINS[DEMO_CHAIN];
 
 /** Numeric EVM chain id (1 mainnet, 11155111 sepolia) for {@link DEMO_CHAIN}. */
 export const DEMO_CHAIN_ID = getChainId(DEMO_CHAIN);
