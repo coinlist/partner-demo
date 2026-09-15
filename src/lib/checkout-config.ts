@@ -24,11 +24,8 @@ export const CHECKOUT_CONFIG: CheckoutConfig = defaultCheckoutConfig({
     // disagree - Ondo renames on a rebrand, and testnet offers may stand in a
     // mock asset - maps the exceptions here instead.
     symbol: (offer) => AssetSymbol(offer.asset.code),
-    // The demo has one Ondo route and it invests, so the direction is a
-    // constant rather than a function of page state. A host that adds a sell
-    // page closes this over whatever selects the direction. The SDK requires
-    // it with no default so that shipping sell without stating a direction is
-    // a compile error rather than a purchase.
+    // One Ondo route, and it invests. A host with a sell page closes this
+    // over whatever selects the direction.
     side: () => 'buy',
   },
   'coinlist::token_sale': {

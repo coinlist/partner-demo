@@ -52,8 +52,6 @@ export function paymentTokenAddress(
   const symbol = paymentSymbol(asset);
   if (symbol === USDC_SYMBOL) return TOKEN_REGISTRY.usdcAddress(chain);
 
-  // USDT is the only stablecoin the registry can answer `null` for: it is not
-  // deployed on every chain the SDK models. USDC is, so it has no such branch.
   const usdt = TOKEN_REGISTRY.usdtAddress(chain);
   if (!usdt) {
     throw new Error(
