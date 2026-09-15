@@ -71,6 +71,8 @@ export function useCheckoutWallets(): CheckoutWalletSelection {
     () => ({
       embedded: NO_EMBEDDED_WALLETS,
       external,
+      // Reached from an offer list, not a position, so the user picks.
+      preselected: null,
       connectExternal,
       disconnectExternal,
     }),
