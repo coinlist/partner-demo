@@ -1,6 +1,6 @@
 'use client';
 
-import type { Offer } from '@coinlist-co/react/shared';
+import type { Offer } from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/routes';
 

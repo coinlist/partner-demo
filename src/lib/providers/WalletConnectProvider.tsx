@@ -1,6 +1,6 @@
 'use client';
 
-import { Blockchain } from '@coinlist-co/react/shared';
+import { Blockchain } from '@coinlist-co/react/universal';
 import { sepolia } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';

@@ -1,5 +1,5 @@
 import { type CheckoutConfig, defaultCheckoutConfig } from '@coinlist-co/react';
-import { AssetSymbol } from '@coinlist-co/react/shared';
+import { AssetSymbol } from '@coinlist-co/react/universal';
 
 /**
  * Everything `CheckoutContainer` needs that an offer cannot tell it, for every

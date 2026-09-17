@@ -1,6 +1,6 @@
 'use client';
 
-import type { Offer } from '@coinlist-co/react/shared';
+import type { Offer } from '@coinlist-co/react/universal';
 import { HomeView } from '@/features/home/HomeView';
 import { useHomeViewModel } from '@/features/home/useHomeViewModel';
 

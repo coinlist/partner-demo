@@ -1,7 +1,7 @@
 'use client';
 
 import { RequirementsChecklistContainer } from '@coinlist-co/react';
-import type { OfferId, OfferOptionId } from '@coinlist-co/react/shared';
+import type { OfferId, OfferOptionId } from '@coinlist-co/react/universal';
 import { ArrowLeft } from 'lucide-react';
 import { OfferBanner } from '@/features/offer/components/OfferBanner';
 import { OfferFaq } from '@/features/offer/components/OfferFaq';

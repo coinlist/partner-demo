@@ -1,6 +1,6 @@
 'use client';
 
-import type { OfferDetail } from '@coinlist-co/react/shared';
+import type { OfferDetail } from '@coinlist-co/react/universal';
 import { OfferCheckoutView } from '@/features/checkout/OfferCheckoutView';
 import { useOfferCheckoutViewModel } from '@/features/checkout/useOfferCheckoutViewModel';
 

@@ -4,7 +4,7 @@ import type {
   CheckoutConfig,
   CheckoutWalletSelection,
 } from '@coinlist-co/react';
-import type { EthereumChain, OfferDetail } from '@coinlist-co/react/shared';
+import type { EthereumChain, OfferDetail } from '@coinlist-co/react/universal';
 import { DEMO_CHAIN } from '@/lib/chain';
 import { CHECKOUT_CONFIG } from '@/lib/checkout-config';
 import { useCheckoutWallets } from '@/lib/checkout-wallets';

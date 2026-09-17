@@ -1,4 +1,4 @@
-import { ClientId, RedirectUri } from '@coinlist-co/react/shared';
+import { ClientId, RedirectUri } from '@coinlist-co/react/universal';
 import { requiredEnv } from '@/lib/env';
 
 /**

@@ -7,7 +7,7 @@ import {
   TOKEN_REGISTRY,
   USDC_SYMBOL,
   USDT_SYMBOL,
-} from '@coinlist-co/react/shared';
+} from '@coinlist-co/react/universal';
 
 const SEPOLIA_TOKEN_SALE_OFFER = OfferId(
   '019f863c-11b1-7b21-a367-0ec66d25d4ba'

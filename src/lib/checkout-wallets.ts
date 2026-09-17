@@ -1,7 +1,7 @@
 'use client';
 
 import type { CheckoutWalletSelection, EvmWallet } from '@coinlist-co/react';
-import { EvmWalletAddress } from '@coinlist-co/react/shared';
+import { EvmWalletAddress } from '@coinlist-co/react/universal';
 import {
   useAppKit,
   useAppKitAccount,

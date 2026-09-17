@@ -1,4 +1,4 @@
-import { AuthorizationCode, CodeVerifier } from '@coinlist-co/react/shared';
+import { AuthorizationCode, CodeVerifier } from '@coinlist-co/react/universal';
 import { type NextRequest, NextResponse } from 'next/server';
 import { coinListServer } from '@/lib/coinlist-server';
 import { cookiesSessionStore } from '@/lib/session-store';

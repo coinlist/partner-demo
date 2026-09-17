@@ -2,7 +2,7 @@ import type { EvmWallet } from '@coinlist-co/react';
 import type {
   EthereumChain,
   EvmWalletAddress,
-} from '@coinlist-co/react/shared';
+} from '@coinlist-co/react/universal';
 import {
   type Config,
   getChainId,

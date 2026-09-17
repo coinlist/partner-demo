@@ -1,7 +1,7 @@
 'use client';
 
 import { OffersGridContainer } from '@coinlist-co/react';
-import type { Offer } from '@coinlist-co/react/shared';
+import type { Offer } from '@coinlist-co/react/universal';
 import { Settings } from 'lucide-react';
 import type {
   HomeUiEvent,

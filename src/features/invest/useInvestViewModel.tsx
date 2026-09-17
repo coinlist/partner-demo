@@ -21,7 +21,7 @@ import {
   type OfferOption,
   parseBlockchainAmount,
   type StablecoinSymbol,
-} from '@coinlist-co/react/shared';
+} from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { formatEther, parseUnits } from 'viem';
