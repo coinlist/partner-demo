@@ -17,13 +17,13 @@ type SdkLogAudience = 'production-api' | 'deployed-demo' | 'local-dev';
  * cannot regress, which a logger answering `'none'` is not - so both call
  * sites spread this in rather than passing `logger: undefined`.
  *
- * frontline-web keys the same ladder on `NEXT_PUBLIC_ENVIRONMENT`. This app
- * has no such variable, and the two signals it does have say the same thing
+ * The rung is derived rather than configured: there is no variable naming the
+ * deployment, and the two signals this app already has say the same thing
  * between them:
  *
  *   - An unset `NEXT_PUBLIC_COINLIST_BASE_URL` is the production CoinList API,
- *     and so real customer data. ADR-8 puts that out of scope for logging the
- *     partner did not ask for, whatever the build - hence no seam at all.
+ *     and so real customer data. That is out of scope for logging nobody asked
+ *     for, whatever the build - hence no seam at all.
  *   - `NODE_ENV` is assigned by Next rather than read from `.env` (`next dev`
  *     is development, `next build` and `next start` are production) and is
  *     inlined at build time, so a deployed demo cannot be talked into `debug`
