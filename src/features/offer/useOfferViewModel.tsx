@@ -12,7 +12,7 @@ import {
   type OfferOptionId,
   type OfferType,
   type ParticipationStatus,
-} from '@coinlist-co/react/shared';
+} from '@coinlist-co/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';

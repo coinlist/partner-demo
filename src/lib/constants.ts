@@ -1,4 +1,4 @@
-import { EvmWalletAddress } from '@coinlist-co/react/shared';
+import { EvmWalletAddress } from '@coinlist-co/react/universal';
 
 /**
  * Stand-in owner address for the SDK's balance reads (`useSwapTokenBalances`)

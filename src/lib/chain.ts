@@ -1,5 +1,5 @@
-import type { EthereumChain } from '@coinlist-co/react/shared';
-import { getChainId } from '@coinlist-co/react/shared';
+import type { EthereumChain } from '@coinlist-co/react/universal';
+import { getChainId } from '@coinlist-co/react/universal';
 import { base, baseSepolia, mainnet, sepolia } from '@reown/appkit/networks';
 import type { Chain } from 'viem';
 

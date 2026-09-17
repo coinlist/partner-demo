@@ -2,7 +2,7 @@ import {
   type OfferDetail,
   OfferId,
   type OfferOption,
-} from '@coinlist-co/react/shared';
+} from '@coinlist-co/react/universal';
 import { redirect } from 'next/navigation';
 import { InvestContainer } from '@/features/invest/InvestContainer';
 import { coinListServer } from '@/lib/coinlist-server';

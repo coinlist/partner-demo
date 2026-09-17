@@ -5,7 +5,7 @@ import {
   createCoinListServer,
   type SessionStore,
 } from '@coinlist-co/react/server';
-import { ClientSecret } from '@coinlist-co/react/shared';
+import { ClientSecret } from '@coinlist-co/react/universal';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 import { requiredEnv } from '@/lib/env';
 
