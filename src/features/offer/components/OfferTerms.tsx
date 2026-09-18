@@ -5,11 +5,17 @@ type OfferTerm = {
   value: string;
 };
 
-export function OfferTerms({ terms }: { terms: OfferTerm[] }) {
+export function OfferTerms({
+  title = 'Sale Terms',
+  terms,
+}: {
+  title?: string;
+  terms: OfferTerm[];
+}) {
   return (
     <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        Sale Terms
+        {title}
       </h2>
       <div className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">
         {terms.map((term) => (

@@ -85,6 +85,7 @@ export type OfferUiState =
       terms: OfferUiTerm[];
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
+      securityDetails: OfferUiTerm[];
       tokenCode: string;
       tokenPriceUsd: string | null;
       participationsState: ParticipationsUiState;
@@ -311,6 +312,7 @@ function mapOfferUiState(
             question: faq.question ?? '',
             answer: faq.answer ?? '',
           })),
+        securityDetails: securityDetails(offerDetail),
         tokenCode: offerDetail.asset.code,
         tokenPriceUsd: selectedOption?.priceUsd ?? null,
         participationsState,
@@ -320,6 +322,24 @@ function mapOfferUiState(
       };
     }
   }
+}
+
+/**
+ * The underlying security's reference fields, labelled as the SDK's Ondo
+ * checkout sidebar labels them. Each is null when the offer has no value for
+ * it, which hides its row; an offer that tokenizes no security has none.
+ */
+function securityDetails(offerDetail: OfferDetail): OfferUiTerm[] {
+  const rows = [
+    { key: 'Issuer', value: offerDetail.issuer },
+    { key: 'Ticker symbol', value: offerDetail.ticker },
+    { key: 'ISIN', value: offerDetail.isin },
+    { key: 'Asset type', value: offerDetail.instrumentType },
+    { key: 'Listing venue', value: offerDetail.listingVenue },
+  ];
+  return rows.flatMap(({ key, value }) =>
+    value === null ? [] : [{ key, value: value.toString() }]
+  );
 }
 
 /**

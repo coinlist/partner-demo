@@ -128,6 +128,12 @@ export function OfferView({ state, onEvent }: Props) {
               ) : null}
             </section>
 
+            {state.securityDetails.length > 0 ? (
+              <OfferTerms
+                title="Security Details"
+                terms={state.securityDetails}
+              />
+            ) : null}
             {state.terms.length > 0 ? <OfferTerms terms={state.terms} /> : null}
             {state.milestones.length > 0 ? (
               <OfferMilestones milestones={state.milestones} />
@@ -218,6 +224,7 @@ function SidebarContent({
           </div>
         </div>
       ) : null}
+      <SkipToCheckoutButton offerId={offerId} />
       {selectedOptionId ? (
         <RequirementsChecklistContainer
           offerId={offerId}
@@ -233,5 +240,25 @@ function SidebarContent({
         <OfferParticipations state={participationsState} />
       ) : null}
     </>
+  );
+}
+
+/**
+ * TEMPORARY QA affordance. Delete before merging, along with
+ * `src/app/offer/[id]/qa/page.tsx`.
+ *
+ * Routes straight to `CheckoutContainer`, skipping the requirements checklist
+ * above so the SDK's checkout can be inspected on an account that has not
+ * cleared an offer's requirements. The requirements themselves are untouched
+ * and still gate real participation.
+ */
+function SkipToCheckoutButton({ offerId }: { offerId: OfferId }) {
+  return (
+    <a
+      href={`/offer/${encodeURIComponent(offerId.toString())}/qa`}
+      className="block rounded-2xl border border-dashed border-amber-400 bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-900 transition hover:bg-amber-100 dark:border-amber-500/60 dark:bg-amber-950/30 dark:text-amber-200 dark:hover:bg-amber-950/50"
+    >
+      QA: skip to checkout →
+    </a>
   );
 }
