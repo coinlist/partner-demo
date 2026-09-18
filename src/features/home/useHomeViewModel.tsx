@@ -2,10 +2,14 @@
 
 import type { Offer } from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import { ROUTES } from '@/lib/routes';
 
 export type HomeUiState = {
-  preloadedOffers: Offer[] | undefined;
+  tokenSaleOffers: Offer[];
+  ondoOffers: Offer[];
+  superstateOffers: Offer[];
+  isEmpty: boolean;
 };
 
 export type HomeUiEvent =
@@ -23,9 +27,23 @@ export function useHomeViewModel(offers: Offer[] | undefined): {
 } {
   const router = useRouter();
 
-  const state: HomeUiState = {
-    preloadedOffers: offers,
-  };
+  const state = useMemo((): HomeUiState => {
+    const list = offers ?? [];
+    const tokenSaleOffers = list.filter(
+      (o) => o.type === 'coinlist::token_sale'
+    );
+    const ondoOffers = list.filter((o) => o.type === 'ondo::swap');
+    const superstateOffers = list.filter((o) => o.type === 'superstate::swap');
+    return {
+      tokenSaleOffers,
+      ondoOffers,
+      superstateOffers,
+      isEmpty:
+        tokenSaleOffers.length === 0 &&
+        ondoOffers.length === 0 &&
+        superstateOffers.length === 0,
+    };
+  }, [offers]);
 
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {
