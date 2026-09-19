@@ -9,6 +9,8 @@ import type {
   HomeUiEvent,
   HomeUiState,
 } from '@/features/home/useHomeViewModel';
+import type { TokenDisplay } from '@/lib/token-display.server';
+import { logoImage } from '@/lib/token-logo';
 
 export interface Props {
   state: HomeUiState;
@@ -22,6 +24,7 @@ export function HomeView({ state, onEvent }: Props) {
   const onOfferClick = (offer: Offer) => {
     onEvent({ type: 'ON_OFFER_CLICK', offer });
   };
+  const displayOf = (offer: Offer) => state.tokenDisplays[offer.id] ?? null;
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 pt-6 pb-16 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -45,7 +48,7 @@ export function HomeView({ state, onEvent }: Props) {
                 {state.tokenSaleOffers.map((offer) => (
                   <OfferSaleCard
                     key={offer.id.toString()}
-                    offer={OfferSaleCardUi.fromOffer(offer)}
+                    offer={saleCardUi(offer, displayOf(offer))}
                     onClick={() => onOfferClick(offer)}
                   />
                 ))}
@@ -63,6 +66,7 @@ export function HomeView({ state, onEvent }: Props) {
                     <OndoOfferAssetCard
                       key={offer.id.toString()}
                       offer={offer}
+                      display={displayOf(offer)}
                       onClick={() => onOfferClick(offer)}
                     />
                   ))}
@@ -79,7 +83,7 @@ export function HomeView({ state, onEvent }: Props) {
                 {state.superstateOffers.map((offer) => (
                   <OfferSaleCard
                     key={offer.id.toString()}
-                    offer={OfferSaleCardUi.fromOffer(offer)}
+                    offer={saleCardUi(offer, displayOf(offer))}
                     onClick={() => onOfferClick(offer)}
                   />
                 ))}
@@ -90,6 +94,19 @@ export function HomeView({ state, onEvent }: Props) {
       </div>
     </div>
   );
+}
+
+/**
+ * The registry logo first, the offer's own artwork otherwise — as
+ * frontline-web's `displayLogoUrl` does. Frontline's `logo_url` is optional
+ * and blank on most swap offers. The SDK cards take a single URL, so no
+ * `srcSet` or dark variant until the cards accept them.
+ */
+function saleCardUi(offer: Offer, display: TokenDisplay | null) {
+  return {
+    ...OfferSaleCardUi.fromOffer(offer),
+    logoUrl: display ? logoImage(display.logo).src : offer.logoUrl,
+  };
 }
 
 function OfferSection({

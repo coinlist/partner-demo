@@ -108,7 +108,7 @@ export function OfferView({ state, onEvent }: Props) {
               <OfferHeader
                 name={state.name}
                 tagline={state.tagline}
-                logoUrl={state.logoUrl}
+                logo={state.logo}
               />
               <div className="mt-5">
                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">

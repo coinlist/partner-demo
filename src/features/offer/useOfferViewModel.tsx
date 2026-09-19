@@ -16,6 +16,8 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';
+import type { TokenDisplay } from '@/lib/token-display.server';
+import { type LogoImage, logoImage } from '@/lib/token-logo';
 
 export type OfferUiLink = {
   label: string;
@@ -36,6 +38,12 @@ export type OfferUiMilestone = {
 export type OfferUiFaq = {
   question: string;
   answer: string;
+};
+
+/** The offer's logo, with a dark-theme variant when the registry has one. */
+export type OfferUiLogo = {
+  light: LogoImage;
+  dark: LogoImage | null;
 };
 
 export type OfferUiOption = {
@@ -77,7 +85,7 @@ export type OfferUiState =
       statusText: string;
       tagline: string | null;
       bannerUrl: string | null;
-      logoUrl: string | null;
+      logo: OfferUiLogo | null;
       about: string | null;
       startsAt: Date;
       endsAt: Date | null;
@@ -120,7 +128,7 @@ export type OfferCheckoutState =
   | { type: 'CLOSED' }
   | { type: 'OPEN'; offerDetail: OfferDetail };
 
-export function useOfferViewModel(): {
+export function useOfferViewModel(tokenDisplay: TokenDisplay | null): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
   checkout: OfferCheckoutState;
@@ -142,7 +150,8 @@ export function useOfferViewModel(): {
     offerId,
     offerDetailsState,
     selectedOptionId,
-    participationsState
+    participationsState,
+    tokenDisplay
   );
 
   const offerDetail =
@@ -224,7 +233,8 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  loadParticipationsState: LoadParticipationsState
+  loadParticipationsState: LoadParticipationsState,
+  tokenDisplay: TokenDisplay | null
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
     loadParticipationsState.type === 'CONTENT'
@@ -282,7 +292,7 @@ function mapOfferUiState(
         statusText: offerStatusText(offerDetail.type),
         tagline: offerDetail.tagline,
         bannerUrl: offerDetail.bannerUrl,
-        logoUrl: offerDetail.logoUrl,
+        logo: offerLogo(tokenDisplay, offerDetail.logoUrl),
         about: offerDetail.about,
         startsAt: offerDetail.startsAt,
         endsAt: offerDetail.endsAt,
@@ -320,6 +330,23 @@ function mapOfferUiState(
       };
     }
   }
+}
+
+/**
+ * The registry logo first, the offer's own artwork otherwise. Frontline's
+ * `logo_url` is optional and blank on most swap offers.
+ */
+function offerLogo(
+  tokenDisplay: TokenDisplay | null,
+  offerLogoUrl: string
+): OfferUiLogo | null {
+  if (tokenDisplay) {
+    return {
+      light: logoImage(tokenDisplay.logo),
+      dark: tokenDisplay.logoDark ? logoImage(tokenDisplay.logoDark) : null,
+    };
+  }
+  return offerLogoUrl ? { light: { src: offerLogoUrl }, dark: null } : null;
 }
 
 /**
