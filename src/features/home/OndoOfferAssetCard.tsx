@@ -7,6 +7,7 @@ import {
 } from '@coinlist-co/react';
 import type { Offer } from '@coinlist-co/react/universal';
 import type { TokenDisplay } from '@/lib/token-display.server';
+import { logoImage } from '@/lib/token-logo';
 
 /**
  * Ondo browse rows need name + symbol for {@link OfferAssetCard}. The list
@@ -38,7 +39,7 @@ export function OndoOfferAssetCard({
               ...cardUi,
               name: display.name,
               symbol: display.code,
-              logoUrl: display.logoUrl,
+              logoUrl: logoImage(display.logo).src,
             }
           : cardUi
       }

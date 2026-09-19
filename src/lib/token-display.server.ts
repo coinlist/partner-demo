@@ -20,16 +20,15 @@ import type {
 export type TokenDisplay = {
   name: string;
   code: string;
-  logoUrl: string;
+  logo: TokenLogo;
+  /** Dark-theme logo; `null` when the registry configures none. */
+  logoDark: TokenLogo | null;
 };
 
 /** Resolves an offer (or offer detail) to its registry display, if listed. */
 export type TokenDisplays = (offer: {
   tokens: OfferToken[];
 }) => TokenDisplay | null;
-
-// Cards render logos at up to 48px; 2x displays need twice that.
-const LOGO_RENDER_WIDTH = 96;
 
 /**
  * Loads the complete registry snapshot once — every chain in one request —
@@ -69,15 +68,7 @@ function toDisplay(metadata: TokenMetadata): TokenDisplay {
   return {
     name: metadata.name,
     code: metadata.symbol,
-    logoUrl: logoUrl(metadata.logo),
+    logo: metadata.logo,
+    logoDark: metadata.logoDark,
   };
-}
-
-/** The smallest raster variant covering the render size, else the original. */
-function logoUrl(logo: TokenLogo): string {
-  if (logo.kind === 'VECTOR') return logo.url;
-  const covering = logo.variants
-    .filter((variant) => variant.width >= LOGO_RENDER_WIDTH)
-    .sort((a, b) => a.width - b.width)[0];
-  return (covering ?? logo.original).url;
 }

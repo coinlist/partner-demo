@@ -17,9 +17,7 @@ export default async function OfferPage({ params }: Props) {
     coinlist.offers.get(OfferId(id)).catch(() => null),
     loadTokenDisplays(coinlist),
   ]);
-  const registryLogoUrl = offerDetail
-    ? (displayOf(offerDetail)?.logoUrl ?? null)
-    : null;
+  const tokenDisplay = offerDetail ? displayOf(offerDetail) : null;
 
-  return <OfferContainer registryLogoUrl={registryLogoUrl} />;
+  return <OfferContainer tokenDisplay={tokenDisplay} />;
 }

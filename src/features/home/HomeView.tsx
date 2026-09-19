@@ -10,6 +10,7 @@ import type {
   HomeUiState,
 } from '@/features/home/useHomeViewModel';
 import type { TokenDisplay } from '@/lib/token-display.server';
+import { logoImage } from '@/lib/token-logo';
 
 export interface Props {
   state: HomeUiState;
@@ -98,12 +99,13 @@ export function HomeView({ state, onEvent }: Props) {
 /**
  * The registry logo first, the offer's own artwork otherwise — as
  * frontline-web's `displayLogoUrl` does. Frontline's `logo_url` is optional
- * and blank on most swap offers.
+ * and blank on most swap offers. The SDK cards take a single URL, so no
+ * `srcSet` or dark variant until the cards accept them.
  */
 function saleCardUi(offer: Offer, display: TokenDisplay | null) {
   return {
     ...OfferSaleCardUi.fromOffer(offer),
-    logoUrl: display?.logoUrl ?? offer.logoUrl,
+    logoUrl: display ? logoImage(display.logo).src : offer.logoUrl,
   };
 }
 
