@@ -4,12 +4,15 @@ import type { Offer } from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { ROUTES } from '@/lib/routes';
+import type { TokenDisplay } from '@/lib/token-display.server';
 
 export type HomeUiState = {
   tokenSaleOffers: Offer[];
   ondoOffers: Offer[];
   superstateOffers: Offer[];
   isEmpty: boolean;
+  /** Registry display per offer id; `null` when the registry lists none. */
+  tokenDisplays: Record<string, TokenDisplay | null>;
 };
 
 export type HomeUiEvent =
@@ -21,7 +24,10 @@ export type HomeUiEvent =
       offer: Offer;
     };
 
-export function useHomeViewModel(offers: Offer[] | undefined): {
+export function useHomeViewModel(
+  offers: Offer[] | undefined,
+  tokenDisplays: Record<string, TokenDisplay | null>
+): {
   state: HomeUiState;
   onEvent: (event: HomeUiEvent) => void;
 } {
@@ -42,8 +48,9 @@ export function useHomeViewModel(offers: Offer[] | undefined): {
         tokenSaleOffers.length === 0 &&
         ondoOffers.length === 0 &&
         superstateOffers.length === 0,
+      tokenDisplays,
     };
-  }, [offers]);
+  }, [offers, tokenDisplays]);
 
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {

@@ -4,8 +4,13 @@ import { OfferCheckoutContainer } from '@/features/checkout/OfferCheckoutContain
 import { OfferView } from '@/features/offer/OfferView';
 import { useOfferViewModel } from '@/features/offer/useOfferViewModel';
 
-export function OfferContainer() {
-  const { state, onEvent, checkout } = useOfferViewModel();
+export function OfferContainer({
+  registryLogoUrl,
+}: {
+  /** The token's Nabu registry logo; `null` when the registry lists none. */
+  registryLogoUrl: string | null;
+}) {
+  const { state, onEvent, checkout } = useOfferViewModel(registryLogoUrl);
 
   // The checkout takes over the whole page rather than rendering beside the
   // offer, and unmounting the offer view is what stops its requests while it

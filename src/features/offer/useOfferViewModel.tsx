@@ -120,7 +120,7 @@ export type OfferCheckoutState =
   | { type: 'CLOSED' }
   | { type: 'OPEN'; offerDetail: OfferDetail };
 
-export function useOfferViewModel(): {
+export function useOfferViewModel(registryLogoUrl: string | null): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
   checkout: OfferCheckoutState;
@@ -142,7 +142,8 @@ export function useOfferViewModel(): {
     offerId,
     offerDetailsState,
     selectedOptionId,
-    participationsState
+    participationsState,
+    registryLogoUrl
   );
 
   const offerDetail =
@@ -224,7 +225,8 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  loadParticipationsState: LoadParticipationsState
+  loadParticipationsState: LoadParticipationsState,
+  registryLogoUrl: string | null
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
     loadParticipationsState.type === 'CONTENT'
@@ -282,7 +284,8 @@ function mapOfferUiState(
         statusText: offerStatusText(offerDetail.type),
         tagline: offerDetail.tagline,
         bannerUrl: offerDetail.bannerUrl,
-        logoUrl: offerDetail.logoUrl,
+        // Registry logo first, the offer's own artwork otherwise.
+        logoUrl: registryLogoUrl ?? offerDetail.logoUrl,
         about: offerDetail.about,
         startsAt: offerDetail.startsAt,
         endsAt: offerDetail.endsAt,
