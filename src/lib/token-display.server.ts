@@ -38,7 +38,15 @@ export type TokenDisplays = (offer: {
 export async function loadTokenDisplays(
   coinlist: CoinListServer
 ): Promise<TokenDisplays> {
-  const tokens = await coinlist.tokens.list().catch(() => []);
+  const tokens = await coinlist.tokens.list().catch((error: unknown) => {
+    // The registry always publishes the complete snapshot, so a failure is an
+    // outage or a blocked request — log it rather than silently degrade.
+    console.error('Nabu registry snapshot fetch failed', error);
+    return [];
+  });
+  if (tokens.length === 0) {
+    console.error('Nabu registry snapshot is empty');
+  }
   const registry = new Map(
     tokens.map((token) => [
       registryKey(token.identifier.chain, token.identifier.address),
