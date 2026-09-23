@@ -3,8 +3,10 @@
 import {
   type LoadOfferDetailsState,
   type LoadParticipationsState,
+  OfferLogoUi,
   useOfferDetails,
   useParticipations,
+  useTokenRegistry,
 } from '@coinlist-co/react';
 import {
   type OfferDetail,
@@ -12,6 +14,7 @@ import {
   type OfferOptionId,
   type OfferType,
   type ParticipationStatus,
+  TokenRegistrySnapshot,
 } from '@coinlist-co/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -77,7 +80,8 @@ export type OfferUiState =
       statusText: string;
       tagline: string | null;
       bannerUrl: string | null;
-      logoUrl: string | null;
+      /** Registry logo first, the offer's own artwork otherwise. */
+      logo: OfferLogoUi | null;
       about: string | null;
       startsAt: Date;
       endsAt: Date | null;
@@ -137,12 +141,18 @@ export function useOfferViewModel(): {
   // until the detail loads, so we always fetch here; the panel stays hidden for
   // swap offers (see `showParticipations`), and the result is simply unused.
   const { participationsState } = useParticipations(offerId);
+  // Fetched here rather than seeded: this page is client-rendered, and the
+  // registry is public, so the browser can read it directly.
+  const { state: registryState } = useTokenRegistry();
+  const registry =
+    registryState.type === 'CONTENT' ? registryState.registry : null;
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
     offerDetailsState,
     selectedOptionId,
-    participationsState
+    participationsState,
+    registry
   );
 
   const offerDetail =
@@ -224,7 +234,8 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
-  loadParticipationsState: LoadParticipationsState
+  loadParticipationsState: LoadParticipationsState,
+  registry: TokenRegistrySnapshot | null
 ): OfferUiState {
   const participationsState: ParticipationsUiState =
     loadParticipationsState.type === 'CONTENT'
@@ -282,7 +293,12 @@ function mapOfferUiState(
         statusText: offerStatusText(offerDetail.type),
         tagline: offerDetail.tagline,
         bannerUrl: offerDetail.bannerUrl,
-        logoUrl: offerDetail.logoUrl,
+        logo: OfferLogoUi.fromOffer(
+          offerDetail,
+          registry
+            ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
+            : null
+        ),
         about: offerDetail.about,
         startsAt: offerDetail.startsAt,
         endsAt: offerDetail.endsAt,
