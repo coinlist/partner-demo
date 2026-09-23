@@ -1,7 +1,10 @@
 'use client';
 
 import { OfferSaleCard, OfferSaleCardUi } from '@coinlist-co/react';
-import type { Offer } from '@coinlist-co/react/universal';
+import {
+  type Offer,
+  TokenRegistrySnapshot,
+} from '@coinlist-co/react/universal';
 import { Settings } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { OndoOfferAssetCard } from '@/features/home/OndoOfferAssetCard';
@@ -22,6 +25,13 @@ export function HomeView({ state, onEvent }: Props) {
   const onOfferClick = (offer: Offer) => {
     onEvent({ type: 'ON_OFFER_CLICK', offer });
   };
+  // The registry's entry for the token an offer is about, or `null`: the SDK
+  // mappers then take name, ticker and logo from the registry when it has
+  // them and from the offer otherwise.
+  const tokenOf = (offer: Offer) =>
+    state.registry
+      ? TokenRegistrySnapshot.forOffer(state.registry, offer)
+      : null;
 
   return (
     <div className="min-h-screen bg-zinc-50 px-6 pt-6 pb-16 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -45,7 +55,7 @@ export function HomeView({ state, onEvent }: Props) {
                 {state.tokenSaleOffers.map((offer) => (
                   <OfferSaleCard
                     key={offer.id.toString()}
-                    offer={OfferSaleCardUi.fromOffer(offer)}
+                    offer={OfferSaleCardUi.fromOffer(offer, tokenOf(offer))}
                     onClick={() => onOfferClick(offer)}
                   />
                 ))}
@@ -63,6 +73,7 @@ export function HomeView({ state, onEvent }: Props) {
                     <OndoOfferAssetCard
                       key={offer.id.toString()}
                       offer={offer}
+                      tokenMetadata={tokenOf(offer)}
                       onClick={() => onOfferClick(offer)}
                     />
                   ))}
@@ -79,7 +90,7 @@ export function HomeView({ state, onEvent }: Props) {
                 {state.superstateOffers.map((offer) => (
                   <OfferSaleCard
                     key={offer.id.toString()}
-                    offer={OfferSaleCardUi.fromOffer(offer)}
+                    offer={OfferSaleCardUi.fromOffer(offer, tokenOf(offer))}
                     onClick={() => onOfferClick(offer)}
                   />
                 ))}
