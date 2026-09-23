@@ -21,7 +21,7 @@ export function InvestView({ state, onEvent }: Props) {
     !isSubmitting(state.submitState);
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+    <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       {/* Top row */}
       <DealFlowHeader
         backLabel={state.backLabel}
@@ -186,11 +186,13 @@ export function InvestView({ state, onEvent }: Props) {
               </div>
               <div>
                 <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  {state.sidebar.tokenName}
+                  {state.sidebar.tokenCode}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  ${state.sidebar.tokenCode}
-                </p>
+                {state.sidebar.optionLabel ? (
+                  <p className="text-xs text-zinc-500 capitalize dark:text-zinc-400">
+                    {state.sidebar.optionLabel}
+                  </p>
+                ) : null}
               </div>
             </div>
             {state.sidebar.tokenPriceUsd && (

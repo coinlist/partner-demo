@@ -5,27 +5,48 @@ type OfferTerm = {
   value: string;
 };
 
-export function OfferTerms({ terms }: { terms: OfferTerm[] }) {
-  return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
-      <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        Sale Terms
-      </h2>
-      <div className="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">
+export function OfferTerms({
+  terms,
+  layout,
+}: {
+  terms: OfferTerm[];
+  layout: 'rows' | 'grid';
+}) {
+  if (layout === 'rows') {
+    return (
+      <dl className="divide-y divide-zinc-200 dark:divide-zinc-800">
         {terms.map((term) => (
           <div
             key={term.key}
-            className="grid grid-cols-1 gap-2 py-3 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-2 py-5 sm:grid-cols-[minmax(0,14rem)_1fr] sm:gap-10"
           >
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <dt className="text-sm text-zinc-500 dark:text-zinc-400">
               {term.key}
-            </p>
-            <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+            </dt>
+            <dd className="whitespace-pre-line text-sm leading-6 text-zinc-900 dark:text-zinc-100">
               {term.value}
-            </p>
+            </dd>
           </div>
         ))}
-      </div>
-    </section>
+      </dl>
+    );
+  }
+
+  return (
+    <dl className="grid grid-cols-1 gap-x-10 gap-y-4 sm:grid-cols-2">
+      {terms.map((term) => (
+        <div
+          key={term.key}
+          className="flex items-baseline justify-between gap-4"
+        >
+          <dt className="text-sm text-zinc-500 dark:text-zinc-400">
+            {term.key}
+          </dt>
+          <dd className="min-w-0 break-words text-right text-sm text-zinc-900 dark:text-zinc-100">
+            {term.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }

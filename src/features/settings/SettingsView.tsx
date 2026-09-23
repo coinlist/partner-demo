@@ -19,7 +19,7 @@ export function SettingsView({ state, onEvent }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-6 py-10 font-sans dark:bg-black">
+    <div className="min-h-screen bg-white px-6 py-10 font-sans dark:bg-black">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
         <header className="space-y-5">
           <div className="flex items-center justify-start">

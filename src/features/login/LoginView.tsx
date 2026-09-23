@@ -10,7 +10,7 @@ export interface Props {
 
 export function LoginView({ state }: Props) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center bg-white px-6 py-16 font-sans dark:bg-black">
       <div className="flex w-full max-w-md flex-col gap-4">
         {state.oauthError && <ErrorBanner message={state.oauthError} />}
         <CoinListSignInCardContainer />

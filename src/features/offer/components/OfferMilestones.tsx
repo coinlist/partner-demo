@@ -12,11 +12,11 @@ export function OfferMilestones({
   milestones: OfferMilestone[];
 }) {
   return (
-    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
-      <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+    <section className="flex flex-col gap-4">
+      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
         Milestones
       </h2>
-      <ul className="mt-5 space-y-5">
+      <ul className="space-y-5">
         {milestones.map((milestone, index) => (
           <li
             key={`${milestone.name}-${milestone.schedule}`}
@@ -64,7 +64,7 @@ function StatusDot({
         />
       ) : null}
       <span
-        className={`relative z-10 h-3.5 w-3.5 rounded-full border shadow-[0_0_0_3px] shadow-white dark:shadow-zinc-900 ${dotClass}`}
+        className={`relative z-10 h-3.5 w-3.5 rounded-full border shadow-[0_0_0_3px] shadow-white dark:shadow-black ${dotClass}`}
       />
     </span>
   );
