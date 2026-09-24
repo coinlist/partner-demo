@@ -69,8 +69,8 @@ export type InvestUiState = {
   submitState: SubmitStateUi;
   submitError: string | null;
   sidebar: {
-    tokenName: string;
     tokenCode: string;
+    optionLabel: string | null;
     tokenPriceUsd: string | null;
     fullyDilutedValue: string | null;
     allocatedTokenSupply: string | null;
@@ -182,7 +182,12 @@ export function useInvestViewModel(
     saleAgreementUrl: option.saleAgreementUrl,
     submitState,
     submitError,
-    sidebar: deriveSidebar(offerDetail, option, tokenCode, fundingAssets),
+    sidebar: deriveSidebar(
+      option,
+      tokenCode,
+      fundingAssets,
+      offerDetail.options.length > 1
+    ),
   };
 
   const handleSignAndCommit = async () => {
@@ -374,14 +379,14 @@ function deriveTokenEquivalent(
 }
 
 function deriveSidebar(
-  offerDetail: OfferDetail,
   option: OfferOption,
   tokenCode: string,
-  fundingAssets: Asset[]
+  fundingAssets: Asset[],
+  hasChoice: boolean
 ): InvestUiState['sidebar'] {
   return {
-    tokenName: offerDetail.name,
     tokenCode,
+    optionLabel: hasChoice ? option.slug.toString().replace(/-/g, ' ') : null,
     tokenPriceUsd: option.priceUsd,
     fullyDilutedValue:
       option.totalTokenSupply != null && option.priceUsd != null

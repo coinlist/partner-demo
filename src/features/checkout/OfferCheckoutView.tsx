@@ -28,7 +28,7 @@ interface Props {
  */
 export function OfferCheckoutView({ state, onEvent }: Props) {
   return (
-    <div className="min-h-screen bg-zinc-50 px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+    <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <DealFlowHeader
         backLabel="Back to deal page"
         onBack={() => onEvent({ type: 'ON_BACK' })}

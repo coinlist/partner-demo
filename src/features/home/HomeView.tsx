@@ -24,7 +24,7 @@ export function HomeView({ state, onEvent }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-6 pt-6 pb-16 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
+    <div className="min-h-screen bg-white px-6 pt-6 pb-16 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex justify-end">
           <SettingsButton onClick={onSettingsClick} />

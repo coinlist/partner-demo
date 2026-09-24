@@ -2,16 +2,12 @@
 
 import {
   type LoadOfferDetailsState,
-  type LoadParticipationsState,
   useOfferDetails,
-  useParticipations,
 } from '@coinlist-co/react';
 import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
-  type OfferType,
-  type ParticipationStatus,
 } from '@coinlist-co/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -41,23 +37,7 @@ export type OfferUiFaq = {
 export type OfferUiOption = {
   id: OfferOptionId;
   slug: string;
-  priceUsd: string | null;
 };
-
-export type ParticipationUi = {
-  id: string;
-  displayAmount: string;
-  assetCode: string;
-  status: ParticipationStatus;
-  chain: string;
-  walletAddress: string | null;
-  insertedAt: Date | null;
-};
-
-export type ParticipationsUiState =
-  | { type: 'LOADING' }
-  | { type: 'ERROR' }
-  | { type: 'CONTENT'; participations: ParticipationUi[] };
 
 export type OfferUiState =
   | {
@@ -74,21 +54,15 @@ export type OfferUiState =
       options: OfferUiOption[];
       selectedOptionId: OfferOptionId | null;
       name: string;
-      statusText: string;
+      symbol: string;
       tagline: string | null;
-      bannerUrl: string | null;
       logoUrl: string | null;
       about: string | null;
-      startsAt: Date;
-      endsAt: Date | null;
       links: OfferUiLink[];
       terms: OfferUiTerm[];
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
-      tokenCode: string;
-      tokenPriceUsd: string | null;
-      participationsState: ParticipationsUiState;
-      showParticipations: boolean;
+      isTokenSale: boolean;
     };
 
 export type OfferUiEvent =
@@ -133,16 +107,11 @@ export function useOfferViewModel(): {
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
-  // Only token sales surface participations, but the offer type isn't known
-  // until the detail loads, so we always fetch here; the panel stays hidden for
-  // swap offers (see `showParticipations`), and the result is simply unused.
-  const { participationsState } = useParticipations(offerId);
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
     offerDetailsState,
-    selectedOptionId,
-    participationsState
+    selectedOptionId
   );
 
   const offerDetail =
@@ -223,24 +192,8 @@ function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
-  selectedOptionId: OfferOptionId | null,
-  loadParticipationsState: LoadParticipationsState
+  selectedOptionId: OfferOptionId | null
 ): OfferUiState {
-  const participationsState: ParticipationsUiState =
-    loadParticipationsState.type === 'CONTENT'
-      ? {
-          type: 'CONTENT',
-          participations: loadParticipationsState.participations.map((p) => ({
-            id: p.id.toString(),
-            displayAmount: p.displayAmount,
-            assetCode: p.asset.code.toString(),
-            status: p.status,
-            chain: p.chain.toString(),
-            walletAddress: p.walletAddress?.toString() ?? null,
-            insertedAt: p.insertedAt,
-          })),
-        }
-      : { type: loadParticipationsState.type };
   if (!routeOfferId) {
     return {
       type: 'ERROR',
@@ -265,27 +218,21 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      const isTokenSale = offerDetail.type === 'coinlist::token_sale';
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
-        priceUsd: opt.priceUsd,
       }));
       const resolvedOptionId = selectedOptionId ?? options[0]?.id ?? null;
-      const selectedOption = options.find((opt) => opt.id === resolvedOptionId);
       return {
         type: 'CONTENT',
         offerId: OfferId(routeOfferId),
         options,
         selectedOptionId: resolvedOptionId,
         name: offerDetail.name,
-        statusText: offerStatusText(offerDetail.type),
+        symbol: offerDetail.asset.code.toString(),
         tagline: offerDetail.tagline,
-        bannerUrl: offerDetail.bannerUrl,
-        logoUrl: offerDetail.logoUrl,
+        logoUrl: offerDetail.logoUrl || null,
         about: offerDetail.about,
-        startsAt: offerDetail.startsAt,
-        endsAt: offerDetail.endsAt,
         links: offerDetail.links
           .filter((link) => Boolean(link.label && link.url))
           .map((link) => ({
@@ -311,35 +258,8 @@ function mapOfferUiState(
             question: faq.question ?? '',
             answer: faq.answer ?? '',
           })),
-        tokenCode: offerDetail.asset.code,
-        tokenPriceUsd: selectedOption?.priceUsd ?? null,
-        participationsState,
-        // Participations are a token-sale concept: a swap settles on-chain in
-        // one transaction, so there is nothing for CoinList to record.
-        showParticipations: isTokenSale,
+        isTokenSale: offerDetail.type === 'coinlist::token_sale',
       };
-    }
-  }
-}
-
-/**
- * What the sidebar calls this kind of offer.
- *
- * An exhaustive switch rather than a token-sale/other ternary, so a new offer
- * type CoinList adds is a compile error here instead of quietly labelling
- * itself as something it is not.
- */
-function offerStatusText(type: OfferType): string {
-  switch (type) {
-    case 'coinlist::token_sale':
-      return 'Token Sale';
-    case 'superstate::swap':
-      return 'Superstate Swap';
-    case 'ondo::swap':
-      return 'Ondo Swap';
-    default: {
-      const exhaustive: never = type;
-      return exhaustive;
     }
   }
 }
