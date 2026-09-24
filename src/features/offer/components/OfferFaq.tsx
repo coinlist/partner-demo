@@ -7,7 +7,7 @@ type OfferFaqItem = {
 
 export function OfferFaq({ faqs }: { faqs: OfferFaqItem[] }) {
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex min-w-0 flex-col gap-4">
       <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
         FAQ
       </h2>
@@ -17,7 +17,7 @@ export function OfferFaq({ faqs }: { faqs: OfferFaqItem[] }) {
             <summary className="cursor-pointer text-sm font-medium text-zinc-900 dark:text-zinc-100">
               {faq.question}
             </summary>
-            <p className="mt-2 whitespace-pre-line text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="mt-2 whitespace-pre-line break-words text-sm text-zinc-600 dark:text-zinc-300">
               {faq.answer}
             </p>
           </details>

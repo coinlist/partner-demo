@@ -12,14 +12,10 @@ export type HomeUiState = {
   isEmpty: boolean;
 };
 
-export type HomeUiEvent =
-  | {
-      type: 'ON_SETTINGS_CLICK';
-    }
-  | {
-      type: 'ON_OFFER_CLICK';
-      offer: Offer;
-    };
+export type HomeUiEvent = {
+  type: 'ON_OFFER_CLICK';
+  offer: Offer;
+};
 
 export function useHomeViewModel(offers: Offer[] | undefined): {
   state: HomeUiState;
@@ -47,9 +43,6 @@ export function useHomeViewModel(offers: Offer[] | undefined): {
 
   const onEvent = (event: HomeUiEvent) => {
     switch (event.type) {
-      case 'ON_SETTINGS_CLICK':
-        router.push(ROUTES.SETTINGS);
-        break;
       case 'ON_OFFER_CLICK':
         router.push(ROUTES.OFFER_DETAILS(event.offer.id));
         break;

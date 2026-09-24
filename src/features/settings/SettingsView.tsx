@@ -1,7 +1,6 @@
 'use client';
 
 import { LogOut, Settings } from 'lucide-react';
-import { BackButton } from '@/components/BackButton';
 import { InlineErrorText } from '@/components/InlineErrorText';
 import type {
   SettingsUiEvent,
@@ -22,9 +21,6 @@ export function SettingsView({ state, onEvent }: Props) {
     <div className="min-h-screen bg-white px-6 py-10 font-sans dark:bg-black">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
         <header className="space-y-5">
-          <div className="flex items-center justify-start">
-            <BackButton label="Back" />
-          </div>
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
               <Settings size={14} />

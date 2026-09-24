@@ -10,6 +10,6 @@ interface Props {
 }
 
 export function OfferCheckoutContainer({ offerDetail, onBack }: Props) {
-  const { state, onEvent } = useOfferCheckoutViewModel({ offerDetail, onBack });
-  return <OfferCheckoutView state={state} onEvent={onEvent} />;
+  const { state } = useOfferCheckoutViewModel({ offerDetail });
+  return <OfferCheckoutView state={state} onBack={onBack} />;
 }

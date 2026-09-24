@@ -18,16 +18,10 @@ export type OfferCheckoutUiState = {
   wallets: CheckoutWalletSelection;
   /** What each offer type needs beyond the offer itself. */
   config: CheckoutConfig;
-  /** Drives the "Ends in …" badge; `null` for an offer with no end date. */
-  endsAt: Date | null;
 };
-
-export type OfferCheckoutUiEvent = { type: 'ON_BACK' };
 
 export interface UseOfferCheckoutViewModelOptions {
   offerDetail: OfferDetail;
-  /** Returns to the offer details page. Owned by the offer feature. */
-  onBack: () => void;
 }
 
 /**
@@ -45,10 +39,8 @@ export interface UseOfferCheckoutViewModelOptions {
  */
 export function useOfferCheckoutViewModel({
   offerDetail,
-  onBack,
 }: UseOfferCheckoutViewModelOptions): {
   state: OfferCheckoutUiState;
-  onEvent: (event: OfferCheckoutUiEvent) => void;
 } {
   const wallets = useCheckoutWallets();
 
@@ -57,16 +49,7 @@ export function useOfferCheckoutViewModel({
     chain: DEMO_CHAIN,
     wallets,
     config: CHECKOUT_CONFIG,
-    endsAt: offerDetail.endsAt,
   };
 
-  const onEvent = (event: OfferCheckoutUiEvent) => {
-    switch (event.type) {
-      case 'ON_BACK':
-        onBack();
-        break;
-    }
-  };
-
-  return { state, onEvent };
+  return { state };
 }

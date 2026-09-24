@@ -10,47 +10,29 @@ import type {
 
 export function OfferDetailsCard({
   name,
-  symbol,
   tagline,
-  logoUrl,
   about,
   terms,
   links,
   isTokenSale,
 }: {
   name: string;
-  symbol: string;
   tagline: string | null;
-  logoUrl: string | null;
   about: string | null;
   terms: OfferUiTerm[];
   links: OfferUiLink[];
   isTokenSale: boolean;
 }) {
-  const ticker =
-    symbol && symbol.toLowerCase() !== name.toLowerCase() ? symbol : null;
   const description =
     about ??
     (tagline && tagline.toLowerCase() !== name.toLowerCase() ? tagline : null);
 
+  if (terms.length === 0 && !description && links.length === 0) return null;
+
   return (
     <div className="flex min-w-0 flex-col gap-8">
-      <div className="flex min-w-0 items-center gap-4">
-        <OfferLogo name={name} logoUrl={logoUrl} size={56} />
-        <div className="min-w-0">
-          <h1 className="truncate text-[28px] font-medium leading-[120%] text-zinc-900 dark:text-zinc-100">
-            {name}
-          </h1>
-          {ticker ? (
-            <p className="truncate text-sm text-zinc-500 dark:text-zinc-400">
-              {ticker}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
       {terms.length > 0 ? (
-        <section className="flex flex-col gap-4">
+        <section className="flex min-w-0 flex-col gap-4">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {isTokenSale ? 'Sale Terms' : 'Asset details'}
           </h2>
@@ -61,12 +43,12 @@ export function OfferDetailsCard({
       {description || links.length > 0 ? (
         <>
           {terms.length > 0 ? <SectionDivider /> : null}
-          <section className="flex flex-col gap-4">
+          <section className="flex min-w-0 flex-col gap-4">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               About {name}
             </h2>
             {description ? (
-              <p className="whitespace-pre-line text-[16px] leading-[160%] text-zinc-600 dark:text-zinc-300">
+              <p className="min-w-0 whitespace-pre-line break-words text-[16px] leading-[160%] text-zinc-600 dark:text-zinc-300">
                 {description}
               </p>
             ) : null}
@@ -80,6 +62,35 @@ export function OfferDetailsCard({
           </section>
         </>
       ) : null}
+    </div>
+  );
+}
+
+export function OfferIdentity({
+  name,
+  symbol,
+  logoUrl,
+}: {
+  name: string;
+  symbol: string;
+  logoUrl: string | null;
+}) {
+  const ticker =
+    symbol && symbol.toLowerCase() !== name.toLowerCase() ? symbol : null;
+
+  return (
+    <div className="flex min-w-0 items-center gap-4">
+      <OfferLogo name={name} logoUrl={logoUrl} size={56} />
+      <div className="min-w-0">
+        <h1 className="truncate text-[28px] font-medium leading-[120%] text-zinc-900 dark:text-zinc-100">
+          {name}
+        </h1>
+        {ticker ? (
+          <p className="truncate text-sm text-zinc-500 dark:text-zinc-400">
+            {ticker}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
