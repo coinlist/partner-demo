@@ -3,6 +3,7 @@
 import { ArrowLeft } from 'lucide-react';
 import {
   OfferDetailsCard,
+  OfferIdentity,
   SectionDivider,
 } from '@/features/offer/components/OfferDetailsCard';
 import { OfferFaq } from '@/features/offer/components/OfferFaq';
@@ -82,13 +83,27 @@ export function OfferView({ state, onEvent }: Props) {
   return (
     <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-5xl">
-        <div className="grid w-full items-start grid-cols-1 gap-6 md:grid-cols-[minmax(0,11fr)_minmax(0,8fr)] md:gap-x-12">
-          <div className="flex min-w-0 flex-col gap-8">
+        <div className="grid w-full items-start grid-cols-1 gap-8 md:grid-cols-[minmax(0,11fr)_minmax(0,8fr)] md:gap-x-12">
+          <OfferIdentity
+            name={state.name}
+            symbol={state.symbol}
+            logoUrl={state.logoUrl}
+          />
+          <div className="md:col-start-2 md:row-span-2 md:row-start-1">
+            <OfferRequirementsCard
+              offerId={state.offerId}
+              options={state.options}
+              selectedOptionId={state.selectedOptionId}
+              onOptionSelect={(optionId) =>
+                onEvent({ type: 'ON_OPTION_SELECT', optionId })
+              }
+              onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
+            />
+          </div>
+          <div className="flex min-w-0 flex-col gap-8 md:col-start-1">
             <OfferDetailsCard
               name={state.name}
-              symbol={state.symbol}
               tagline={state.tagline}
-              logoUrl={state.logoUrl}
               about={state.about}
               terms={state.terms}
               links={state.links}
@@ -107,16 +122,6 @@ export function OfferView({ state, onEvent }: Props) {
               </>
             ) : null}
           </div>
-
-          <OfferRequirementsCard
-            offerId={state.offerId}
-            options={state.options}
-            selectedOptionId={state.selectedOptionId}
-            onOptionSelect={(optionId) =>
-              onEvent({ type: 'ON_OPTION_SELECT', optionId })
-            }
-            onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
-          />
         </div>
       </div>
     </div>

@@ -36,7 +36,7 @@ export function OfferCheckoutView({ state, onBack }: Props) {
           type="button"
           onClick={onBack}
           aria-label="Back to deal page"
-          className="absolute top-0 left-0 inline-flex h-11 w-11 -translate-x-[calc(100%+32px)] cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          className="absolute top-0 left-0 hidden h-11 w-11 -translate-x-[calc(100%+32px)] cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50 lg:inline-flex dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
         >
           <ArrowLeft size={20} />
         </button>

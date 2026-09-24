@@ -33,7 +33,7 @@ export function SiteHeader() {
             href={DOCS_HREF}
             target="_blank"
             rel="noreferrer"
-            className="text-sm font-medium text-zinc-700 transition hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+            className="hidden text-sm font-medium text-zinc-700 transition hover:text-zinc-900 sm:inline dark:text-zinc-300 dark:hover:text-zinc-100"
           >
             View our docs
           </a>
