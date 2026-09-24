@@ -1,7 +1,6 @@
 'use client';
 
 import { ChevronRight, Wallet, X } from 'lucide-react';
-import { DealFlowHeader } from '@/components/DealFlowHeader';
 import type {
   InvestUiEvent,
   InvestUiState,
@@ -22,13 +21,6 @@ export function InvestView({ state, onEvent }: Props) {
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
-      {/* Top row */}
-      <DealFlowHeader
-        backLabel={state.backLabel}
-        onBack={() => onEvent({ type: 'ON_BACK_CLICK' })}
-        endsAt={state.endsAt}
-      />
-
       {/* Two-column layout */}
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_300px]">
         {/* Left — Commitment card */}

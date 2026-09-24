@@ -2,7 +2,6 @@
 
 import { OfferSaleCard, OfferSaleCardUi } from '@coinlist-co/react';
 import type { Offer } from '@coinlist-co/react/universal';
-import { Settings } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { OndoOfferAssetCard } from '@/features/home/OndoOfferAssetCard';
 import type {
@@ -16,9 +15,6 @@ export interface Props {
 }
 
 export function HomeView({ state, onEvent }: Props) {
-  const onSettingsClick = () => {
-    onEvent({ type: 'ON_SETTINGS_CLICK' });
-  };
   const onOfferClick = (offer: Offer) => {
     onEvent({ type: 'ON_OFFER_CLICK', offer });
   };
@@ -26,10 +22,6 @@ export function HomeView({ state, onEvent }: Props) {
   return (
     <div className="min-h-screen bg-white px-6 pt-6 pb-16 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-3xl">
-        <div className="flex justify-end">
-          <SettingsButton onClick={onSettingsClick} />
-        </div>
-
         {state.isEmpty ? (
           <p className="mt-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
             No offers available right now.
@@ -128,19 +120,5 @@ function OfferSection({
       </div>
       <div className="flex w-full flex-col gap-4">{children}</div>
     </section>
-  );
-}
-
-function SettingsButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Open settings"
-      title="Settings"
-      className="rounded-full border border-zinc-300 bg-white p-2 text-zinc-900 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-    >
-      <Settings size={18} />
-    </button>
   );
 }

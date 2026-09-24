@@ -48,8 +48,6 @@ const MIN_ETH_FOR_GAS_LABEL = '0.001 ETH';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type InvestUiState = {
-  backLabel: string;
-  endsAt: Date | null;
   walletState:
     | { type: 'DISCONNECTED' }
     | {
@@ -91,7 +89,6 @@ export type SubmitStateUi =
   | 'success';
 
 export type InvestUiEvent =
-  | { type: 'ON_BACK_CLICK' }
   | { type: 'ON_CONNECT_WALLET' }
   | { type: 'ON_DISCONNECT_WALLET' }
   | { type: 'ON_ASSET_SELECT'; assetId: AssetId }
@@ -161,8 +158,6 @@ export function useInvestViewModel(
   const tokenCode = offerDetail.asset.code.toString();
 
   const state: InvestUiState = {
-    backLabel: 'Back to deal page',
-    endsAt: offerDetail.endsAt,
     walletState: deriveWalletState(isConnected, address, ethBalance?.value),
     fundingAssets: fundingAssets.map((a) => ({
       assetId: a.id,
@@ -288,9 +283,6 @@ export function useInvestViewModel(
 
   const onEvent = (event: InvestUiEvent) => {
     switch (event.type) {
-      case 'ON_BACK_CLICK':
-        router.push(ROUTES.OFFER_DETAILS(offerId));
-        break;
       case 'ON_CONNECT_WALLET':
         connect();
         break;

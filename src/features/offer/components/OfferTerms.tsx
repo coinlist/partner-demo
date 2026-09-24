@@ -23,7 +23,7 @@ export function OfferTerms({
             <dt className="text-sm text-zinc-500 dark:text-zinc-400">
               {term.key}
             </dt>
-            <dd className="whitespace-pre-line text-sm leading-6 text-zinc-900 dark:text-zinc-100">
+            <dd className="min-w-0 whitespace-pre-line break-words text-sm leading-6 text-zinc-900 dark:text-zinc-100">
               {term.value}
             </dd>
           </div>

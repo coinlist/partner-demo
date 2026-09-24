@@ -22,10 +22,24 @@ export function OfferView({ state, onEvent }: Props) {
   if (state.type === 'LOADING') {
     return (
       <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
-        <div className="mx-auto w-full max-w-5xl animate-pulse space-y-4">
-          <div className="h-40 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
-          <div className="h-24 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
-          <div className="h-56 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+        <div className="mx-auto grid w-full max-w-5xl animate-pulse grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,11fr)_minmax(0,8fr)] md:gap-x-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 shrink-0 rounded-full bg-zinc-200 dark:bg-zinc-900" />
+              <div className="h-7 w-48 rounded-md bg-zinc-200 dark:bg-zinc-900" />
+            </div>
+            <div className="space-y-3">
+              <div className="h-4 w-full rounded-md bg-zinc-200 dark:bg-zinc-900" />
+              <div className="h-4 w-4/5 rounded-md bg-zinc-200 dark:bg-zinc-900" />
+              <div className="h-4 w-2/3 rounded-md bg-zinc-200 dark:bg-zinc-900" />
+            </div>
+          </div>
+          <div className="space-y-3 rounded-[24px] border border-zinc-200 p-6 dark:border-zinc-800">
+            <div className="mb-3 h-4 w-36 rounded-md bg-zinc-200 dark:bg-zinc-900" />
+            <div className="h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+            <div className="h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-900" />
+            <div className="mt-3 h-11 rounded-full bg-zinc-200 dark:bg-zinc-900" />
+          </div>
         </div>
       </div>
     );
@@ -68,15 +82,6 @@ export function OfferView({ state, onEvent }: Props) {
   return (
     <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-5xl">
-        <button
-          type="button"
-          onClick={() => onEvent({ type: 'ON_BACK_CLICK' })}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          <ArrowLeft size={16} />
-          Back to offers
-        </button>
-
         <div className="grid w-full items-start grid-cols-1 gap-6 md:grid-cols-[minmax(0,11fr)_minmax(0,8fr)] md:gap-x-12">
           <div className="flex min-w-0 flex-col gap-8">
             <OfferDetailsCard
