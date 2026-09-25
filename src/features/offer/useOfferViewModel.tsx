@@ -155,7 +155,7 @@ export function useOfferViewModel(): {
             setCheckoutOpen(true);
             break;
           default: {
-            const exhaustive: never = offerDetail.type;
+            const exhaustive: never = offerDetail;
             return exhaustive;
           }
         }
@@ -218,6 +218,9 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
+      // Ondo swaps omit OfferEditorial (no campaign copy).
+      const tagline =
+        offerDetail.type === 'ondo::swap' ? null : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -230,7 +233,7 @@ function mapOfferUiState(
         selectedOptionId: resolvedOptionId,
         name: offerDetail.name,
         symbol: offerDetail.asset.code.toString(),
-        tagline: offerDetail.tagline,
+        tagline,
         logoUrl: offerDetail.logoUrl || null,
         about: offerDetail.about,
         links: offerDetail.links
