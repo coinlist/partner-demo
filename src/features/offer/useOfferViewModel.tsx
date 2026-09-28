@@ -2,12 +2,15 @@
 
 import {
   type LoadOfferDetailsState,
+  OfferLogoUi,
   useOfferDetails,
+  useTokenRegistry,
 } from '@coinlist-co/react';
 import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
+  TokenRegistrySnapshot,
 } from '@coinlist-co/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -56,7 +59,8 @@ export type OfferUiState =
       name: string;
       symbol: string;
       tagline: string | null;
-      logoUrl: string | null;
+      /** Registry logo first, the offer's own artwork otherwise. */
+      logo: OfferLogoUi | null;
       about: string | null;
       links: OfferUiLink[];
       terms: OfferUiTerm[];
@@ -107,11 +111,17 @@ export function useOfferViewModel(): {
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
+  // Fetched here rather than seeded: this page is client-rendered, and the
+  // registry is public, so the browser can read it directly.
+  const { state: registryState } = useTokenRegistry();
+  const registry =
+    registryState.type === 'CONTENT' ? registryState.registry : null;
 
   const state: OfferUiState = mapOfferUiState(
     offerId,
     offerDetailsState,
-    selectedOptionId
+    selectedOptionId,
+    registry
   );
 
   const offerDetail =
@@ -192,7 +202,8 @@ function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
 function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
-  selectedOptionId: OfferOptionId | null
+  selectedOptionId: OfferOptionId | null,
+  registry: TokenRegistrySnapshot | null
 ): OfferUiState {
   if (!routeOfferId) {
     return {
@@ -234,7 +245,12 @@ function mapOfferUiState(
         name: offerDetail.name,
         symbol: offerDetail.asset.code.toString(),
         tagline,
-        logoUrl: offerDetail.logoUrl || null,
+        logo: OfferLogoUi.fromOffer(
+          offerDetail,
+          registry
+            ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
+            : null
+        ),
         about: offerDetail.about,
         links: offerDetail.links
           .filter((link) => Boolean(link.label && link.url))

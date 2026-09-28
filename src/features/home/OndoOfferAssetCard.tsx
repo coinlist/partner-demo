@@ -5,26 +5,34 @@ import {
   OfferAssetCardUi,
   useOfferDetails,
 } from '@coinlist-co/react';
-import type { Offer } from '@coinlist-co/react/universal';
+import type { Offer, TokenMetadata } from '@coinlist-co/react/universal';
 
 /**
- * Ondo browse rows need name + symbol for {@link OfferAssetCard}. The list
- * payload has neither, so load detail and map with `fromDetail`. Logo comes
- * from the offer catalogue (`logoUrl`) the same way the SDK mapper intends.
+ * Ondo browse rows need name + symbol for {@link OfferAssetCard}. The Nabu
+ * token registry (`tokenMetadata`) is the source of name, ticker and logo;
+ * only when it does not list the token is the offer detail loaded to fill
+ * them in, since the list payload carries neither.
  */
 export function OndoOfferAssetCard({
   offer,
+  tokenMetadata,
   onClick,
 }: {
   offer: Offer;
+  tokenMetadata: TokenMetadata | null;
   onClick: () => void;
 }) {
-  const { offerDetailsState } = useOfferDetails(offer.id);
+  const { offerDetailsState } = useOfferDetails(offer.id, {
+    enabled: tokenMetadata === null,
+  });
 
   const cardUi =
     offerDetailsState.type === 'CONTENT'
-      ? OfferAssetCardUi.fromDetail(offerDetailsState.offerDetail)
-      : OfferAssetCardUi.fromOffer(offer);
+      ? OfferAssetCardUi.fromDetail(
+          offerDetailsState.offerDetail,
+          tokenMetadata
+        )
+      : OfferAssetCardUi.fromOffer(offer, tokenMetadata);
 
   return <OfferAssetCard offer={cardUi} onClick={onClick} />;
 }
