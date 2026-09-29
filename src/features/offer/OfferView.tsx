@@ -87,7 +87,7 @@ export function OfferView({ state, onEvent }: Props) {
           <OfferIdentity
             name={state.name}
             symbol={state.symbol}
-            logoUrl={state.logoUrl}
+            logo={state.logo}
           />
           <div className="md:col-start-2 md:row-span-2 md:row-start-1">
             <OfferRequirementsCard

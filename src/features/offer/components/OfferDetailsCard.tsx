@@ -1,5 +1,6 @@
 'use client';
 
+import type { OfferLogoUi } from '@coinlist-co/react';
 import Image from 'next/image';
 import { OfferLink } from '@/features/offer/components/OfferLink';
 import { OfferTerms } from '@/features/offer/components/OfferTerms';
@@ -69,18 +70,19 @@ export function OfferDetailsCard({
 export function OfferIdentity({
   name,
   symbol,
-  logoUrl,
+  logo,
 }: {
   name: string;
   symbol: string;
-  logoUrl: string | null;
+  /** The SDK's logo model: registry artwork first, the offer's own otherwise. */
+  logo: OfferLogoUi | null;
 }) {
   const ticker =
     symbol && symbol.toLowerCase() !== name.toLowerCase() ? symbol : null;
 
   return (
     <div className="flex min-w-0 items-center gap-4">
-      <OfferLogo name={name} logoUrl={logoUrl} size={56} />
+      <OfferLogo name={name} logo={logo} size={56} />
       <div className="min-w-0">
         <h1 className="truncate text-[28px] font-medium leading-[120%] text-zinc-900 dark:text-zinc-100">
           {name}
@@ -101,11 +103,11 @@ export function SectionDivider() {
 
 function OfferLogo({
   name,
-  logoUrl,
+  logo,
   size,
 }: {
   name: string;
-  logoUrl: string | null;
+  logo: OfferLogoUi | null;
   size: number;
 }) {
   return (
@@ -113,14 +115,30 @@ function OfferLogo({
       className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"
       style={{ width: size, height: size }}
     >
-      {logoUrl ? (
-        <Image
-          src={logoUrl}
-          alt=""
-          fill
-          sizes={`${size}px`}
-          className="object-contain"
-        />
+      {logo ? (
+        <>
+          <Image
+            src={logo.light.src}
+            alt=""
+            fill
+            sizes={`${size}px`}
+            className={
+              logo.dark ? 'object-contain dark:hidden' : 'object-contain'
+            }
+          />
+          {/* The registry's dark-theme logo, when it configures one. The
+              demo's dark theme follows the system setting, as Tailwind's
+              `dark:` does. */}
+          {logo.dark ? (
+            <Image
+              src={logo.dark.src}
+              alt=""
+              fill
+              sizes={`${size}px`}
+              className="hidden object-contain dark:block"
+            />
+          ) : null}
+        </>
       ) : (
         <span className="text-sm font-medium text-zinc-500 dark:text-zinc-300">
           {name.slice(0, 1).toUpperCase()}
