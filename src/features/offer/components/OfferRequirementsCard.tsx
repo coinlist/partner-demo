@@ -1,25 +1,39 @@
 'use client';
 
-import { RequirementsChecklistContainer } from '@coinlist-co/react';
-import type { OfferId, OfferOptionId } from '@coinlist-co/react/universal';
+import {
+  ClaimContainer,
+  RequirementsChecklistContainer,
+} from '@coinlist-co/react';
+import type {
+  AsyncOfferDetail,
+  OfferId,
+  OfferOptionId,
+} from '@coinlist-co/react/universal';
 import { useState } from 'react';
 import type { OfferUiOption } from '@/features/offer/useOfferViewModel';
+import { useClaimWallets } from '@/lib/claim-wallets';
 import { useEvmWallet } from '@/lib/evm-wallet';
+
+/** Every claim entry is optional, so the demo passes none. */
+const CLAIM_CONFIG = { 'centrifuge::vault': {} } as const;
 
 export function OfferRequirementsCard({
   offerId,
   options,
   selectedOptionId,
+  claimableOffer,
   onOptionSelect,
   onContinue,
 }: {
   offerId: OfferId;
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
+  claimableOffer: AsyncOfferDetail | null;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
 }) {
   const { connectWallet, connect } = useEvmWallet();
+  const claimWallets = useClaimWallets();
   const hasChoice = options.length > 1;
   const [confirmed, setConfirmed] = useState(!hasChoice);
   const selectedOption = options.find((opt) => opt.id === selectedOptionId);
@@ -85,6 +99,15 @@ export function OfferRequirementsCard({
           </button>
         </div>
       )}
+
+      {claimableOffer ? (
+        <ClaimContainer
+          key={claimableOffer.id.toString()}
+          offer={claimableOffer}
+          wallets={claimWallets}
+          config={CLAIM_CONFIG}
+        />
+      ) : null}
     </aside>
   );
 }

@@ -202,7 +202,10 @@ export function useInvestViewModel(
     const validationError = validateSubmit({
       amountInput,
       ethBalanceWei: ethBalance?.value,
-      minimumPurchaseUsd: option.minimumPurchaseUsd,
+      minimumPurchaseUsd:
+        option.minimumPurchaseUsd === null
+          ? null
+          : Number(option.minimumPurchaseUsd),
     });
     if (validationError) {
       setSubmitState('error');
