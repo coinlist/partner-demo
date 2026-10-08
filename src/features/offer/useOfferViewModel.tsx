@@ -7,6 +7,7 @@ import {
   useTokenRegistry,
 } from '@coinlist-co/react';
 import {
+  AsyncOfferDetail,
   type OfferDetail,
   OfferId,
   type OfferOptionId,
@@ -67,6 +68,11 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       isTokenSale: boolean;
+      /**
+       * The offer when it settles asynchronously and so has orders to claim
+       * later, `null` for one that settles in the purchase itself.
+       */
+      claimableOffer: AsyncOfferDetail | null;
     };
 
 export type OfferUiEvent =
@@ -160,8 +166,9 @@ export function useOfferViewModel(): {
           }
           case 'superstate::swap':
           case 'ondo::swap':
-            // Both are swaps the SDK's CheckoutContainer handles in-page, so
-            // it does not matter which provider the offer belongs to.
+          case 'centrifuge::vault':
+            // The SDK's CheckoutContainer handles all of these in-page, so it
+            // does not matter which provider the offer belongs to.
             setCheckoutOpen(true);
             break;
           default: {
@@ -229,9 +236,13 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Ondo swaps omit OfferEditorial (no campaign copy).
+      // Ondo swaps and Centrifuge vaults omit OfferEditorial (no campaign
+      // copy).
       const tagline =
-        offerDetail.type === 'ondo::swap' ? null : offerDetail.tagline;
+        offerDetail.type === 'ondo::swap' ||
+        offerDetail.type === 'centrifuge::vault'
+          ? null
+          : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -278,6 +289,7 @@ function mapOfferUiState(
             answer: faq.answer ?? '',
           })),
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
+        claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
       };
     }
   }

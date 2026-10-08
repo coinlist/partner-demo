@@ -94,6 +94,7 @@ export function OfferView({ state, onEvent }: Props) {
               offerId={state.offerId}
               options={state.options}
               selectedOptionId={state.selectedOptionId}
+              claimableOffer={state.claimableOffer}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }

@@ -12,10 +12,10 @@ import { AssetSymbol } from '@coinlist-co/react/universal';
  * instead - the SDK keys effects off this object's identity.
  *
  * `defaultCheckoutConfig` requires only the entries a host has to own, which
- * today is `ondo::swap` and `coinlist::token_sale`, and fills the rest from the
- * SDK's own defaults. A new offer type therefore renders the SDK default here
- * instead of breaking the build, so this file is worth a look whenever the SDK
- * adds one.
+ * today is `ondo::swap`, `coinlist::token_sale` and `centrifuge::vault`, and
+ * fills the rest from the SDK's own defaults. A new offer type therefore
+ * renders the SDK default here instead of breaking the build, so this file is
+ * worth a look whenever the SDK adds one.
  */
 export const CHECKOUT_CONFIG: CheckoutConfig = defaultCheckoutConfig({
   'ondo::swap': {
@@ -35,5 +35,10 @@ export const CHECKOUT_CONFIG: CheckoutConfig = defaultCheckoutConfig({
     // routing bug into a crash. Delete both this and that route once the SDK
     // ships the token-sale flow.
     render: () => null,
+  },
+  'centrifuge::vault': {
+    // The share token's symbol. CoinList's asset code is that symbol for this
+    // catalogue; the optional fund, APY and order callback are left unset.
+    symbol: (offer) => AssetSymbol(offer.asset.code),
   },
 });
