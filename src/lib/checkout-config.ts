@@ -1,5 +1,4 @@
 import { type CheckoutConfig, defaultCheckoutConfig } from '@coinlist-co/react';
-import { AssetSymbol } from '@coinlist-co/react/universal';
 
 /**
  * Everything `CheckoutContainer` needs that an offer cannot tell it, for every
@@ -19,14 +18,9 @@ import { AssetSymbol } from '@coinlist-co/react/universal';
  */
 export const CHECKOUT_CONFIG: CheckoutConfig = defaultCheckoutConfig({
   'ondo::swap': {
-    // Ondo's API symbol tracks the underlying ticker, which for this catalogue
-    // is the asset code CoinList already returns. A partner whose offers
-    // disagree - Ondo renames on a rebrand, and testnet offers may stand in a
-    // mock asset - maps the exceptions here instead.
-    symbol: (offer) => AssetSymbol(offer.asset.code),
-    // One Ondo route, and it invests. A host with a sell page closes this
-    // over whatever selects the direction.
-    side: () => 'buy',
+    // One Ondo route, and it invests. A host with a sell page passes whatever
+    // selects the direction. The SDK derives Ondo's symbol from the offer.
+    side: 'buy',
   },
   'coinlist::token_sale': {
     // Unreachable: the offer page routes token sales to /offer/[id]/invest
@@ -37,8 +31,7 @@ export const CHECKOUT_CONFIG: CheckoutConfig = defaultCheckoutConfig({
     render: () => null,
   },
   'centrifuge::vault': {
-    // The share token's symbol. CoinList's asset code is that symbol for this
-    // catalogue; the optional fund, APY and order callback are left unset.
-    symbol: (offer) => AssetSymbol(offer.asset.code),
+    // One vault route, and it deposits. The order callback is left unset.
+    side: 'buy',
   },
 });

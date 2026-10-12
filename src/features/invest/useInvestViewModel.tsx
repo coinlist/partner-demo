@@ -3,13 +3,8 @@
 import type {
   TokenSaleExecutionError,
   TokenSaleExecutionPhase,
-  WalletError,
 } from '@coinlist-co/react';
-import {
-  executeTokenSale,
-  useCoinList,
-  useErc20TokenBalances,
-} from '@coinlist-co/react';
+import { useCoinList, useErc20TokenBalances } from '@coinlist-co/react';
 import {
   type AmountParseErrorReason,
   type Asset,
@@ -21,6 +16,7 @@ import {
   type OfferOption,
   parseBlockchainAmount,
   type StablecoinSymbol,
+  type WalletError,
 } from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -249,7 +245,7 @@ export function useInvestViewModel(
     setSubmitState('checking_allowance');
     setSubmitError(null);
 
-    // The SDK's `executeTokenSale` drives the whole flow over an `EvmWallet`:
+    // The SDK's `coinlist.tokenSale.execute` drives the whole flow over an `EvmWallet`:
     // it reads the allowance, resets a stale non-zero allowance (USDT-style
     // tokens), submits + confirms the approve, and records the participation.
     // Chain switching is handled inside the wallet adapter.
@@ -259,9 +255,7 @@ export function useInvestViewModel(
       config: wagmiConfig,
     });
 
-    const result = await executeTokenSale({
-      erc20: coinlist.erc20,
-      tokenSale: coinlist.tokenSale,
+    const result = await coinlist.tokenSale.execute({
       wallet,
       offerId,
       offerOptionId: option.id,
