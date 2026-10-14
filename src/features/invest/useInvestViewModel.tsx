@@ -1,6 +1,7 @@
 'use client';
 
 import type {
+  LoadErc20TokenBalancesState,
   TokenSaleExecutionError,
   TokenSaleExecutionPhase,
 } from '@coinlist-co/react';
@@ -24,7 +25,6 @@ import { formatEther, parseUnits } from 'viem';
 import { useBalance, useConfig, useWalletClient } from 'wagmi';
 import { useToast } from '@/components/toast/useToast';
 import { DEMO_CHAIN, DEMO_CHAIN_ID } from '@/lib/chain';
-import { ZERO_WALLET_ADDRESS } from '@/lib/constants';
 import { useEvmWallet } from '@/lib/evm-wallet';
 import { ROUTES } from '@/lib/routes';
 import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
@@ -126,11 +126,11 @@ export function useInvestViewModel(
     StablecoinSymbol,
     ...StablecoinSymbol[],
   ];
-  const { balances } = useErc20TokenBalances({
-    address: address ?? ZERO_WALLET_ADDRESS,
+  const { state: balancesState } = useErc20TokenBalances({
+    address,
     chain: DEMO_CHAIN,
     assets: fundingSymbols,
-    enabled: !!address && fundingSymbols.length > 0,
+    enabled: fundingSymbols.length > 0,
   });
 
   const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
@@ -159,7 +159,7 @@ export function useInvestViewModel(
       assetId: a.id,
       code: a.code.toString(),
       balance: formatTokenBalance(
-        balances.get(paymentSymbol(a)) ?? undefined,
+        fundingBalance(balancesState, paymentSymbol(a)),
         a.fractionalDigits
       ),
     })),
@@ -324,6 +324,24 @@ function supportedFundingAssets(assets: readonly Asset[]): Asset[] {
       return false;
     }
   });
+}
+
+/**
+ * The raw balance of one funding asset, or `undefined` while there is none to
+ * show: balances still loading, disabled, failed, or this asset's read failed.
+ */
+function fundingBalance(
+  state: LoadErc20TokenBalancesState,
+  symbol: StablecoinSymbol
+): bigint | undefined {
+  switch (state.type) {
+    case 'CONTENT':
+      return state.balances.get(symbol) ?? undefined;
+    case 'DISABLED':
+    case 'LOADING':
+    case 'ERROR':
+      return undefined;
+  }
 }
 
 function formatTokenBalance(

@@ -1,13 +1,17 @@
 'use client';
 
 import type { CheckoutWalletSelection } from '@coinlist-co/react';
-import { type EvmWallet, EvmWalletAddress } from '@coinlist-co/react/universal';
+import {
+  type EvmWallet,
+  EvmWalletAddress,
+  type ExternalWalletAdapter,
+} from '@coinlist-co/react/universal';
 import {
   useAppKit,
   useAppKitAccount,
   useDisconnect,
 } from '@reown/appkit/react';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useConfig, useWalletClient } from 'wagmi';
 import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
 
@@ -59,23 +63,26 @@ export function useCheckoutWallets(): CheckoutWalletSelection {
    * outcome from `external` on the next render rather than from this promise,
    * precisely so a host connecting through a redirect still works.
    */
-  const connectExternal = useCallback(async () => {
-    await open();
-  }, [open]);
-
-  const disconnectExternal = useCallback(async () => {
-    await disconnect();
-  }, [disconnect]);
+  const externalAdapter = useMemo<ExternalWalletAdapter>(
+    () => ({
+      connect: async () => {
+        await open();
+      },
+      disconnect: async () => {
+        await disconnect();
+      },
+    }),
+    [open, disconnect]
+  );
 
   return useMemo(
     () => ({
       embedded: NO_EMBEDDED_WALLETS,
       external,
+      externalAdapter,
       // Reached from an offer list, not a position, so the user picks.
       preselected: null,
-      connectExternal,
-      disconnectExternal,
     }),
-    [external, connectExternal, disconnectExternal]
+    [external, externalAdapter]
   );
 }
