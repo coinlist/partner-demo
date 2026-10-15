@@ -14,6 +14,7 @@ export function OfferContainer() {
     return (
       <OfferCheckoutContainer
         offerDetail={checkout.offerDetail}
+        optionId={checkout.optionId}
         onBack={() => onEvent({ type: 'ON_CHECKOUT_BACK' })}
       />
     );

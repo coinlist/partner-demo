@@ -26,9 +26,8 @@ const ALLOWED_CHAINS = Object.keys(CHAINS) as EthereumChain[];
 function resolveDemoChain(): EthereumChain {
   const value = process.env.NEXT_PUBLIC_CHAIN;
   // Unset defaults to a testnet: the demo currently serves only Sepolia
-  // offers, and FUNDING_CONTRACT_ADDRESS holds only Sepolia spenders, so a
-  // mainnet default would turn a forgotten env var into a real approve on the
-  // wrong chain. Serving a mainnet offer means keying that map by chain too.
+  // offers, so a mainnet default would turn a forgotten env var into a real
+  // approve on the wrong chain.
   if (!value) return 'ethereum_sepolia';
   // Set-but-invalid is a config mistake worth failing loudly on, rather than
   // silently sending traffic for the wrong chain.

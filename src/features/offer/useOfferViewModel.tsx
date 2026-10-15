@@ -102,7 +102,16 @@ export type OfferUiEvent =
  */
 export type OfferCheckoutState =
   | { type: 'CLOSED' }
-  | { type: 'OPEN'; offerDetail: OfferDetail };
+  | {
+      type: 'OPEN';
+      offerDetail: OfferDetail;
+      /**
+       * The option picked on this page. Only a token sale reads it - its
+       * options each set their own price and minimum - and `null` lets the SDK
+       * default to the first.
+       */
+      optionId: OfferOptionId | null;
+    };
 
 export function useOfferViewModel(): {
   state: OfferUiState;
@@ -148,34 +157,9 @@ export function useOfferViewModel(): {
         // Nothing to invest in until the detail loads, and the button is only
         // reachable from the loaded view anyway.
         if (!offerDetail) break;
-
-        // Where each kind of offer is bought. Matched rather than tested for
-        // "not a token sale", so a new offer type CoinList adds is a compile
-        // error here instead of silently opening a checkout the SDK may not
-        // serve yet.
-        switch (offerDetail.type) {
-          case 'coinlist::token_sale': {
-            // The SDK ships no token-sale flow yet; the demo's own lives at
-            // /offer/[id]/invest.
-            const resolvedOptionId =
-              selectedOptionId ?? offerDetail.options[0]?.id ?? null;
-            if (resolvedOptionId) {
-              router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
-            }
-            break;
-          }
-          case 'superstate::swap':
-          case 'ondo::swap':
-          case 'centrifuge::vault':
-            // The SDK's CheckoutContainer handles all of these in-page, so it
-            // does not matter which provider the offer belongs to.
-            setCheckoutOpen(true);
-            break;
-          default: {
-            const exhaustive: never = offerDetail;
-            return exhaustive;
-          }
-        }
+        // The SDK's CheckoutContainer runs every offer type in-page, token
+        // sales included, so it does not matter which provider this is.
+        setCheckoutOpen(true);
         break;
       }
       case 'ON_CHECKOUT_BACK':
@@ -189,7 +173,7 @@ export function useOfferViewModel(): {
     onEvent,
     checkout:
       checkoutOpen && offerDetail
-        ? { type: 'OPEN', offerDetail }
+        ? { type: 'OPEN', offerDetail, optionId: selectedOptionId }
         : { type: 'CLOSED' },
   };
 }
