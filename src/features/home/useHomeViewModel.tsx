@@ -14,6 +14,7 @@ export type HomeUiState = {
   tokenSaleOffers: Offer[];
   ondoOffers: Offer[];
   superstateOffers: Offer[];
+  centrifugeOffers: Offer[];
   isEmpty: boolean;
   /**
    * The Nabu token registry, indexed for per-offer lookups; `null` while it
@@ -48,14 +49,17 @@ export function useHomeViewModel(
     );
     const ondoOffers = list.filter((o) => o.type === 'ondo::swap');
     const superstateOffers = list.filter((o) => o.type === 'superstate::swap');
+    const centrifugeOffers = list.filter((o) => o.type === 'centrifuge::vault');
     return {
       tokenSaleOffers,
       ondoOffers,
       superstateOffers,
+      centrifugeOffers,
       isEmpty:
         tokenSaleOffers.length === 0 &&
         ondoOffers.length === 0 &&
-        superstateOffers.length === 0,
+        superstateOffers.length === 0 &&
+        centrifugeOffers.length === 0,
       registry,
     };
   }, [offers, registry]);

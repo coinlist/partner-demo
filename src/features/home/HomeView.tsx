@@ -88,6 +88,22 @@ export function HomeView({ state, onEvent }: Props) {
                 ))}
               </OfferSection>
             ) : null}
+
+            {state.centrifugeOffers.length > 0 ? (
+              <OfferSection
+                title="Tokenized Funds from Centrifuge"
+                description="Tokenized fund shares issued through Centrifuge vaults. Orders settle asynchronously: invest now, then claim your shares once the order is processed."
+                docsHref="https://docs.passage.coinlist.co/use-cases/tokenized-assets"
+              >
+                {state.centrifugeOffers.map((offer) => (
+                  <OfferSaleCard
+                    key={offer.id.toString()}
+                    offer={OfferSaleCardUi.fromOffer(offer, tokenOf(offer))}
+                    onClick={() => onOfferClick(offer)}
+                  />
+                ))}
+              </OfferSection>
+            ) : null}
           </div>
         )}
       </div>

@@ -42,6 +42,7 @@ export function OfferCheckoutView({ state, onBack }: Props) {
         </button>
         <CheckoutContainer
           offer={state.offerDetail}
+          optionId={state.optionId}
           chain={state.chain}
           wallets={state.wallets}
           config={state.config}
