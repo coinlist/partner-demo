@@ -8,14 +8,17 @@ import type {
   EthereumChain,
   OfferDetail,
   OfferOptionId,
+  OrderBookSide,
 } from '@coinlist-co/react/universal';
 import { DEMO_CHAIN } from '@/lib/chain';
 import { CHECKOUT_CONFIG } from '@/lib/checkout-config';
 import { useCheckoutWallets } from '@/lib/checkout-wallets';
 
 export type OfferCheckoutUiState = {
-  /** The offer being bought. Its `type` is what picks the provider's flow. */
+  /** The offer being ordered. Its `type` is what picks the provider's flow. */
   offerDetail: OfferDetail;
+  /** Buy deposits into the asset. Sell redeems a holding of it. */
+  side: OrderBookSide;
   /**
    * The token-sale option to buy, or `undefined` for the offer's first. Every
    * other offer type ignores it.
@@ -32,6 +35,7 @@ export type OfferCheckoutUiState = {
 export interface UseOfferCheckoutViewModelOptions {
   offerDetail: OfferDetail;
   optionId: OfferOptionId | null;
+  side: OrderBookSide;
 }
 
 /**
@@ -50,6 +54,7 @@ export interface UseOfferCheckoutViewModelOptions {
 export function useOfferCheckoutViewModel({
   offerDetail,
   optionId,
+  side,
 }: UseOfferCheckoutViewModelOptions): {
   state: OfferCheckoutUiState;
 } {
@@ -57,6 +62,7 @@ export function useOfferCheckoutViewModel({
 
   const state: OfferCheckoutUiState = {
     offerDetail,
+    side,
     optionId: optionId ?? undefined,
     chain: DEMO_CHAIN,
     wallets,

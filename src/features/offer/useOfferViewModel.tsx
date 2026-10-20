@@ -11,6 +11,7 @@ import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
+  type OrderBookSide,
   TokenRegistrySnapshot,
 } from '@coinlist-co/react/universal';
 import { useParams, useRouter } from 'next/navigation';
@@ -68,6 +69,8 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       isTokenSale: boolean;
+      /** A Centrifuge vault can be redeemed as well as deposited into. */
+      canSell: boolean;
       /**
        * The offer when it settles asynchronously and so has orders to claim
        * later, `null` for one that settles in the purchase itself.
@@ -90,21 +93,26 @@ export type OfferUiEvent =
       type: 'ON_INVEST_CLICK';
     }
   | {
+      type: 'ON_SELL_CLICK';
+    }
+  | {
       type: 'ON_CHECKOUT_BACK';
     };
 
 /**
- * Whether the checkout has taken over the page, and the offer it is buying.
+ * Whether the checkout has taken over the page, and the offer it is ordering.
  *
  * A union rather than `{ active: boolean; offerDetail: OfferDetail | null }`,
- * so "open with nothing to buy" cannot be built: the checkout can only open
- * once the offer has loaded.
+ * so "open with nothing to order" cannot be built: the checkout can only open
+ * once the offer has loaded. `side` is buy for a deposit and sell for a
+ * redemption.
  */
 export type OfferCheckoutState =
   | { type: 'CLOSED' }
   | {
       type: 'OPEN';
       offerDetail: OfferDetail;
+      side: OrderBookSide;
       /**
        * The option picked on this page. Only a token sale reads it - its
        * options each set their own price and minimum - and `null` lets the SDK
@@ -122,7 +130,7 @@ export function useOfferViewModel(): {
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
@@ -153,17 +161,18 @@ export function useOfferViewModel(): {
       case 'ON_OPTION_SELECT':
         setSelectedOptionId(event.optionId);
         break;
-      case 'ON_INVEST_CLICK': {
-        // Nothing to invest in until the detail loads, and the button is only
+      case 'ON_INVEST_CLICK':
+      case 'ON_SELL_CLICK': {
+        // Nothing to order until the detail loads, and the button is only
         // reachable from the loaded view anyway.
         if (!offerDetail) break;
         // The SDK's CheckoutContainer runs every offer type in-page, token
         // sales included, so it does not matter which provider this is.
-        setCheckoutOpen(true);
+        setCheckoutSide(event.type === 'ON_SELL_CLICK' ? 'sell' : 'buy');
         break;
       }
       case 'ON_CHECKOUT_BACK':
-        setCheckoutOpen(false);
+        setCheckoutSide(null);
         break;
     }
   };
@@ -172,8 +181,13 @@ export function useOfferViewModel(): {
     state,
     onEvent,
     checkout:
-      checkoutOpen && offerDetail
-        ? { type: 'OPEN', offerDetail, optionId: selectedOptionId }
+      checkoutSide && offerDetail
+        ? {
+            type: 'OPEN',
+            offerDetail,
+            optionId: selectedOptionId,
+            side: checkoutSide,
+          }
         : { type: 'CLOSED' },
   };
 }
@@ -273,6 +287,7 @@ function mapOfferUiState(
             answer: faq.answer ?? '',
           })),
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
+        canSell: offerDetail.type === 'centrifuge::vault',
         claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
       };
     }

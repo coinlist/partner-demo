@@ -24,6 +24,7 @@ export function OfferRequirementsCard({
   claimableOffer,
   onOptionSelect,
   onContinue,
+  onSell,
 }: {
   offerId: OfferId;
   options: OfferUiOption[];
@@ -31,6 +32,8 @@ export function OfferRequirementsCard({
   claimableOffer: AsyncOfferDetail | null;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
+  /** Opens the redemption checkout. Only a Centrifuge vault passes this. */
+  onSell?: () => void;
 }) {
   const { connectWallet, connect } = useEvmWallet();
   const claimWallets = useClaimWallets();
@@ -66,15 +69,26 @@ export function OfferRequirementsCard({
         ) : null}
 
         {showRequirements && selectedOptionId ? (
-          <RequirementsChecklistContainer
-            offerId={offerId}
-            optionId={selectedOptionId}
-            title="Sale Requirements"
-            description="Complete the requirements below to be eligible."
-            onContinue={onContinue}
-            wallet={connectWallet}
-            onRequestConnect={connect}
-          />
+          <>
+            <RequirementsChecklistContainer
+              offerId={offerId}
+              optionId={selectedOptionId}
+              title="Sale Requirements"
+              description="Complete the requirements below to be eligible."
+              onContinue={onContinue}
+              wallet={connectWallet}
+              onRequestConnect={connect}
+            />
+            {onSell ? (
+              <button
+                type="button"
+                onClick={onSell}
+                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-full border border-zinc-300 bg-white text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+              >
+                Sell
+              </button>
+            ) : null}
+          </>
         ) : (
           <div className="flex flex-col gap-4">
             <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">

@@ -41,9 +41,11 @@ export function OfferCheckoutView({ state, onBack }: Props) {
           <ArrowLeft size={20} />
         </button>
         <CheckoutContainer
+          key={`${state.offerDetail.id}:${state.chain}:${state.side}`}
           offer={state.offerDetail}
           optionId={state.optionId}
           chain={state.chain}
+          side={state.side}
           wallets={state.wallets}
           config={state.config}
         />

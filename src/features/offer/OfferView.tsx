@@ -99,6 +99,11 @@ export function OfferView({ state, onEvent }: Props) {
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
               onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
+              onSell={
+                state.canSell
+                  ? () => onEvent({ type: 'ON_SELL_CLICK' })
+                  : undefined
+              }
             />
           </div>
           <div className="flex min-w-0 flex-col gap-8 md:col-start-1">
