@@ -1,10 +1,7 @@
 'use client';
 
-import { OfferSaleCard, OfferSaleCardUi } from '@coinlist-co/react';
-import {
-  type Offer,
-  TokenRegistrySnapshot,
-} from '@coinlist-co/react/universal';
+import { OfferSaleCard, OfferSaleCardUi } from '@passage-cl/react';
+import { type Offer, TokenRegistrySnapshot } from '@passage-cl/react/universal';
 import type { ReactNode } from 'react';
 import { OndoOfferAssetCard } from '@/features/home/OndoOfferAssetCard';
 import type {

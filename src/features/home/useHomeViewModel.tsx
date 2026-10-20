@@ -1,11 +1,11 @@
 'use client';
 
-import { useTokenRegistry } from '@coinlist-co/react';
+import { useTokenRegistry } from '@passage-cl/react';
 import type {
   Offer,
   TokenMetadata,
   TokenRegistrySnapshot,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { ROUTES } from '@/lib/routes';

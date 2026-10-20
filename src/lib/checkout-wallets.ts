@@ -1,11 +1,11 @@
 'use client';
 
-import type { CheckoutWalletSelection } from '@coinlist-co/react';
+import type { CheckoutWalletSelection } from '@passage-cl/react';
 import {
   type EvmWallet,
   EvmWalletAddress,
   type ExternalWalletAdapter,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import {
   useAppKit,
   useAppKitAccount,

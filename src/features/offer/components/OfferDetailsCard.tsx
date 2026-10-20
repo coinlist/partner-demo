@@ -1,6 +1,6 @@
 'use client';
 
-import type { OfferLogoUi } from '@coinlist-co/react';
+import type { OfferLogoUi } from '@passage-cl/react';
 import Image from 'next/image';
 import { OfferLink } from '@/features/offer/components/OfferLink';
 import { OfferTerms } from '@/features/offer/components/OfferTerms';

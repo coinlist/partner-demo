@@ -1,6 +1,6 @@
 'use client';
 
-import type { WalletSelection } from '@coinlist-co/react/universal';
+import type { WalletSelection } from '@passage-cl/react/universal';
 import { useMemo } from 'react';
 import { useCheckoutWallets } from '@/lib/checkout-wallets';
 

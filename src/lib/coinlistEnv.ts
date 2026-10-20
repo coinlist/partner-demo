@@ -1,4 +1,4 @@
-import { ClientId, RedirectUri } from '@coinlist-co/react/universal';
+import { ClientId, RedirectUri } from '@passage-cl/react/universal';
 import { requiredEnv } from '@/lib/env';
 
 /**
@@ -10,7 +10,7 @@ import { requiredEnv } from '@/lib/env';
  *   apiBaseUrl -> `baseUrl`          data calls + token exchange
  *   webBaseUrl -> `coinlistBaseUrl`  OAuth authorize + redirects
  *
- * `COINLIST_CLIENT_SECRET` is deliberately absent. It stays in `coinlist-server.ts`
+ * `COINLIST_CLIENT_SECRET` is deliberately absent. It stays in `passage-server.ts`
  * behind `server-only` so it can't reach the browser bundle.
  */
 const apiBaseUrl = process.env.NEXT_PUBLIC_COINLIST_BASE_URL;

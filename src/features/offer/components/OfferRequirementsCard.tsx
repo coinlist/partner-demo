@@ -3,12 +3,12 @@
 import {
   ClaimContainer,
   RequirementsChecklistContainer,
-} from '@coinlist-co/react';
+} from '@passage-cl/react';
 import type {
   AsyncOfferDetail,
   OfferId,
   OfferOptionId,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { useState } from 'react';
 import type { OfferUiOption } from '@/features/offer/useOfferViewModel';
 import { useClaimWallets } from '@/lib/claim-wallets';

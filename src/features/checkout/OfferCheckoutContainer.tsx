@@ -4,7 +4,7 @@ import type {
   OfferDetail,
   OfferOptionId,
   OrderBookSide,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { OfferCheckoutView } from '@/features/checkout/OfferCheckoutView';
 import { useOfferCheckoutViewModel } from '@/features/checkout/useOfferCheckoutViewModel';
 

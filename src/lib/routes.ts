@@ -1,4 +1,4 @@
-import type { OfferId } from '@coinlist-co/react/universal';
+import type { OfferId } from '@passage-cl/react/universal';
 
 export const ROUTES = {
   ROOT: '/',

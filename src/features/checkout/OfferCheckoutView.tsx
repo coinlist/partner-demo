@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckoutContainer } from '@coinlist-co/react';
+import { CheckoutContainer } from '@passage-cl/react';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import type { OfferCheckoutUiState } from '@/features/checkout/useOfferCheckoutViewModel';

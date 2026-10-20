@@ -1,6 +1,6 @@
 'use client';
 
-import { useCoinList } from '@coinlist-co/react';
+import { usePassage } from '@passage-cl/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';
@@ -20,7 +20,7 @@ export function useSettingsViewModel(): {
 } {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
-  const { coinlist } = useCoinList();
+  const { passage } = usePassage();
   const router = useRouter();
 
   const uiState: SettingsUiState = {
@@ -43,7 +43,7 @@ export function useSettingsViewModel(): {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('logout failed');
-      coinlist.auth.logout();
+      passage.auth.logout();
       router.replace(ROUTES.ROOT);
     } catch {
       setLogoutError('Could not sign out. Try again.');

@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { coinListServer } from '@/lib/coinlist-server';
+import { passageServer } from '@/lib/passage-server';
 import { cookiesSessionStore } from '@/lib/session-store';
 
 export async function GET(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
-  const token = await coinListServer(store).auth.getAccessToken();
+  const token = await passageServer(store).auth.getAccessToken();
   if (token == null) {
     return applyCookies(new NextResponse(null, { status: 204 }));
   }

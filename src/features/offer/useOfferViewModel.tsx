@@ -5,7 +5,7 @@ import {
   OfferLogoUi,
   useOfferDetails,
   useTokenRegistry,
-} from '@coinlist-co/react';
+} from '@passage-cl/react';
 import {
   AsyncOfferDetail,
   type OfferDetail,
@@ -13,7 +13,7 @@ import {
   type OfferOptionId,
   type OrderBookSide,
   TokenRegistrySnapshot,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';

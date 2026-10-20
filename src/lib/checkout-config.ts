@@ -1,4 +1,4 @@
-import type { CheckoutConfig } from '@coinlist-co/react';
+import type { CheckoutConfig } from '@passage-cl/react';
 
 /**
  * Everything `CheckoutContainer` needs that an offer cannot tell it, for every

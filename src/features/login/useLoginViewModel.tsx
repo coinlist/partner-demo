@@ -1,6 +1,6 @@
 'use client';
 
-import type { CompleteOAuthFailureReason } from '@coinlist-co/react';
+import type { CompleteOAuthFailureReason } from '@passage-cl/react';
 import { useSearchParams } from 'next/navigation';
 
 export type LoginUiState = {

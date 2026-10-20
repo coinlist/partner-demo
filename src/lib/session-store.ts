@@ -1,8 +1,8 @@
 import 'server-only';
 
-import type { SessionStore } from '@coinlist-co/react/server';
-import type { OAuthSession } from '@coinlist-co/react/universal';
-import { OAuthRefreshToken } from '@coinlist-co/react/universal';
+import type { SessionStore } from '@passage-cl/react/server';
+import type { OAuthSession } from '@passage-cl/react/universal';
+import { OAuthRefreshToken } from '@passage-cl/react/universal';
 import type { NextRequest, NextResponse } from 'next/server';
 
 const COINLIST_SESSION_COOKIE = 'coinlist_session';

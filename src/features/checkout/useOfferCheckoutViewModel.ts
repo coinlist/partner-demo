@@ -3,13 +3,13 @@
 import type {
   CheckoutConfig,
   CheckoutWalletSelection,
-} from '@coinlist-co/react';
+} from '@passage-cl/react';
 import type {
   EthereumChain,
   OfferDetail,
   OfferOptionId,
   OrderBookSide,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { DEMO_CHAIN } from '@/lib/chain';
 import { CHECKOUT_CONFIG } from '@/lib/checkout-config';
 import { useCheckoutWallets } from '@/lib/checkout-wallets';
