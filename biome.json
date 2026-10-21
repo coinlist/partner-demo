@@ -20,10 +20,10 @@
     "rules": {
       "preset": "recommended",
       "a11y": { "preset": "none" },
-      "complexity": { "preset": "none" },
-      "correctness": { "preset": "none" },
-      "performance": { "preset": "none" },
-      "security": { "preset": "none" },
+      "complexity": { "preset": "recommended" },
+      "correctness": { "preset": "recommended" },
+      "performance": { "preset": "recommended" },
+      "security": { "preset": "recommended" },
       "style": {
         "preset": "recommended",
         "useConst": "error",

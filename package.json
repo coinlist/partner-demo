@@ -39,6 +39,6 @@
     "@x402/evm": "^2.25.0",
     "@x402/svm": "^2.25.0",
     "tailwindcss": "^4",
-    "typescript": "^7"
+    "typescript": "^5"
   }
 }
