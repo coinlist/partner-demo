@@ -1,6 +1,5 @@
 'use client';
 
-import { Blockchain } from '@coinlist-co/react/universal';
 import { sepolia } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
@@ -12,7 +11,7 @@ import { requiredEnv } from '@/lib/env';
 // The funding chain for the invest/participation flow. Env-driven via
 // `DEMO_CHAIN` (see `@/lib/chain`) so it tracks the same chain wallet-connect
 // and the ownership challenge use, instead of drifting to a hardcoded mainnet.
-export const ETHEREUM_CHAIN = Blockchain(DEMO_CHAIN);
+export const ETHEREUM_CHAIN = DEMO_CHAIN;
 
 const projectId = requiredEnv(
   'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID',

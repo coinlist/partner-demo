@@ -27,6 +27,13 @@ export default async function InvestPage({ params, searchParams }: Props) {
     redirect(ROUTES.OFFER_DETAILS(OfferId(id)));
   }
 
+  // This page runs the demo's own participation flow, which the SDK scopes to
+  // token sales. Any other offer type (a swap, a vault) has its checkout on
+  // the offer page instead, so send it back there.
+  if (offerDetail.type !== 'coinlist::token_sale') {
+    redirect(ROUTES.OFFER_DETAILS(OfferId(id)));
+  }
+
   const option: OfferOption | undefined =
     offerDetail.options.find(
       (o: OfferOption) => o.id.toString() === optionId

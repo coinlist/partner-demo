@@ -1,11 +1,14 @@
 'use client';
 
-import type { OfferDetail, OfferOption } from '@coinlist-co/react/universal';
+import type {
+  CoinListTokenSaleOfferDetail,
+  OfferOption,
+} from '@coinlist-co/react/universal';
 import { InvestView } from '@/features/invest/InvestView';
 import { useInvestViewModel } from '@/features/invest/useInvestViewModel';
 
 interface Props {
-  offerDetail: OfferDetail;
+  offerDetail: CoinListTokenSaleOfferDetail;
   option: OfferOption;
 }
 

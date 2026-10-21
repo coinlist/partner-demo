@@ -1,7 +1,7 @@
 'use client';
 
-import type { CheckoutWalletSelection, EvmWallet } from '@coinlist-co/react';
-import { EvmWalletAddress } from '@coinlist-co/react/universal';
+import type { CheckoutWalletSelection } from '@coinlist-co/react';
+import { type EvmWallet, EvmWalletAddress } from '@coinlist-co/react/universal';
 import {
   useAppKit,
   useAppKitAccount,
@@ -73,8 +73,10 @@ export function useCheckoutWallets(): CheckoutWalletSelection {
       external,
       // Reached from an offer list, not a position, so the user picks.
       preselected: null,
-      connectExternal,
-      disconnectExternal,
+      externalAdapter: {
+        connect: connectExternal,
+        disconnect: disconnectExternal,
+      },
     }),
     [external, connectExternal, disconnectExternal]
   );

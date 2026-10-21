@@ -160,8 +160,10 @@ export function useOfferViewModel(): {
           }
           case 'superstate::swap':
           case 'ondo::swap':
-            // Both are swaps the SDK's CheckoutContainer handles in-page, so
-            // it does not matter which provider the offer belongs to.
+          case 'centrifuge::vault':
+            // All three are flows the SDK's CheckoutContainer handles in-page
+            // (a swap, or a vault deposit), so it does not matter which
+            // provider the offer belongs to.
             setCheckoutOpen(true);
             break;
           default: {
@@ -229,9 +231,13 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Ondo swaps omit OfferEditorial (no campaign copy).
+      // Ondo swaps and Centrifuge vaults omit OfferEditorial (no campaign
+      // copy); token sales and Superstate swaps carry it.
       const tagline =
-        offerDetail.type === 'ondo::swap' ? null : offerDetail.tagline;
+        offerDetail.type === 'ondo::swap' ||
+        offerDetail.type === 'centrifuge::vault'
+          ? null
+          : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),

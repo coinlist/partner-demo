@@ -1,7 +1,9 @@
 'use client';
 
-import type { ConnectWallet } from '@coinlist-co/react';
-import type { EthereumChain } from '@coinlist-co/react/universal';
+import type {
+  ConnectWallet,
+  EthereumChain,
+} from '@coinlist-co/react/universal';
 import { EvmWalletAddress } from '@coinlist-co/react/universal';
 import {
   useAppKit,
