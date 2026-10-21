@@ -3,24 +3,19 @@
 import type {
   TokenSaleExecutionError,
   TokenSaleExecutionPhase,
-  WalletError,
 } from '@coinlist-co/react';
-import {
-  executeTokenSale,
-  useCoinList,
-  useErc20TokenBalances,
-} from '@coinlist-co/react';
+import { useCoinList, useErc20TokenBalances } from '@coinlist-co/react';
 import {
   type AmountParseErrorReason,
   type Asset,
   AssetDecimals,
   type AssetId,
-  type EvmContractAddress,
-  type OfferDetail,
+  type CoinListTokenSaleOfferDetail,
   type OfferId,
   type OfferOption,
   parseBlockchainAmount,
   type StablecoinSymbol,
+  type WalletError,
 } from '@coinlist-co/react/universal';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -28,15 +23,10 @@ import { formatEther, parseUnits } from 'viem';
 import { useBalance, useConfig, useWalletClient } from 'wagmi';
 import { useToast } from '@/components/toast/useToast';
 import { DEMO_CHAIN, DEMO_CHAIN_ID } from '@/lib/chain';
-import { ZERO_WALLET_ADDRESS } from '@/lib/constants';
 import { useEvmWallet } from '@/lib/evm-wallet';
 import { ROUTES } from '@/lib/routes';
 import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
-import {
-  fundingContract,
-  paymentSymbol,
-  paymentTokenAddress,
-} from '@/types/coinlist';
+import { paymentSymbol } from '@/types/coinlist';
 
 /**
  * Minimum ETH balance required to pay gas for the ERC-20 approve transaction.
@@ -98,7 +88,7 @@ export type InvestUiEvent =
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useInvestViewModel(
-  offerDetail: OfferDetail,
+  offerDetail: CoinListTokenSaleOfferDetail,
   option: OfferOption
 ): { state: InvestUiState; onEvent: (event: InvestUiEvent) => void } {
   const router = useRouter();
@@ -126,16 +116,19 @@ export function useInvestViewModel(
 
   // ERC-20 (USDC/USDT) balances via the SDK. `useErc20TokenBalances` is keyed by
   // stablecoin symbol, so we derive each funding asset's symbol from its ticker.
+  // A disconnected wallet passes `null` and the read is disabled below.
   const fundingSymbols = fundingAssets.map(paymentSymbol) as [
     StablecoinSymbol,
     ...StablecoinSymbol[],
   ];
-  const { balances } = useErc20TokenBalances({
-    address: address ?? ZERO_WALLET_ADDRESS,
+  const { state: balancesState } = useErc20TokenBalances({
+    address,
     chain: DEMO_CHAIN,
     assets: fundingSymbols,
     enabled: !!address && fundingSymbols.length > 0,
   });
+  const balances =
+    balancesState.type === 'CONTENT' ? balancesState.balances : null;
 
   const [payWithAssetId, setPayWithAssetId] = useState<AssetId | null>(
     fundingAssets[0]?.id ?? null
@@ -163,7 +156,7 @@ export function useInvestViewModel(
       assetId: a.id,
       code: a.code.toString(),
       balance: formatTokenBalance(
-        balances.get(paymentSymbol(a)) ?? undefined,
+        balances?.get(paymentSymbol(a)) ?? undefined,
         a.fractionalDigits
       ),
     })),
@@ -223,49 +216,27 @@ export function useInvestViewModel(
       return;
     }
 
-    // Both accessors throw when this build has no entry for the offer or the
-    // asset, and `executeTokenSale` evaluates them as arguments. Resolving them
-    // here keeps that throw on the error path: inside the call it would escape
-    // an async handler nothing awaits, leaving `submitState` on
-    // `checking_allowance` with the spinner up and no message to read.
-    let paymentToken: EvmContractAddress;
-    let fundingContractAddress: EvmContractAddress;
-    try {
-      paymentToken = paymentTokenAddress(payWithAsset, DEMO_CHAIN);
-      fundingContractAddress = fundingContract(offerId);
-    } catch (error) {
-      setSubmitState('error');
-      setSubmitError(
-        error instanceof Error
-          ? error.message
-          : 'This offer is not configured for participation.'
-      );
-      return;
-    }
-
     setSubmitState('checking_allowance');
     setSubmitError(null);
 
-    // The SDK's `executeTokenSale` drives the whole flow over an `EvmWallet`:
-    // it reads the allowance, resets a stale non-zero allowance (USDT-style
-    // tokens), submits + confirms the approve, and records the participation.
-    // Chain switching is handled inside the wallet adapter.
+    // The SDK's `coinlist.tokenSale.execute` drives the whole flow over an
+    // `EvmWallet`: it reads the allowance, resets a stale non-zero allowance
+    // (USDT-style tokens), submits + confirms the approve, and records the
+    // participation. The funding contract, the coin's on-chain address and its
+    // asset id are all read off the offer; the caller names only the coin it
+    // pays in. Chain switching is handled inside the wallet adapter.
     const wallet = buildEvmWallet({
       address,
       walletClient,
       config: wagmiConfig,
     });
 
-    const result = await executeTokenSale({
-      erc20: coinlist.erc20,
-      tokenSale: coinlist.tokenSale,
+    const result = await coinlist.tokenSale.execute({
       wallet,
-      offerId,
-      offerOptionId: option.id,
-      assetId: payWithAsset.id,
-      paymentTokenAddress: paymentToken,
-      fundingContractAddress,
+      offer: offerDetail,
+      optionId: option.id,
       chain: DEMO_CHAIN,
+      inputAsset: paymentSymbol(payWithAsset),
       amount: parsedAmount.amount,
       onProgress: (phase) => setSubmitState(phaseToSubmitState(phase)),
     });
@@ -460,9 +431,18 @@ function phaseToSubmitState(phase: TokenSaleExecutionPhase): SubmitStateUi {
  * user-facing message. Each step the flow can fail at gets its own message so
  * the user knows which of the two wallet prompts they rejected, whether an
  * approval reverted on-chain, or whether only the final recording failed.
+ * The three lookup refusals (chain, asset, option) should be unreachable
+ * behind the pickers, but answer each arm rather than leaving a bare
+ * fallback.
  */
 function executionErrorMessage(error: TokenSaleExecutionError): string {
   switch (error.step) {
+    case 'unsupported-chain':
+      return 'This offer does not accept commitments on the current chain.';
+    case 'unsupported-asset':
+      return 'This offer does not accept the selected payment asset.';
+    case 'unknown-option':
+      return 'This purchase option is no longer available. Please go back and choose again.';
     case 'allowance-check':
       return "We couldn't read your current token allowance. Please try again.";
     case 'allowance-reset':

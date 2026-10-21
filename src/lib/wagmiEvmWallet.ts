@@ -1,6 +1,6 @@
-import type { EvmWallet } from '@coinlist-co/react';
 import type {
   EthereumChain,
+  EvmWallet,
   EvmWalletAddress,
 } from '@coinlist-co/react/universal';
 import {
