@@ -11,6 +11,7 @@ import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
+  type OfferType,
   type OrderBookSide,
   TokenRegistrySnapshot,
 } from '@passage-cl/react/universal';
@@ -69,7 +70,10 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       isTokenSale: boolean;
-      /** A Centrifuge vault can be redeemed as well as deposited into. */
+      /**
+       * Whether the offer can be sold as well as bought: a Centrifuge vault
+       * redeems, an Ondo swap sells back.
+       */
       canSell: boolean;
       /**
        * The offer when it settles asynchronously and so has orders to claim
@@ -287,9 +291,24 @@ function mapOfferUiState(
             answer: faq.answer ?? '',
           })),
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
-        canSell: offerDetail.type === 'centrifuge::vault',
+        canSell: isSellable(offerDetail.type),
         claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
       };
     }
+  }
+}
+
+/**
+ * The offer types the SDK's CheckoutContainer serves in the sell direction.
+ * Exhaustive, so a new offer type has to decide here whether it sells.
+ */
+function isSellable(type: OfferType): boolean {
+  switch (type) {
+    case 'centrifuge::vault':
+    case 'ondo::swap':
+      return true;
+    case 'coinlist::token_sale':
+    case 'superstate::swap':
+      return false;
   }
 }

@@ -32,7 +32,10 @@ export function OfferRequirementsCard({
   claimableOffer: AsyncOfferDetail | null;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
-  /** Opens the redemption checkout. Only a Centrifuge vault passes this. */
+  /**
+   * Opens the sell checkout. Only a sellable offer passes this, and then the
+   * checklist's Continue reads "Buy" so the two directions read as a pair.
+   */
   onSell?: () => void;
 }) {
   const { connectWallet, connect } = useEvmWallet();
@@ -76,6 +79,7 @@ export function OfferRequirementsCard({
               title="Sale Requirements"
               description="Complete the requirements below to be eligible."
               onContinue={onContinue}
+              continueLabel={onSell ? 'Buy' : 'Continue'}
               wallet={connectWallet}
               onRequestConnect={connect}
             />
