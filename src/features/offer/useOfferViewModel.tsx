@@ -5,13 +5,15 @@ import {
   OfferLogoUi,
   useOfferDetails,
   useTokenRegistry,
-} from '@coinlist-co/react';
+} from '@passage-cl/react';
 import {
+  AsyncOfferDetail,
   type OfferDetail,
   OfferId,
   type OfferOptionId,
+  type OrderBookSide,
   TokenRegistrySnapshot,
-} from '@coinlist-co/react/universal';
+} from '@passage-cl/react/universal';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';
@@ -67,6 +69,13 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       isTokenSale: boolean;
+      /** A Centrifuge vault can be redeemed as well as deposited into. */
+      canSell: boolean;
+      /**
+       * The offer when it settles asynchronously and so has orders to claim
+       * later, `null` for one that settles in the purchase itself.
+       */
+      claimableOffer: AsyncOfferDetail | null;
     };
 
 export type OfferUiEvent =
@@ -84,19 +93,33 @@ export type OfferUiEvent =
       type: 'ON_INVEST_CLICK';
     }
   | {
+      type: 'ON_SELL_CLICK';
+    }
+  | {
       type: 'ON_CHECKOUT_BACK';
     };
 
 /**
- * Whether the checkout has taken over the page, and the offer it is buying.
+ * Whether the checkout has taken over the page, and the offer it is ordering.
  *
  * A union rather than `{ active: boolean; offerDetail: OfferDetail | null }`,
- * so "open with nothing to buy" cannot be built: the checkout can only open
- * once the offer has loaded.
+ * so "open with nothing to order" cannot be built: the checkout can only open
+ * once the offer has loaded. `side` is buy for a deposit and sell for a
+ * redemption.
  */
 export type OfferCheckoutState =
   | { type: 'CLOSED' }
-  | { type: 'OPEN'; offerDetail: OfferDetail };
+  | {
+      type: 'OPEN';
+      offerDetail: OfferDetail;
+      side: OrderBookSide;
+      /**
+       * The option picked on this page. Only a token sale reads it - its
+       * options each set their own price and minimum - and `null` lets the SDK
+       * default to the first.
+       */
+      optionId: OfferOptionId | null;
+    };
 
 export function useOfferViewModel(): {
   state: OfferUiState;
@@ -107,7 +130,7 @@ export function useOfferViewModel(): {
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
   const { offerDetailsState } = useOfferDetails(offerId);
@@ -138,41 +161,18 @@ export function useOfferViewModel(): {
       case 'ON_OPTION_SELECT':
         setSelectedOptionId(event.optionId);
         break;
-      case 'ON_INVEST_CLICK': {
-        // Nothing to invest in until the detail loads, and the button is only
+      case 'ON_INVEST_CLICK':
+      case 'ON_SELL_CLICK': {
+        // Nothing to order until the detail loads, and the button is only
         // reachable from the loaded view anyway.
         if (!offerDetail) break;
-
-        // Where each kind of offer is bought. Matched rather than tested for
-        // "not a token sale", so a new offer type CoinList adds is a compile
-        // error here instead of silently opening a checkout the SDK may not
-        // serve yet.
-        switch (offerDetail.type) {
-          case 'coinlist::token_sale': {
-            // The SDK ships no token-sale flow yet; the demo's own lives at
-            // /offer/[id]/invest.
-            const resolvedOptionId =
-              selectedOptionId ?? offerDetail.options[0]?.id ?? null;
-            if (resolvedOptionId) {
-              router.push(ROUTES.OFFER_INVEST(offerId, resolvedOptionId));
-            }
-            break;
-          }
-          case 'superstate::swap':
-          case 'ondo::swap':
-            // Both are swaps the SDK's CheckoutContainer handles in-page, so
-            // it does not matter which provider the offer belongs to.
-            setCheckoutOpen(true);
-            break;
-          default: {
-            const exhaustive: never = offerDetail;
-            return exhaustive;
-          }
-        }
+        // The SDK's CheckoutContainer runs every offer type in-page, token
+        // sales included, so it does not matter which provider this is.
+        setCheckoutSide(event.type === 'ON_SELL_CLICK' ? 'sell' : 'buy');
         break;
       }
       case 'ON_CHECKOUT_BACK':
-        setCheckoutOpen(false);
+        setCheckoutSide(null);
         break;
     }
   };
@@ -181,8 +181,13 @@ export function useOfferViewModel(): {
     state,
     onEvent,
     checkout:
-      checkoutOpen && offerDetail
-        ? { type: 'OPEN', offerDetail }
+      checkoutSide && offerDetail
+        ? {
+            type: 'OPEN',
+            offerDetail,
+            optionId: selectedOptionId,
+            side: checkoutSide,
+          }
         : { type: 'CLOSED' },
   };
 }
@@ -229,9 +234,13 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Ondo swaps omit OfferEditorial (no campaign copy).
+      // Ondo swaps and Centrifuge vaults omit OfferEditorial (no campaign
+      // copy).
       const tagline =
-        offerDetail.type === 'ondo::swap' ? null : offerDetail.tagline;
+        offerDetail.type === 'ondo::swap' ||
+        offerDetail.type === 'centrifuge::vault'
+          ? null
+          : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -278,6 +287,8 @@ function mapOfferUiState(
             answer: faq.answer ?? '',
           })),
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
+        canSell: offerDetail.type === 'centrifuge::vault',
+        claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
       };
     }
   }

@@ -3,15 +3,27 @@
 import type {
   CheckoutConfig,
   CheckoutWalletSelection,
-} from '@coinlist-co/react';
-import type { EthereumChain, OfferDetail } from '@coinlist-co/react/universal';
+} from '@passage-cl/react';
+import type {
+  EthereumChain,
+  OfferDetail,
+  OfferOptionId,
+  OrderBookSide,
+} from '@passage-cl/react/universal';
 import { DEMO_CHAIN } from '@/lib/chain';
 import { CHECKOUT_CONFIG } from '@/lib/checkout-config';
 import { useCheckoutWallets } from '@/lib/checkout-wallets';
 
 export type OfferCheckoutUiState = {
-  /** The offer being bought. Its `type` is what picks the provider's flow. */
+  /** The offer being ordered. Its `type` is what picks the provider's flow. */
   offerDetail: OfferDetail;
+  /** Buy deposits into the asset. Sell redeems a holding of it. */
+  side: OrderBookSide;
+  /**
+   * The token-sale option to buy, or `undefined` for the offer's first. Every
+   * other offer type ignores it.
+   */
+  optionId: OfferOptionId | undefined;
   /** The chain the order executes on: balances, approval and broadcast. */
   chain: EthereumChain;
   /** The wallets the buyer can spend from, and how to connect one. */
@@ -22,10 +34,12 @@ export type OfferCheckoutUiState = {
 
 export interface UseOfferCheckoutViewModelOptions {
   offerDetail: OfferDetail;
+  optionId: OfferOptionId | null;
+  side: OrderBookSide;
 }
 
 /**
- * Assembles the four things `CheckoutContainer` cannot work out for itself and
+ * Assembles the things `CheckoutContainer` cannot work out for itself and
  * hands them to the View.
  *
  * There is no flow state here, and that is the point of the SDK: the wallet
@@ -39,6 +53,8 @@ export interface UseOfferCheckoutViewModelOptions {
  */
 export function useOfferCheckoutViewModel({
   offerDetail,
+  optionId,
+  side,
 }: UseOfferCheckoutViewModelOptions): {
   state: OfferCheckoutUiState;
 } {
@@ -46,6 +62,8 @@ export function useOfferCheckoutViewModel({
 
   const state: OfferCheckoutUiState = {
     offerDetail,
+    side,
+    optionId: optionId ?? undefined,
     chain: DEMO_CHAIN,
     wallets,
     config: CHECKOUT_CONFIG,

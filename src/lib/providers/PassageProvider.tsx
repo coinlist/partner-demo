@@ -1,7 +1,7 @@
 'use client';
 
-import type { ClientConfig } from '@coinlist-co/react';
-import { CoinListProvider, pinoClientLogger } from '@coinlist-co/react';
+import type { ClientConfig } from '@passage-cl/react';
+import { PassageProvider, pinoClientLogger } from '@passage-cl/react';
 import { useMemo } from 'react';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
@@ -12,7 +12,7 @@ import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
 // Undefined against the production API, where the SDK is given no logger.
 const logger = SDK_LOG_OPTIONS ? pinoClientLogger(SDK_LOG_OPTIONS) : undefined;
 
-export function DemoCoinListProvider({
+export function DemoPassageProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -44,7 +44,7 @@ export function DemoCoinListProvider({
         };
       },
       // The browser half of the SDK's logging seam; the server half is wired in
-      // `coinlist-server.ts` off the same options. Spread rather than
+      // `passage-server.ts` off the same options. Spread rather than
       // `logger: undefined`: the SDK's guarantee is about an absent key, and a
       // build pointed at the production API must carry no logging seam at all.
       ...(logger ? { logger } : {}),
@@ -52,5 +52,5 @@ export function DemoCoinListProvider({
     []
   );
 
-  return <CoinListProvider config={config}>{children}</CoinListProvider>;
+  return <PassageProvider config={config}>{children}</PassageProvider>;
 }

@@ -113,13 +113,13 @@ rules:
 
   - id: features-no-server-lib
     description: >-
-      Feature files run on the client under 'use client'. @/lib/coinlist-server
+      Feature files run on the client under 'use client'. @/lib/passage-server
       imports the 'server-only' package and must never be bundled into the client.
       Importing it from a feature would silently compile in server credentials and
       break the Next.js server/client boundary, potentially leaking secrets.
     target: "@/features/**"
     forbids:
-      - import: "@/lib/coinlist-server"
+      - import: "@/lib/passage-server"
       - import: "server-only"
     fix: >-
       Remove the server lib import from the feature. Server-side data fetching

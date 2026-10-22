@@ -1,6 +1,6 @@
-import { AuthorizationCode, CodeVerifier } from '@coinlist-co/react/universal';
+import { AuthorizationCode, CodeVerifier } from '@passage-cl/react/universal';
 import { type NextRequest, NextResponse } from 'next/server';
-import { coinListServer } from '@/lib/coinlist-server';
+import { passageServer } from '@/lib/passage-server';
 import { cookiesSessionStore } from '@/lib/session-store';
 
 interface CompleteOAuthRequest {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { store, applyCookies } = cookiesSessionStore(request);
-  await coinListServer(store).auth.completeOAuth({
+  await passageServer(store).auth.completeOAuth({
     code: AuthorizationCode(code),
     codeVerifier: CodeVerifier(codeVerifier),
   });

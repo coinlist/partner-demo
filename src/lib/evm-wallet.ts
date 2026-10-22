@@ -1,8 +1,7 @@
 'use client';
 
-import type { ConnectWallet } from '@coinlist-co/react';
-import type { EthereumChain } from '@coinlist-co/react/universal';
-import { EvmWalletAddress } from '@coinlist-co/react/universal';
+import type { ConnectWallet, EthereumChain } from '@passage-cl/react/universal';
+import { EvmWalletAddress } from '@passage-cl/react/universal';
 import {
   useAppKit,
   useAppKitAccount,
@@ -47,8 +46,7 @@ export interface UseEvmWalletResult {
  * directly and the SDK stays wallet-stack agnostic.
  *
  * Scope is the connect-wallet / ownership-signature lifecycle only. Spending
- * from a wallet is a different contract: the invest flow and the SDK's
- * checkout both need a full `EvmWallet` that can approve, broadcast and await
+ * from a wallet is a different contract: the SDK's checkout needs a full `EvmWallet` that can approve, broadcast and await
  * a receipt, which is what {@link buildEvmWallet} and
  * {@link useCheckoutWallets} provide.
  *
