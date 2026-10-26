@@ -15,6 +15,7 @@
       devShells = eachSystem (pkgs: {
         default = pkgs.mkShell {
           packages = [
+            pkgs.git
             pkgs.nodejs_24
             pkgs.typescript
             pkgs.typescript-language-server

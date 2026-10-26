@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { coinListServer } from '@/lib/coinlist-server';
+import { passageServer } from '@/lib/passage-server';
 import { cookiesSessionStore } from '@/lib/session-store';
 
 export const config = {
@@ -14,7 +14,7 @@ export const config = {
 export async function proxy(request: NextRequest) {
   const { store, applyCookies } = cookiesSessionStore(request);
   try {
-    await coinListServer(store).auth.getAccessToken();
+    await passageServer(store).auth.getAccessToken();
   } catch {
     return NextResponse.next(); // degrade gracefully
   }

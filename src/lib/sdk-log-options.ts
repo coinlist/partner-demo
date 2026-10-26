@@ -1,4 +1,4 @@
-import type { PinoLoggerOptions } from '@coinlist-co/react/universal';
+import type { PinoLoggerOptions } from '@passage-cl/react/universal';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 
 /**
@@ -9,7 +9,7 @@ import { coinlistEnv } from '@/lib/coinlistEnv';
 type SdkLogAudience = 'production-api' | 'deployed-demo' | 'local-dev';
 
 /**
- * How much the CoinList SDK may report.
+ * How much the Passage SDK may report.
  *
  * `undefined` means the seam is absent rather than configured off: an omitted
  * `Config.logger` makes the SDK emit nothing on any codepath, with no

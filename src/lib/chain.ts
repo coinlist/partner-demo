@@ -1,5 +1,5 @@
-import type { EthereumChain } from '@coinlist-co/react/universal';
-import { getChainId } from '@coinlist-co/react/universal';
+import type { EthereumChain } from '@passage-cl/react/universal';
+import { getChainId } from '@passage-cl/react/universal';
 import { base, baseSepolia, mainnet, sepolia } from '@reown/appkit/networks';
 import type { Chain } from 'viem';
 
@@ -27,8 +27,7 @@ function resolveDemoChain(): EthereumChain {
   const value = process.env.NEXT_PUBLIC_CHAIN;
   // Unset defaults to a testnet: the demo currently serves only Sepolia
   // offers, so a mainnet default would turn a forgotten env var into a real
-  // approve on the wrong chain. Serving a mainnet offer works as-is - the SDK
-  // reads each offer's funding contracts off the offer itself, keyed by chain.
+  // approve on the wrong chain.
   if (!value) return 'ethereum_sepolia';
   // Set-but-invalid is a config mistake worth failing loudly on, rather than
   // silently sending traffic for the wrong chain.

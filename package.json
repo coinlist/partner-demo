@@ -15,29 +15,29 @@
     "fix": "npm run lint:fix"
   },
   "dependencies": {
-    "@coinlist-co/react": "0.12.2",
+    "@passage-cl/react": "0.14.1-rc.899985a",
     "@reown/appkit": "^1.8.24",
     "@reown/appkit-adapter-wagmi": "^1.8.24",
-    "@tanstack/react-query": "^5.104.5",
+    "@tanstack/react-query": "^5.105.0",
     "@wagmi/core": "^3.6.7",
     "accounts": "0.18.4",
     "lucide-react": "^1.61.0",
-    "next": "16.4.2",
+    "next": "16.4.3",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "viem": "^2.57.7",
+    "viem": "^2.57.11",
     "wagmi": "^3.7.9"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.2",
-    "@ivy-apps/deslop": "^0.11.1",
+    "@biomejs/biome": "^2.6.3",
+    "@ivy-apps/deslop": "^0.12.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@x402/core": "^2.25.0",
-    "@x402/evm": "^2.25.0",
-    "@x402/svm": "^2.25.0",
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/svm": "^2.28.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

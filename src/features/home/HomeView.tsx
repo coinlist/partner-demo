@@ -1,10 +1,7 @@
 'use client';
 
-import { OfferSaleCard, OfferSaleCardUi } from '@coinlist-co/react';
-import {
-  type Offer,
-  TokenRegistrySnapshot,
-} from '@coinlist-co/react/universal';
+import { OfferSaleCard, OfferSaleCardUi } from '@passage-cl/react';
+import { type Offer, TokenRegistrySnapshot } from '@passage-cl/react/universal';
 import type { ReactNode } from 'react';
 import { OndoOfferAssetCard } from '@/features/home/OndoOfferAssetCard';
 import type {
@@ -80,6 +77,22 @@ export function HomeView({ state, onEvent }: Props) {
                 docsHref="https://docs.passage.coinlist.co/use-cases/tokenized-assets"
               >
                 {state.superstateOffers.map((offer) => (
+                  <OfferSaleCard
+                    key={offer.id.toString()}
+                    offer={OfferSaleCardUi.fromOffer(offer, tokenOf(offer))}
+                    onClick={() => onOfferClick(offer)}
+                  />
+                ))}
+              </OfferSection>
+            ) : null}
+
+            {state.centrifugeOffers.length > 0 ? (
+              <OfferSection
+                title="Tokenized Funds from Centrifuge"
+                description="Tokenized fund shares issued through Centrifuge vaults. Orders settle asynchronously: invest now, then claim your shares once the order is processed."
+                docsHref="https://docs.passage.coinlist.co/use-cases/tokenized-assets"
+              >
+                {state.centrifugeOffers.map((offer) => (
                   <OfferSaleCard
                     key={offer.id.toString()}
                     offer={OfferSaleCardUi.fromOffer(offer, tokenOf(offer))}

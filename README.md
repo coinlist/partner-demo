@@ -1,7 +1,7 @@
 # CoinList Partner Demo
 
 This is a demo website demonstrating the integration with CoinList using the
-`@coinlist-co/react` SDK. It's live at [partner.coinlist.dev](https://partner.coinlist.dev/) 🚀
+`@passage-cl/react` SDK. It's live at [partner.coinlist.dev](https://partner.coinlist.dev/) 🚀
 
 We recommend reading [the official CoinList documentation](https://docs.coinlist.co/) while
 exploring the source code.
@@ -9,6 +9,7 @@ exploring the source code.
 ## Running locally
 
 1. Provide the environment variables
+
 ```shell
 cp .environments/.env.example .env
 ```

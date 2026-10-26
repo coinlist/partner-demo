@@ -3,7 +3,7 @@
 import {
   type CompleteOAuthFailureReason,
   useCompleteOAuth,
-} from '@coinlist-co/react';
+} from '@passage-cl/react';
 import { useRouter } from 'next/navigation';
 
 export default function CoinListCallbackPage() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { CoinListSignInCardContainer } from '@coinlist-co/react';
+import { CoinListSignInCardContainer } from '@passage-cl/react';
 import { ErrorBanner } from '@/components/ErrorBanner';
 import type { LoginUiState } from '@/features/login/useLoginViewModel';
 

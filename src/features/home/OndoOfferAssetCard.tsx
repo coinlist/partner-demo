@@ -4,8 +4,8 @@ import {
   OfferAssetCard,
   OfferAssetCardUi,
   useOfferDetails,
-} from '@coinlist-co/react';
-import type { Offer, TokenMetadata } from '@coinlist-co/react/universal';
+} from '@passage-cl/react';
+import type { Offer, TokenMetadata } from '@passage-cl/react/universal';
 
 /**
  * Ondo browse rows need name + symbol for {@link OfferAssetCard}. The Nabu

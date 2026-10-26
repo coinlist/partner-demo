@@ -5,13 +5,8 @@ import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
-import { APPKIT_NETWORK, DEMO_CHAIN } from '@/lib/chain';
+import { APPKIT_NETWORK } from '@/lib/chain';
 import { requiredEnv } from '@/lib/env';
-
-// The funding chain for the invest/participation flow. Env-driven via
-// `DEMO_CHAIN` (see `@/lib/chain`) so it tracks the same chain wallet-connect
-// and the ownership challenge use, instead of drifting to a hardcoded mainnet.
-export const ETHEREUM_CHAIN = DEMO_CHAIN;
 
 const projectId = requiredEnv(
   'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID',

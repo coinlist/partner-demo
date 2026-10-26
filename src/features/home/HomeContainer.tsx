@@ -1,6 +1,6 @@
 'use client';
 
-import type { Offer, TokenMetadata } from '@coinlist-co/react/universal';
+import type { Offer, TokenMetadata } from '@passage-cl/react/universal';
 import { HomeView } from '@/features/home/HomeView';
 import { useHomeViewModel } from '@/features/home/useHomeViewModel';
 
