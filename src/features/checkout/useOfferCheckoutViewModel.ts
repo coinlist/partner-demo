@@ -20,8 +20,8 @@ export type OfferCheckoutUiState = {
   /** Buy deposits into the asset. Sell redeems a holding of it. */
   side: OrderBookSide;
   /**
-   * The token-sale option to buy, or `undefined` for the offer's first. Every
-   * other offer type ignores it.
+   * The option to order, sent for token sales, Ondo swaps and Centrifuge
+   * vaults, or `undefined` for an offer with no options.
    */
   optionId: OfferOptionId | undefined;
   /** The chain the order executes on: balances, approval and broadcast. */

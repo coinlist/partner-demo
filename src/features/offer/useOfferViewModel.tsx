@@ -118,9 +118,10 @@ export type OfferCheckoutState =
       offerDetail: OfferDetail;
       side: OrderBookSide;
       /**
-       * The option picked on this page. Only a token sale reads it - its
-       * options each set their own price and minimum - and `null` lets the SDK
-       * default to the first.
+       * The option the page shows as selected: the user's pick, otherwise the
+       * offer's first. Token sales, Ondo swaps and Centrifuge vaults all send
+       * it with the order, and `null` (an offer with no options) lets the SDK
+       * pick.
        */
       optionId: OfferOptionId | null;
     };
@@ -189,7 +190,7 @@ export function useOfferViewModel(): {
         ? {
             type: 'OPEN',
             offerDetail,
-            optionId: selectedOptionId,
+            optionId: resolveOptionId(selectedOptionId, offerDetail),
             side: checkoutSide,
           }
         : { type: 'CLOSED' },
@@ -206,6 +207,14 @@ function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
   }
 
   return OfferId(id);
+}
+
+/** The user's pick, otherwise the offer's first option. */
+function resolveOptionId(
+  selectedOptionId: OfferOptionId | null,
+  offerDetail: OfferDetail
+): OfferOptionId | null {
+  return selectedOptionId ?? offerDetail.options[0]?.id ?? null;
 }
 
 function mapOfferUiState(
@@ -249,12 +258,11 @@ function mapOfferUiState(
         id: opt.id,
         slug: opt.slug.toString(),
       }));
-      const resolvedOptionId = selectedOptionId ?? options[0]?.id ?? null;
       return {
         type: 'CONTENT',
         offerId: OfferId(routeOfferId),
         options,
-        selectedOptionId: resolvedOptionId,
+        selectedOptionId: resolveOptionId(selectedOptionId, offerDetail),
         name: offerDetail.name,
         symbol: offerDetail.asset.code.toString(),
         tagline,
