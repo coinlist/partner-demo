@@ -3,7 +3,7 @@
 import { AlertCircle, Check } from 'lucide-react';
 import type React from 'react';
 import { createContext, useCallback, useEffect, useState } from 'react';
-import type { Toast, ToastType } from '@/components/toast/useToast';
+import type { Toast, ToastType } from '@/components/toast/types';
 
 export interface ToastContextType {
   toasts: Toast[];
