@@ -15,7 +15,7 @@
     "fix": "npm run lint:fix"
   },
   "dependencies": {
-    "@passage-cl/react": "0.14.1-rc.899985a",
+    "@passage-cl/react": "0.15.1-rc.96de6e2",
     "@reown/appkit": "^1.8.24",
     "@reown/appkit-adapter-wagmi": "^1.8.24",
     "@tanstack/react-query": "^5.105.0",
