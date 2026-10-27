@@ -190,7 +190,7 @@ export function useOfferViewModel(): {
         ? {
             type: 'OPEN',
             offerDetail,
-            optionId: resolveOptionId(selectedOptionId, offerDetail),
+            optionId: resolveOptionId(selectedOptionId, offerDetail.options),
             side: checkoutSide,
           }
         : { type: 'CLOSED' },
@@ -212,9 +212,9 @@ function parseRouteOfferId(id: string | string[] | undefined): OfferId | null {
 /** The user's pick, otherwise the offer's first option. */
 function resolveOptionId(
   selectedOptionId: OfferOptionId | null,
-  offerDetail: OfferDetail
+  options: OfferDetail['options']
 ): OfferOptionId | null {
-  return selectedOptionId ?? offerDetail.options[0]?.id ?? null;
+  return selectedOptionId ?? options[0]?.id ?? null;
 }
 
 function mapOfferUiState(
@@ -262,7 +262,10 @@ function mapOfferUiState(
         type: 'CONTENT',
         offerId: OfferId(routeOfferId),
         options,
-        selectedOptionId: resolveOptionId(selectedOptionId, offerDetail),
+        selectedOptionId: resolveOptionId(
+          selectedOptionId,
+          offerDetail.options
+        ),
         name: offerDetail.name,
         symbol: offerDetail.asset.code.toString(),
         tagline,
