@@ -126,7 +126,7 @@ export type OfferCheckoutState =
       optionId: OfferOptionId | null;
     };
 
-export function useOfferViewModel(): {
+export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
   checkout: OfferCheckoutState;
@@ -138,7 +138,9 @@ export function useOfferViewModel(): {
   const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
-  const { offerDetailsState } = useOfferDetails(offerId);
+  const { offerDetailsState } = useOfferDetails(offerId, {
+    data: seededOfferDetail,
+  });
   // Fetched here rather than seeded: this page is client-rendered, and the
   // registry is public, so the browser can read it directly.
   const { state: registryState } = useTokenRegistry();

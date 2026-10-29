@@ -3,6 +3,7 @@
 import type { ClientConfig } from '@passage-cl/react';
 import { PassageProvider, pinoClientLogger } from '@passage-cl/react';
 import { useMemo } from 'react';
+import { APPKIT_NETWORK, DEMO_CHAIN } from '@/lib/chain';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
 
@@ -43,6 +44,12 @@ export function DemoPassageProvider({
           expiresAt: new Date(data.expiresAt),
         };
       },
+      // With no user logged in, the Ondo calls and the requirements read go to
+      // this app's relay (`src/lib/relay.ts`), which adds the partner token.
+      relayBaseUrl: '/api/coinlist/relay',
+      // On-chain reads otherwise go through CoinList's RPC proxy, which needs
+      // a user, so an address-only visitor reads from the chain's public RPC.
+      rpc: { [DEMO_CHAIN]: APPKIT_NETWORK.rpcUrls.default.http[0] },
       // The browser half of the SDK's logging seam; the server half is wired in
       // `passage-server.ts` off the same options. Spread rather than
       // `logger: undefined`: the SDK's guarantee is about an absent key, and a
