@@ -2,11 +2,15 @@ import 'server-only';
 
 import {
   createPassageServer,
+  emptySessionStore,
   type PassageServer,
   pinoServerLogger,
   type SessionStore,
 } from '@passage-cl/react/server';
-import { ClientSecret } from '@passage-cl/react/universal';
+import {
+  type ClientCredentialsOAuth,
+  ClientSecret,
+} from '@passage-cl/react/universal';
 import { coinlistEnv } from '@/lib/coinlistEnv';
 import { requiredEnv } from '@/lib/env';
 import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
@@ -33,4 +37,36 @@ export function passageServer(sessionStore: SessionStore): PassageServer {
     // `logger: undefined`, as in `PassageProvider.tsx`.
     ...(logger ? { logger } : {}),
   });
+}
+
+const TOKEN_REFRESH_MARGIN_MS = 60_000;
+
+// Cached in this process, so a deployment with several instances holds one
+// token per instance.
+let token: ClientCredentialsOAuth | null = null;
+let tokenRequest: Promise<ClientCredentialsOAuth> | null = null;
+
+/**
+ * The partner's own `client_credentials` token, for reads and relayed calls
+ * with no CoinList user. It acts for every one of the partner's users, so it
+ * never leaves the server.
+ */
+export async function partnerToken(): Promise<ClientCredentialsOAuth> {
+  if (
+    token &&
+    token.expiresAt.getTime() - Date.now() > TOKEN_REFRESH_MARGIN_MS
+  ) {
+    return token;
+  }
+  // Concurrent calls share one exchange rather than each minting a token.
+  tokenRequest ??= passageServer(emptySessionStore())
+    .auth.clientCredentials()
+    .then((fresh) => {
+      token = fresh;
+      return fresh;
+    })
+    .finally(() => {
+      tokenRequest = null;
+    });
+  return tokenRequest;
 }

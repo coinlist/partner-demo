@@ -48,7 +48,8 @@ export function DemoPassageProvider({
       // this app's relay (`src/lib/relay.ts`), which adds the partner token.
       relayBaseUrl: '/api/coinlist/relay',
       // On-chain reads otherwise go through CoinList's RPC proxy, which needs
-      // a user, so an address-only visitor reads from the chain's public RPC.
+      // a user. Every visitor, logged in or not, reads the demo chain from its
+      // public RPC instead.
       rpc: { [DEMO_CHAIN]: APPKIT_NETWORK.rpcUrls.default.http[0] },
       // The browser half of the SDK's logging seam; the server half is wired in
       // `passage-server.ts` off the same options. Spread rather than

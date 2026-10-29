@@ -1,10 +1,8 @@
 import 'server-only';
 
-import { emptySessionStore } from '@passage-cl/react/server';
-import type { ClientCredentialsOAuth } from '@passage-cl/react/universal';
 import type { NextRequest } from 'next/server';
 import { coinlistEnv } from '@/lib/coinlistEnv';
-import { passageServer } from '@/lib/passage-server';
+import { partnerToken } from '@/lib/passage-server';
 
 /**
  * The reference relay for a caller with no CoinList user: the browser calls
@@ -16,20 +14,12 @@ import { passageServer } from '@/lib/passage-server';
  * address-only caller. Anything off this list is a 404 and never reaches
  * CoinList.
  */
-const ROUTES: { method: string; path: RegExp; rateLimited: boolean }[] = [
-  {
-    method: 'GET',
-    path: /^\/v1\/ondo\/swap\/trading-status$/,
-    rateLimited: false,
-  },
-  { method: 'GET', path: /^\/v1\/ondo\/swap\/quote$/, rateLimited: false },
-  { method: 'POST', path: /^\/v1\/ondo\/swap\/buy$/, rateLimited: true },
-  { method: 'POST', path: /^\/v1\/ondo\/swap\/sell$/, rateLimited: true },
-  {
-    method: 'GET',
-    path: /^\/v1\/offers\/[\w-]+\/requirements$/,
-    rateLimited: false,
-  },
+const RELAYED_CALLS: { method: string; path: RegExp }[] = [
+  { method: 'GET', path: /^\/v1\/ondo\/swap\/trading-status$/ },
+  { method: 'GET', path: /^\/v1\/ondo\/swap\/quote$/ },
+  { method: 'POST', path: /^\/v1\/ondo\/swap\/buy$/ },
+  { method: 'POST', path: /^\/v1\/ondo\/swap\/sell$/ },
+  { method: 'GET', path: /^\/v1\/offers\/[\w-]+\/requirements$/ },
 ];
 
 /**
@@ -47,23 +37,25 @@ const FORWARDED_HEADERS = [
 const API_BASE_URL = coinlistEnv.apiBaseUrl ?? 'https://api.coinlist.co';
 const MAX_BODY_BYTES = 16 * 1024;
 const UPSTREAM_TIMEOUT_MS = 15_000;
-const TOKEN_REFRESH_MARGIN_MS = 60_000;
 const RATE_LIMIT = { requests: 10, windowMs: 60_000 };
 
 export async function relay(
   request: NextRequest,
   path: string
 ): Promise<Response> {
-  const route = ROUTES.find(
-    (r) => r.method === request.method && r.path.test(path)
+  const allowed = RELAYED_CALLS.some(
+    (call) => call.method === request.method && call.path.test(path)
   );
-  if (!route) return status(404);
+  if (!allowed) return status(404);
 
-  if (route.rateLimited && isRateLimited(clientIp(request))) return status(429);
-
-  const body =
-    request.method === 'POST' ? await readCappedBody(request) : undefined;
-  if (body === null) return status(413);
+  // The only POSTs are buy and sell, the calls worth capping per visitor.
+  let body: Blob | undefined;
+  if (request.method === 'POST') {
+    if (isRateLimited(clientIp(request))) return status(429);
+    const capped = await readCappedBody(request);
+    if (capped === null) return status(413);
+    body = capped;
+  }
 
   const headers = new Headers();
   for (const name of FORWARDED_HEADERS) {
@@ -119,38 +111,16 @@ async function readCappedBody(request: NextRequest): Promise<Blob | null> {
   return new Blob(chunks);
 }
 
-// Token cache and rate-limit counters live in this process. A deployment with
-// several instances gets one token and one counter per instance; a partner
-// running more than one would move both to a shared store.
-
-let token: ClientCredentialsOAuth | null = null;
-let tokenRequest: Promise<ClientCredentialsOAuth> | null = null;
-
-export async function partnerToken(): Promise<ClientCredentialsOAuth> {
-  if (
-    token &&
-    token.expiresAt.getTime() - Date.now() > TOKEN_REFRESH_MARGIN_MS
-  ) {
-    return token;
-  }
-  // Concurrent calls share one exchange rather than each minting a token.
-  tokenRequest ??= passageServer(emptySessionStore())
-    .auth.clientCredentials()
-    .then((fresh) => {
-      token = fresh;
-      return fresh;
-    })
-    .finally(() => {
-      tokenRequest = null;
-    });
-  return tokenRequest;
-}
-
+// The counters live in this process, so a deployment with several instances
+// counts per instance; a partner running more than one would move them to a
+// shared store.
 const windows = new Map<string, { start: number; count: number }>();
+let lastSweep = 0;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
-  if (windows.size > 10_000) {
+  if (windows.size > 10_000 && now - lastSweep >= RATE_LIMIT.windowMs) {
+    lastSweep = now;
     for (const [key, { start }] of windows) {
       if (now - start >= RATE_LIMIT.windowMs) windows.delete(key);
     }
