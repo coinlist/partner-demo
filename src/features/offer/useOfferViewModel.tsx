@@ -120,10 +120,10 @@ export type OfferCheckoutState =
       /**
        * The option the page shows as selected: the user's pick, otherwise the
        * offer's first. Token sales, Ondo swaps and Centrifuge vaults all send
-       * it with the order, and `null` (an offer with no options) lets the SDK
-       * pick.
+       * it with the order. The SDK never picks one, so an offer with no
+       * options has no checkout.
        */
-      optionId: OfferOptionId | null;
+      optionId: OfferOptionId;
     };
 
 export function useOfferViewModel(): {
@@ -182,15 +182,19 @@ export function useOfferViewModel(): {
     }
   };
 
+  const checkoutOptionId = offerDetail
+    ? resolveOptionId(selectedOptionId, offerDetail.options)
+    : null;
+
   return {
     state,
     onEvent,
     checkout:
-      checkoutSide && offerDetail
+      checkoutSide && offerDetail && checkoutOptionId
         ? {
             type: 'OPEN',
             offerDetail,
-            optionId: resolveOptionId(selectedOptionId, offerDetail.options),
+            optionId: checkoutOptionId,
             side: checkoutSide,
           }
         : { type: 'CLOSED' },

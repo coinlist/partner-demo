@@ -10,7 +10,7 @@ import { useOfferCheckoutViewModel } from '@/features/checkout/useOfferCheckoutV
 
 interface Props {
   offerDetail: OfferDetail;
-  optionId: OfferOptionId | null;
+  optionId: OfferOptionId;
   side: OrderBookSide;
   onBack: () => void;
 }

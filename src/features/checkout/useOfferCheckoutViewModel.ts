@@ -21,9 +21,9 @@ export type OfferCheckoutUiState = {
   side: OrderBookSide;
   /**
    * The option to order, sent for token sales, Ondo swaps and Centrifuge
-   * vaults, or `undefined` for an offer with no options.
+   * vaults. The SDK requires it for every offer type.
    */
-  optionId: OfferOptionId | undefined;
+  optionId: OfferOptionId;
   /** The chain the order executes on: balances, approval and broadcast. */
   chain: EthereumChain;
   /** The wallets the buyer can spend from, and how to connect one. */
@@ -34,7 +34,7 @@ export type OfferCheckoutUiState = {
 
 export interface UseOfferCheckoutViewModelOptions {
   offerDetail: OfferDetail;
-  optionId: OfferOptionId | null;
+  optionId: OfferOptionId;
   side: OrderBookSide;
 }
 
@@ -63,7 +63,7 @@ export function useOfferCheckoutViewModel({
   const state: OfferCheckoutUiState = {
     offerDetail,
     side,
-    optionId: optionId ?? undefined,
+    optionId,
     chain: DEMO_CHAIN,
     wallets,
     config: CHECKOUT_CONFIG,
