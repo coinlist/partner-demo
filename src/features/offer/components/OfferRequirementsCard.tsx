@@ -125,7 +125,7 @@ export function OfferRequirementsCard({
       {claimableOffer ? (
         <ClaimContainer
           key={claimableOffer.id.toString()}
-          offer={claimableOffer}
+          offers={claimableOffer}
           wallets={claimWallets}
           config={CLAIM_CONFIG}
         />
