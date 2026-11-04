@@ -4,13 +4,18 @@ import { sepolia } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import { http, WagmiProvider } from 'wagmi';
 import { APPKIT_NETWORK } from '@/lib/chain';
 import { requiredEnv } from '@/lib/env';
 
 const projectId = requiredEnv(
   'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID',
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+);
+
+const sepoliaRpcUrl = requiredEnv(
+  'NEXT_PUBLIC_SEPOLIA_RPC_URL',
+  process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL
 );
 
 // The participation flow runs on the env-driven demo chain (Sepolia unless
@@ -27,6 +32,11 @@ const networks =
 const wagmiAdapter = new WagmiAdapter({
   networks: [...networks],
   projectId,
+  // Without a transport, AppKit reads Sepolia only from Reown's RPC (it rewrites
+  // the network's default RPC to Reown's), which refuses Sepolia on the free
+  // plan (HTTP 400, code 35). Receipt waits then fail, and every approval reads
+  // as failed although it mines. AppKit keeps Reown's RPC behind this one.
+  transports: { [sepolia.id]: http(sepoliaRpcUrl) },
 });
 
 createAppKit({
