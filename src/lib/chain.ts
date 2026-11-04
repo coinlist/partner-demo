@@ -16,6 +16,15 @@ export const CHAINS = {
 
 const ALLOWED_CHAINS = Object.keys(CHAINS) as EthereumChain[];
 
+export function isEthereumChain(value: unknown): value is EthereumChain {
+  return typeof value === 'string' && Object.hasOwn(CHAINS, value);
+}
+
+/** The SDK's name for an EVM chain id, or `null` for a chain it does not model. */
+export function ethereumChainOf(chainId: number): EthereumChain | null {
+  return ALLOWED_CHAINS.find((chain) => getChainId(chain) === chainId) ?? null;
+}
+
 /**
  * Single source of truth for which chain the demo runs on.
  *
@@ -31,9 +40,7 @@ function resolveDemoChain(): EthereumChain {
   if (!value) return 'ethereum_sepolia';
   // Set-but-invalid is a config mistake worth failing loudly on, rather than
   // silently sending traffic for the wrong chain.
-  if ((ALLOWED_CHAINS as string[]).includes(value)) {
-    return value as EthereumChain;
-  }
+  if (isEthereumChain(value)) return value;
   throw new Error(
     `Invalid NEXT_PUBLIC_CHAIN "${value}". Expected one of: ${ALLOWED_CHAINS.join(
       ', '

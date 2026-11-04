@@ -2,9 +2,14 @@
 
 import type { ClientConfig } from '@passage-cl/react';
 import { PassageProvider, pinoClientLogger } from '@passage-cl/react';
+import type { SignInMethod } from '@passage-cl/react/universal';
+import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { coinlistEnv } from '@/lib/coinlistEnv';
+import { useEvmWallet } from '@/lib/evm-wallet';
 import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
+import { postLogout } from '@/lib/sign-out';
+import { useWalletConnection } from '@/lib/wallet-connection';
 
 // Built once rather than per render: the options are a build-time constant, so
 // a logger rebuilt on every render would be a new pino instance each time - and
@@ -37,11 +42,12 @@ export function DemoPassageProvider({
         if (!res.ok) {
           throw new Error('GET /api/coinlist/oauth/access-token failed');
         }
-        const data = (await res.json()) as { value: string; expiresAt: string };
-        return {
-          value: data.value,
-          expiresAt: new Date(data.expiresAt),
+        const data = (await res.json()) as {
+          value: string;
+          expiresAt: string;
+          signInMethod: SignInMethod;
         };
+        return { ...data, expiresAt: new Date(data.expiresAt) };
       },
       // The browser half of the SDK's logging seam; the server half is wired in
       // `passage-server.ts` off the same options. Spread rather than
@@ -52,5 +58,45 @@ export function DemoPassageProvider({
     []
   );
 
-  return <PassageProvider config={config}>{children}</PassageProvider>;
+  const connection = useWalletConnection();
+  const { disconnect } = useEvmWallet();
+  const router = useRouter();
+
+  return (
+    <PassageProvider
+      config={config}
+      // Wallet sign-in goes through this app's server, as OAuth does: the
+      // challenge needs the partner's own token, and the session lands in the
+      // same httpOnly cookie.
+      walletSignIn={{
+        challenge: (params) =>
+          postJson('/api/coinlist/wallet/challenge', params),
+        complete: async (params) => {
+          await postJson('/api/coinlist/wallet/complete', params);
+        },
+        // Disconnected, the visitor connects and signs in again on the
+        // offer's network. The server components read the cleared cookie
+        // only on a refresh after the logout route has cleared it.
+        signOut: async () => {
+          void disconnect();
+          await postLogout();
+          router.refresh();
+        },
+        connection,
+      }}
+    >
+      {children}
+    </PassageProvider>
+  );
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`POST ${path} failed`);
+  return (await res.json()) as T;
 }

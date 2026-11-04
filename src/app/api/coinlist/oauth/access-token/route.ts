@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     NextResponse.json({
       value: token.value,
       expiresAt: token.expiresAt.toISOString(),
+      signInMethod: token.signInMethod,
     })
   );
 }

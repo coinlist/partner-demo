@@ -4,6 +4,7 @@ import { usePassage } from '@passage-cl/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/routes';
+import { postLogout } from '@/lib/sign-out';
 
 export type SettingsUiState = {
   logoutLoading: boolean;
@@ -38,11 +39,7 @@ export function useSettingsViewModel(): {
     setLogoutLoading(true);
     setLogoutError(null);
     try {
-      const res = await fetch('/api/coinlist/oauth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error('logout failed');
+      await postLogout();
       passage.auth.logout();
       router.replace(ROUTES.ROOT);
     } catch {

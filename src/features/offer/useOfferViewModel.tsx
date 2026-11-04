@@ -4,6 +4,7 @@ import {
   type LoadOfferDetailsState,
   OfferLogoUi,
   useOfferDetails,
+  usePassage,
   useTokenRegistry,
 } from '@passage-cl/react';
 import {
@@ -13,10 +14,11 @@ import {
   type OfferOptionId,
   type OfferType,
   type OrderBookSide,
+  type SignInMethod,
   TokenRegistrySnapshot,
 } from '@passage-cl/react/universal';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ROUTES } from '@/lib/routes';
 
 export type OfferUiLink = {
@@ -126,7 +128,12 @@ export type OfferCheckoutState =
       optionId: OfferOptionId;
     };
 
-export function useOfferViewModel(): {
+/** The sign-in each option takes, for a visitor with no CoinList account. */
+export type SignInByOption = Partial<
+  Record<OfferOptionId, SignInMethod['method']>
+>;
+
+export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
   checkout: OfferCheckoutState;
@@ -136,11 +143,20 @@ export function useOfferViewModel(): {
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
   const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
+  const { authState } = usePassage();
+  // A wallet session that ends mid-checkout leaves nothing to order with, so
+  // the visitor is back on the offer, to connect and sign in again. Signed
+  // out, the page opens no checkout.
+  useEffect(() => {
+    if (authState.type === 'logged-out') setCheckoutSide(null);
+  }, [authState.type]);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
-  const { offerDetailsState } = useOfferDetails(offerId);
-  // Fetched here rather than seeded: this page is client-rendered, and the
-  // registry is public, so the browser can read it directly.
+  const { offerDetailsState } = useOfferDetails(offerId, {
+    data: seededOfferDetail,
+  });
+  // Fetched here rather than seeded: the registry is public, so the browser
+  // can read it directly.
   const { state: registryState } = useTokenRegistry();
   const registry =
     registryState.type === 'CONTENT' ? registryState.registry : null;

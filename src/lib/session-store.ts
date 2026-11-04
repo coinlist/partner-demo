@@ -1,9 +1,13 @@
 import 'server-only';
 
 import type { SessionStore } from '@passage-cl/react/server';
-import type { OAuthSession } from '@passage-cl/react/universal';
-import { OAuthRefreshToken } from '@passage-cl/react/universal';
+import type { OAuthSession, SignInMethod } from '@passage-cl/react/universal';
+import {
+  EvmWalletAddress,
+  OAuthRefreshToken,
+} from '@passage-cl/react/universal';
 import type { NextRequest, NextResponse } from 'next/server';
+import { isEthereumChain } from '@/lib/chain';
 
 const COINLIST_SESSION_COOKIE = 'coinlist_session';
 
@@ -73,7 +77,11 @@ function deserializeSession(raw?: string): OAuthSession | null {
 
   if (typeof parsed !== 'object' || parsed == null) return null;
   const maybe = parsed as {
-    accessToken?: { value?: unknown; expiresAt?: unknown };
+    accessToken?: {
+      value?: unknown;
+      expiresAt?: unknown;
+      signInMethod?: unknown;
+    };
     refreshToken?: unknown;
   };
 
@@ -87,8 +95,16 @@ function deserializeSession(raw?: string): OAuthSession | null {
   const expiresAt = new Date(maybe.accessToken.expiresAt);
   if (Number.isNaN(expiresAt.getTime())) return null;
 
+  // A cookie from before wallet sign-in says nothing, and is a CoinList login,
+  // as the SDK reads such a token.
+  const signInMethod =
+    maybe.accessToken.signInMethod === undefined
+      ? { method: 'coinlist' as const }
+      : parseSignInMethod(maybe.accessToken.signInMethod);
+  if (!signInMethod) return null;
+
   return {
-    accessToken: { value: maybe.accessToken.value, expiresAt },
+    accessToken: { value: maybe.accessToken.value, expiresAt, signInMethod },
     ...(typeof maybe.refreshToken === 'string' && maybe.refreshToken !== ''
       ? { refreshToken: OAuthRefreshToken(maybe.refreshToken) }
       : {}),
@@ -100,9 +116,33 @@ function serializeSession(session: OAuthSession): string {
     accessToken: {
       value: session.accessToken.value,
       expiresAt: session.accessToken.expiresAt.toISOString(),
+      signInMethod: session.accessToken.signInMethod,
     },
     ...(session.refreshToken
       ? { refreshToken: String(session.refreshToken) }
       : {}),
   });
+}
+
+function parseSignInMethod(value: unknown): SignInMethod | null {
+  if (typeof value !== 'object' || value == null) return null;
+  const maybe = value as {
+    method?: unknown;
+    wallet?: { address?: unknown; chain?: unknown };
+  };
+  if (maybe.method === 'coinlist') return { method: 'coinlist' };
+  if (
+    maybe.method === 'wallet' &&
+    typeof maybe.wallet?.address === 'string' &&
+    isEthereumChain(maybe.wallet.chain)
+  ) {
+    return {
+      method: 'wallet',
+      wallet: {
+        address: EvmWalletAddress(maybe.wallet.address),
+        chain: maybe.wallet.chain,
+      },
+    };
+  }
+  return null;
 }
