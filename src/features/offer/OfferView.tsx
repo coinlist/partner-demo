@@ -17,9 +17,10 @@ import type {
 export interface Props {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
+  isCoinListUser: boolean;
 }
 
-export function OfferView({ state, onEvent }: Props) {
+export function OfferView({ state, onEvent, isCoinListUser }: Props) {
   if (state.type === 'LOADING') {
     return (
       <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -95,6 +96,7 @@ export function OfferView({ state, onEvent }: Props) {
               options={state.options}
               selectedOptionId={state.selectedOptionId}
               claimableOffer={state.claimableOffer}
+              isCoinListUser={isCoinListUser}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }

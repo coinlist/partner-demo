@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { ToastProvider } from '@/components/toast/Toast';
 import { DemoPassageProvider } from '@/lib/providers/PassageProvider';
+import { SignInMethodProvider } from '@/lib/providers/SignInMethodProvider';
 import { WalletConnectProvider } from '@/lib/providers/WalletConnectProvider';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -19,7 +20,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WalletConnectProvider>
       <DemoPassageProvider>
-        <ToastProvider>{children}</ToastProvider>
+        <SignInMethodProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </SignInMethodProvider>
       </DemoPassageProvider>
     </WalletConnectProvider>
   );

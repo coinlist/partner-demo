@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { LoginView } from '@/features/login/LoginView';
 import { useLoginViewModel } from '@/features/login/useLoginViewModel';
+import { useWalletSignInViewModel } from '@/features/wallet-sign-in/useWalletSignInViewModel';
 
 export function LoginContainer() {
   return (
@@ -14,7 +15,8 @@ export function LoginContainer() {
 
 function LoginContainerContent() {
   const { state } = useLoginViewModel();
-  return <LoginView state={state} />;
+  const walletSignIn = useWalletSignInViewModel();
+  return <LoginView state={state} walletSignIn={walletSignIn} />;
 }
 
 function LoginFallback() {

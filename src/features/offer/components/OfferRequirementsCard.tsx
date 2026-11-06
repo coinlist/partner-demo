@@ -3,6 +3,7 @@
 import {
   ClaimContainer,
   RequirementsChecklistContainer,
+  usePassage,
 } from '@passage-cl/react';
 import type {
   AsyncOfferDetail,
@@ -22,6 +23,7 @@ export function OfferRequirementsCard({
   options,
   selectedOptionId,
   claimableOffer,
+  isCoinListUser,
   onOptionSelect,
   onContinue,
   onSell,
@@ -30,6 +32,11 @@ export function OfferRequirementsCard({
   options: OfferUiOption[];
   selectedOptionId: OfferOptionId | null;
   claimableOffer: AsyncOfferDetail | null;
+  /**
+   * Requirement statuses belong to a CoinList user, so a visitor without an
+   * account signs in from the header, then buys.
+   */
+  isCoinListUser: boolean;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
   /**
@@ -39,11 +46,20 @@ export function OfferRequirementsCard({
   onSell?: () => void;
 }) {
   const { connectWallet, connect } = useEvmWallet();
+  const { authState } = usePassage();
+  const signedIn = authState.type === 'logged-in';
+  const buyLabel = onSell ? 'Buy' : 'Continue';
   const claimWallets = useClaimWallets();
   const hasChoice = options.length > 1;
   const [confirmed, setConfirmed] = useState(!hasChoice);
   const selectedOption = options.find((opt) => opt.id === selectedOptionId);
   const showRequirements = !hasChoice || confirmed;
+  // The SDK's token-sale claim has no check for a wallet session, which would
+  // read as an error card, so a wallet session claims on a vault only.
+  const showClaim =
+    claimableOffer &&
+    (isCoinListUser ||
+      (signedIn && claimableOffer.type === 'centrifuge::vault'));
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -73,17 +89,29 @@ export function OfferRequirementsCard({
 
         {showRequirements && selectedOptionId ? (
           <>
-            <RequirementsChecklistContainer
-              offerId={offerId}
-              optionId={selectedOptionId}
-              title="Sale Requirements"
-              description="Complete the requirements below to be eligible."
-              onContinue={onContinue}
-              continueLabel={onSell ? 'Buy' : 'Continue'}
-              wallet={connectWallet}
-              onRequestConnect={connect}
-            />
-            {onSell ? (
+            {/* The SDK's checkout opens a signed-out visitor as it is, and its
+                reads then fail, so Buy and Sell wait for the header's sign-in. */}
+            {isCoinListUser ? (
+              <RequirementsChecklistContainer
+                offerId={offerId}
+                optionId={selectedOptionId}
+                title="Sale Requirements"
+                description="Complete the requirements below to be eligible."
+                onContinue={onContinue}
+                continueLabel={buyLabel}
+                wallet={connectWallet}
+                onRequestConnect={connect}
+              />
+            ) : signedIn ? (
+              <button
+                type="button"
+                onClick={onContinue}
+                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              >
+                {buyLabel}
+              </button>
+            ) : null}
+            {onSell && (isCoinListUser || signedIn) ? (
               <button
                 type="button"
                 onClick={onSell}
@@ -122,7 +150,7 @@ export function OfferRequirementsCard({
 
       {/* Below the card rather than inside it, so the orders get the
           column's full width. */}
-      {claimableOffer ? (
+      {showClaim ? (
         <ClaimContainer
           key={claimableOffer.id.toString()}
           offers={claimableOffer}

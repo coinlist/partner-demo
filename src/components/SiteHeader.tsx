@@ -1,6 +1,6 @@
-import { Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { HeaderAccount } from '@/features/header/HeaderAccount';
 import { ROUTES } from '@/lib/routes';
 
 const DOCS_HREF = 'https://docs.passage.coinlist.co';
@@ -37,13 +37,7 @@ export function SiteHeader() {
           >
             View our docs
           </a>
-          <Link
-            href={ROUTES.SETTINGS}
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-3.5 py-1.5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-          >
-            <Settings size={16} />
-            Settings
-          </Link>
+          <HeaderAccount />
         </div>
       </div>
     </header>

@@ -1,19 +1,13 @@
 'use client';
 
 import type { CheckoutWalletSelection } from '@passage-cl/react';
-import {
-  type EvmWallet,
-  EvmWalletAddress,
-  type ExternalWalletAdapter,
+import type {
+  EvmWallet,
+  ExternalWalletAdapter,
 } from '@passage-cl/react/universal';
-import {
-  useAppKit,
-  useAppKitAccount,
-  useDisconnect,
-} from '@reown/appkit/react';
+import { useAppKit, useDisconnect } from '@reown/appkit/react';
 import { useMemo } from 'react';
-import { useConfig, useWalletClient } from 'wagmi';
-import { buildEvmWallet } from '@/lib/wagmiEvmWallet';
+import { useConnectedWallet } from '@/lib/evm-wallet';
 
 /**
  * The demo ships no custodial wallets, so the embedded list is always empty -
@@ -42,20 +36,9 @@ const NO_EMBEDDED_WALLETS: EvmWallet[] = [];
  * checkout runs on is `CheckoutContainer`'s `chain` prop.
  */
 export function useCheckoutWallets(): CheckoutWalletSelection {
-  const wagmiConfig = useConfig();
-  const { address, isConnected } = useAppKitAccount();
-  const { data: walletClient } = useWalletClient();
+  const external = useConnectedWallet();
   const { open } = useAppKit();
   const { disconnect } = useDisconnect();
-
-  const external = useMemo<EvmWallet | null>(() => {
-    if (!(isConnected && address && walletClient)) return null;
-    return buildEvmWallet({
-      address: EvmWalletAddress(address),
-      walletClient,
-      config: wagmiConfig,
-    });
-  }, [address, isConnected, walletClient, wagmiConfig]);
 
   /**
    * AppKit's `open()` resolves when the modal opens, not when the user
