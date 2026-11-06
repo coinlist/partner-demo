@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
     walletAddress?: unknown;
     chain?: unknown;
     signature?: unknown;
-  } = await request.json().catch(() => ({}));
+    // A JSON body can be a literal `null`, which has no fields to read.
+  } = (await request.json().catch(() => null)) ?? {};
   if (
     typeof body.walletAddress !== 'string' ||
     !isEthereumChain(body.chain) ||

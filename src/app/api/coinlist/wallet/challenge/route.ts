@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
   }
 
-  const body: { walletAddress?: unknown; chain?: unknown } = await request
-    .json()
-    .catch(() => ({}));
+  // A JSON body can be a literal `null`, which has no fields to read.
+  const body: { walletAddress?: unknown; chain?: unknown } =
+    (await request.json().catch(() => null)) ?? {};
   if (typeof body.walletAddress !== 'string' || !isEthereumChain(body.chain)) {
     return NextResponse.json({ error: 'missing_fields' }, { status: 400 });
   }
