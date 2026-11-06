@@ -5,8 +5,7 @@ import type { EvmWallet } from '@passage-cl/react/universal';
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { useEvmWallet } from '@/lib/evm-wallet';
-import { useConnectedWallet } from '@/lib/wallet-connection';
+import { useConnectedWallet, useEvmWallet } from '@/lib/evm-wallet';
 
 export type WalletSignInUiState = {
   label: string;
@@ -16,14 +15,16 @@ export type WalletSignInUiState = {
 
 export type WalletSignInUiEvent = { type: 'ON_SIGN_IN_CLICK' };
 
+export type WalletSignInViewModel = {
+  state: WalletSignInUiState;
+  onEvent: (event: WalletSignInUiEvent) => void;
+};
+
 /**
  * One click from a disconnected visitor connects and then signs in: the
  * click opens AppKit, and the sign-in starts once the wallet arrives.
  */
-export function useWalletSignInViewModel(): {
-  state: WalletSignInUiState;
-  onEvent: (event: WalletSignInUiEvent) => void;
-} {
+export function useWalletSignInViewModel(): WalletSignInViewModel {
   const wallet = useConnectedWallet();
   const { connect } = useEvmWallet();
   const { state, signIn } = useWalletSignIn();

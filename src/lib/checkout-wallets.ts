@@ -7,7 +7,7 @@ import type {
 } from '@passage-cl/react/universal';
 import { useAppKit, useDisconnect } from '@reown/appkit/react';
 import { useMemo } from 'react';
-import { useConnectedWallet } from '@/lib/wallet-connection';
+import { useConnectedWallet } from '@/lib/evm-wallet';
 
 /**
  * The demo ships no custodial wallets, so the embedded list is always empty -

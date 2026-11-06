@@ -1,3 +1,4 @@
+import type { PassageServer } from '@passage-cl/react/server';
 import type { OfferType } from '@passage-cl/react/universal';
 import { HomeContainer } from '@/features/home/HomeContainer';
 import { LoginContainer } from '@/features/login/LoginContainer';
@@ -9,8 +10,6 @@ const WALLET_OFFER_TYPES: readonly OfferType[] = [
   'ondo::swap',
   'centrifuge::vault',
 ];
-
-type PassageServer = ReturnType<typeof passageServer>;
 
 /** A wallet session reaches only checkout calls, so the partner token reads. */
 async function listOffersForWallet(passage: PassageServer) {

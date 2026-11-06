@@ -95,12 +95,7 @@ function deserializeSession(raw?: string): OAuthSession | null {
   const expiresAt = new Date(maybe.accessToken.expiresAt);
   if (Number.isNaN(expiresAt.getTime())) return null;
 
-  // A cookie from before wallet sign-in says nothing, and is a CoinList login,
-  // as the SDK reads such a token.
-  const signInMethod =
-    maybe.accessToken.signInMethod === undefined
-      ? { method: 'coinlist' as const }
-      : parseSignInMethod(maybe.accessToken.signInMethod);
+  const signInMethod = parseSignInMethod(maybe.accessToken.signInMethod);
   if (!signInMethod) return null;
 
   return {
@@ -125,6 +120,9 @@ function serializeSession(session: OAuthSession): string {
 }
 
 function parseSignInMethod(value: unknown): SignInMethod | null {
+  // A cookie from before wallet sign-in says nothing, and is a CoinList login,
+  // as the SDK reads such a token.
+  if (value === undefined) return { method: 'coinlist' };
   if (typeof value !== 'object' || value == null) return null;
   const maybe = value as {
     method?: unknown;

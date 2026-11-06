@@ -1,18 +1,13 @@
 'use client';
 
 import { InlineErrorText } from '@/components/InlineErrorText';
-import type {
-  WalletSignInUiEvent,
-  WalletSignInUiState,
-} from '@/features/wallet-sign-in/useWalletSignInViewModel';
+import type { WalletSignInViewModel } from '@/features/wallet-sign-in/useWalletSignInViewModel';
 
 export function WalletSignInButton({
   state,
   onEvent,
   className,
-}: {
-  state: WalletSignInUiState;
-  onEvent: (event: WalletSignInUiEvent) => void;
+}: WalletSignInViewModel & {
   className: string;
 }) {
   return (

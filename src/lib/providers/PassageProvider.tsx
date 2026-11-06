@@ -6,10 +6,9 @@ import type { SignInMethod } from '@passage-cl/react/universal';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { coinlistEnv } from '@/lib/coinlistEnv';
-import { useEvmWallet } from '@/lib/evm-wallet';
+import { useEvmWallet, useWalletConnection } from '@/lib/evm-wallet';
 import { SDK_LOG_OPTIONS } from '@/lib/sdk-log-options';
 import { postLogout } from '@/lib/sign-out';
-import { useWalletConnection } from '@/lib/wallet-connection';
 
 // Built once rather than per render: the options are a build-time constant, so
 // a logger rebuilt on every render would be a new pino instance each time - and
@@ -74,12 +73,13 @@ export function DemoPassageProvider({
         complete: async (params) => {
           await postJson('/api/coinlist/wallet/complete', params);
         },
-        // Disconnected, the visitor connects and signs in again on the
-        // offer's network. The server components read the cleared cookie
-        // only on a refresh after the logout route has cleared it.
         signOut: async () => {
+          // Disconnected, the visitor connects and signs in again on the
+          // offer's network.
           void disconnect();
           await postLogout();
+          // The server components read the cleared cookie only on a refresh
+          // after the logout route has cleared it.
           router.refresh();
         },
         connection,

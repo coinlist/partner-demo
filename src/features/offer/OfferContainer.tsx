@@ -29,9 +29,7 @@ export function OfferContainer({ withoutAccount }: Props) {
   // The header offers the sign-in the selected option takes, or the CoinList
   // login when its requirements did not load.
   useOfferSignInMethod(
-    (withoutAccount &&
-      selectedOptionId &&
-      withoutAccount.signInByOption[selectedOptionId]) ||
+    (selectedOptionId && withoutAccount?.signInByOption[selectedOptionId]) ||
       'coinlist'
   );
 
@@ -53,7 +51,7 @@ export function OfferContainer({ withoutAccount }: Props) {
     <OfferView
       state={state}
       onEvent={onEvent}
-      signInByOption={withoutAccount?.signInByOption ?? null}
+      isCoinListUser={!withoutAccount}
     />
   );
 }

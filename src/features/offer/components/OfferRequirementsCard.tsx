@@ -11,11 +11,7 @@ import type {
   OfferOptionId,
 } from '@passage-cl/react/universal';
 import { useState } from 'react';
-import { PRIMARY_BUTTON } from '@/components/buttons';
-import type {
-  OfferUiOption,
-  SignInByOption,
-} from '@/features/offer/useOfferViewModel';
+import type { OfferUiOption } from '@/features/offer/useOfferViewModel';
 import { useClaimWallets } from '@/lib/claim-wallets';
 import { useEvmWallet } from '@/lib/evm-wallet';
 
@@ -27,7 +23,7 @@ export function OfferRequirementsCard({
   options,
   selectedOptionId,
   claimableOffer,
-  signInByOption,
+  isCoinListUser,
   onOptionSelect,
   onContinue,
   onSell,
@@ -37,10 +33,10 @@ export function OfferRequirementsCard({
   selectedOptionId: OfferOptionId | null;
   claimableOffer: AsyncOfferDetail | null;
   /**
-   * `null` for a CoinList user. Requirement statuses belong to one, so a visitor
-   * without an account signs in from the header, then buys.
+   * Requirement statuses belong to a CoinList user, so a visitor without an
+   * account signs in from the header, then buys.
    */
-  signInByOption: SignInByOption | null;
+  isCoinListUser: boolean;
   onOptionSelect: (optionId: OfferOptionId) => void;
   onContinue: () => void;
   /**
@@ -62,7 +58,7 @@ export function OfferRequirementsCard({
   // read as an error card, so a wallet session claims on a vault only.
   const showClaim =
     claimableOffer &&
-    (signInByOption === null ||
+    (isCoinListUser ||
       (signedIn && claimableOffer.type === 'centrifuge::vault'));
 
   return (
@@ -95,7 +91,7 @@ export function OfferRequirementsCard({
           <>
             {/* The SDK's checkout opens a signed-out visitor as it is, and its
                 reads then fail, so Buy and Sell wait for the header's sign-in. */}
-            {signInByOption === null ? (
+            {isCoinListUser ? (
               <RequirementsChecklistContainer
                 offerId={offerId}
                 optionId={selectedOptionId}
@@ -110,12 +106,12 @@ export function OfferRequirementsCard({
               <button
                 type="button"
                 onClick={onContinue}
-                className={PRIMARY_BUTTON}
+                className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
               >
                 {buyLabel}
               </button>
             ) : null}
-            {onSell && (signInByOption === null || signedIn) ? (
+            {onSell && (isCoinListUser || signedIn) ? (
               <button
                 type="button"
                 onClick={onSell}
@@ -144,7 +140,7 @@ export function OfferRequirementsCard({
               type="button"
               disabled={!selectedOptionId}
               onClick={() => setConfirmed(true)}
-              className={PRIMARY_BUTTON}
+              className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
             >
               Continue
             </button>

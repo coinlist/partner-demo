@@ -14,23 +14,26 @@ const CHALLENGE_TTL_SECONDS = 10 * 60;
 
 type ChallengedWallet = { walletAddress: string; chain: EthereumChain };
 
+function challengeCookieValue({
+  walletAddress,
+  chain,
+}: ChallengedWallet): string {
+  return JSON.stringify({ walletAddress: walletAddress.toLowerCase(), chain });
+}
+
 /** Remembers, in this browser only, which wallet it asked a challenge for. */
 export function rememberChallenge(
   response: NextResponse,
-  { walletAddress, chain }: ChallengedWallet
+  wallet: ChallengedWallet
 ): NextResponse {
-  response.cookies.set(
-    CHALLENGE_COOKIE,
-    JSON.stringify({ walletAddress: walletAddress.toLowerCase(), chain }),
-    {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      // Strict, so a cross-site post to the complete route arrives without it.
-      sameSite: 'strict',
-      path: '/api/coinlist/wallet',
-      maxAge: CHALLENGE_TTL_SECONDS,
-    }
-  );
+  response.cookies.set(CHALLENGE_COOKIE, challengeCookieValue(wallet), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    // Strict, so a cross-site post to the complete route arrives without it.
+    sameSite: 'strict',
+    path: '/api/coinlist/wallet',
+    maxAge: CHALLENGE_TTL_SECONDS,
+  });
   return response;
 }
 
@@ -40,20 +43,13 @@ export function rememberChallenge(
  */
 export function isFromChallengingBrowser(
   request: NextRequest,
-  { walletAddress, chain }: ChallengedWallet
+  wallet: ChallengedWallet
 ): boolean {
-  if (request.headers.get('origin') !== SITE_ORIGIN) return false;
-  const raw = request.cookies.get(CHALLENGE_COOKIE)?.value;
-  if (!raw) return false;
-  try {
-    const challenged = JSON.parse(raw) as Partial<ChallengedWallet>;
-    return (
-      challenged.walletAddress === walletAddress.toLowerCase() &&
-      challenged.chain === chain
-    );
-  } catch {
-    return false;
-  }
+  return (
+    request.headers.get('origin') === SITE_ORIGIN &&
+    request.cookies.get(CHALLENGE_COOKIE)?.value ===
+      challengeCookieValue(wallet)
+  );
 }
 
 export function forgetChallenge(response: NextResponse): NextResponse {

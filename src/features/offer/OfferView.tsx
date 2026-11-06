@@ -12,17 +12,15 @@ import { OfferRequirementsCard } from '@/features/offer/components/OfferRequirem
 import type {
   OfferUiEvent,
   OfferUiState,
-  SignInByOption,
 } from '@/features/offer/useOfferViewModel';
 
 export interface Props {
   state: OfferUiState;
   onEvent: (event: OfferUiEvent) => void;
-  /** `null` for a CoinList user, who completes the requirements checklist. */
-  signInByOption: SignInByOption | null;
+  isCoinListUser: boolean;
 }
 
-export function OfferView({ state, onEvent, signInByOption }: Props) {
+export function OfferView({ state, onEvent, isCoinListUser }: Props) {
   if (state.type === 'LOADING') {
     return (
       <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
@@ -98,7 +96,7 @@ export function OfferView({ state, onEvent, signInByOption }: Props) {
               options={state.options}
               selectedOptionId={state.selectedOptionId}
               claimableOffer={state.claimableOffer}
-              signInByOption={signInByOption}
+              isCoinListUser={isCoinListUser}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
