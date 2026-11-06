@@ -29,6 +29,8 @@ export function isRateLimited(request: NextRequest): boolean {
   return window.count > RATE_LIMIT.requests;
 }
 
+// Trust this header only behind a proxy that overwrites it, as Vercel does.
+// Served directly, a client can send any value and get a new window each time.
 function clientIp(request: NextRequest): string {
   return (
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
