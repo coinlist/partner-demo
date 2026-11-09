@@ -47,7 +47,9 @@ export function useHomeViewModel(
     const tokenSaleOffers = list.filter(
       (o) => o.type === 'coinlist::token_sale'
     );
-    const ondoOffers = list.filter((o) => o.type === 'ondo::swap');
+    const ondoOffers = list.filter(
+      (o) => o.type === 'ondo::swap' || o.type === 'ondo::portfolio'
+    );
     const superstateOffers = list.filter((o) => o.type === 'superstate::swap');
     const centrifugeOffers = list.filter((o) => o.type === 'centrifuge::vault');
     return {

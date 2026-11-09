@@ -271,13 +271,8 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Ondo swaps and Centrifuge vaults omit OfferEditorial (no campaign
-      // copy).
-      const tagline =
-        offerDetail.type === 'ondo::swap' ||
-        offerDetail.type === 'centrifuge::vault'
-          ? null
-          : offerDetail.tagline;
+      // Only offer types with OfferEditorial (campaign copy) carry a tagline.
+      const tagline = 'tagline' in offerDetail ? offerDetail.tagline : null;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
@@ -341,6 +336,7 @@ function isSellable(type: OfferType): boolean {
   switch (type) {
     case 'centrifuge::vault':
     case 'ondo::swap':
+    case 'ondo::portfolio':
       return true;
     case 'coinlist::token_sale':
     case 'superstate::swap':
