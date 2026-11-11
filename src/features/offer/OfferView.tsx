@@ -95,21 +95,16 @@ export function OfferView({ state, onEvent, isCoinListUser }: Props) {
           )}
           <div className="md:col-start-2 md:row-span-2 md:row-start-1">
             <OfferRequirementsCard
-              offerId={state.offerId}
+              offer={state.offerDetail}
+              defaultSide={state.lastSide}
               options={state.options}
               selectedOptionId={state.selectedOptionId}
               claimableOffer={state.claimableOffer}
               isCoinListUser={isCoinListUser}
-              tradeToggle={state.portfolio !== null}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
-              onContinue={() => onEvent({ type: 'ON_INVEST_CLICK' })}
-              onSell={
-                state.canSell
-                  ? () => onEvent({ type: 'ON_SELL_CLICK' })
-                  : undefined
-              }
+              onContinue={(side) => onEvent({ type: 'ON_CONTINUE', side })}
             />
           </div>
           <div className="flex min-w-0 flex-col gap-8 md:col-start-1">
