@@ -3,6 +3,7 @@
 import {
   type LoadOfferDetailsState,
   OfferLogoUi,
+  PortfolioOfferDetailsUi,
   useOfferDetails,
   usePassage,
   useTokenRegistry,
@@ -72,6 +73,11 @@ export type OfferUiState =
       milestones: OfferUiMilestone[];
       faqs: OfferUiFaq[];
       isTokenSale: boolean;
+      /**
+       * The portfolio column, when this offer is an Ondo portfolio. Null for
+       * every other offer type, which keeps the sale layout.
+       */
+      portfolio: PortfolioOfferDetailsUi | null;
       /**
        * Whether the offer can be sold as well as bought: a Centrifuge vault
        * redeems, an Ondo swap sells back.
@@ -271,12 +277,21 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Only offer types with OfferEditorial (campaign copy) carry a tagline.
-      const tagline = 'tagline' in offerDetail ? offerDetail.tagline : null;
+      // Ondo swaps, Ondo portfolios and Centrifuge vaults omit OfferEditorial
+      // (no campaign copy).
+      const tagline =
+        offerDetail.type === 'ondo::swap' ||
+        offerDetail.type === 'ondo::portfolio' ||
+        offerDetail.type === 'centrifuge::vault'
+          ? null
+          : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
         id: opt.id,
         slug: opt.slug.toString(),
       }));
+      const tokenMetadata = registry
+        ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
+        : null;
       return {
         type: 'CONTENT',
         offerId: OfferId(routeOfferId),
@@ -288,12 +303,7 @@ function mapOfferUiState(
         name: offerDetail.name,
         symbol: offerDetail.asset.code.toString(),
         tagline,
-        logo: OfferLogoUi.fromOffer(
-          offerDetail,
-          registry
-            ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
-            : null
-        ),
+        logo: OfferLogoUi.fromOffer(offerDetail, tokenMetadata),
         about: offerDetail.about,
         links: offerDetail.links
           .filter((link) => Boolean(link.label && link.url))
@@ -323,6 +333,15 @@ function mapOfferUiState(
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
         canSell: isSellable(offerDetail.type),
         claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
+        // The demo does not set a locale; en-US is the SDK default.
+        portfolio:
+          offerDetail.type === 'ondo::portfolio'
+            ? PortfolioOfferDetailsUi.fromDetail(
+                offerDetail,
+                'en-US',
+                tokenMetadata
+              )
+            : null,
       };
     }
   }
@@ -341,5 +360,9 @@ function isSellable(type: OfferType): boolean {
     case 'coinlist::token_sale':
     case 'superstate::swap':
       return false;
+    default: {
+      const exhaustive: never = type;
+      return exhaustive;
+    }
   }
 }

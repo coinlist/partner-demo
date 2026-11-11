@@ -27,6 +27,7 @@ export function OfferRequirementsCard({
   onOptionSelect,
   onContinue,
   onSell,
+  tradeToggle = false,
 }: {
   offerId: OfferId;
   options: OfferUiOption[];
@@ -44,16 +45,33 @@ export function OfferRequirementsCard({
    * checklist's Continue reads "Buy" so the two directions read as a pair.
    */
   onSell?: () => void;
+  /**
+   * Invest / Redeem above the checklist, for a portfolio. Continue follows
+   * the selected side, so there is no second button.
+   */
+  tradeToggle?: boolean;
 }) {
   const { connectWallet, connect } = useEvmWallet();
   const { authState } = usePassage();
   const signedIn = authState.type === 'logged-in';
-  const buyLabel = onSell ? 'Buy' : 'Continue';
   const claimWallets = useClaimWallets();
   const hasChoice = options.length > 1;
   const [confirmed, setConfirmed] = useState(!hasChoice);
+  const [side, setSide] = useState<'buy' | 'sell'>('buy');
   const selectedOption = options.find((opt) => opt.id === selectedOptionId);
   const showRequirements = !hasChoice || confirmed;
+  const buyLabel = onSell && !tradeToggle ? 'Buy' : 'Continue';
+  const checklistTitle = tradeToggle ? 'Requirements' : 'Sale Requirements';
+  const checklistDescription = tradeToggle
+    ? `Complete the requirements below to ${side === 'sell' ? 'redeem' : 'invest'}.`
+    : 'Complete the requirements below to be eligible.';
+  const onPrimary = () => {
+    if (tradeToggle && side === 'sell') {
+      onSell?.();
+      return;
+    }
+    onContinue();
+  };
   // The SDK's token-sale claim has no check for a wallet session, which would
   // read as an error card, so a wallet session claims on a vault only.
   const showClaim =
@@ -64,6 +82,9 @@ export function OfferRequirementsCard({
   return (
     <div className="flex w-full flex-col gap-6">
       <aside className="flex w-full flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:rounded-[24px] md:p-6 dark:border-zinc-800 dark:bg-zinc-900/70 dark:shadow-none">
+        {tradeToggle ? (
+          <TradeSideToggle side={side} onSelect={setSide} />
+        ) : null}
         {showRequirements && hasChoice && selectedOption ? (
           <>
             <div className="flex items-start justify-between gap-4">
@@ -95,9 +116,9 @@ export function OfferRequirementsCard({
               <RequirementsChecklistContainer
                 offerId={offerId}
                 optionId={selectedOptionId}
-                title="Sale Requirements"
-                description="Complete the requirements below to be eligible."
-                onContinue={onContinue}
+                title={checklistTitle}
+                description={checklistDescription}
+                onContinue={onPrimary}
                 continueLabel={buyLabel}
                 wallet={connectWallet}
                 onRequestConnect={connect}
@@ -105,13 +126,13 @@ export function OfferRequirementsCard({
             ) : signedIn ? (
               <button
                 type="button"
-                onClick={onContinue}
+                onClick={onPrimary}
                 className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
               >
                 {buyLabel}
               </button>
             ) : null}
-            {onSell && (isCoinListUser || signedIn) ? (
+            {onSell && !tradeToggle && (isCoinListUser || signedIn) ? (
               <button
                 type="button"
                 onClick={onSell}
@@ -159,6 +180,54 @@ export function OfferRequirementsCard({
         />
       ) : null}
     </div>
+  );
+}
+
+function TradeSideToggle({
+  side,
+  onSelect,
+}: {
+  side: 'buy' | 'sell';
+  onSelect: (side: 'buy' | 'sell') => void;
+}) {
+  return (
+    <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-800">
+      <SideButton
+        label="Invest"
+        selected={side === 'buy'}
+        onSelect={() => onSelect('buy')}
+      />
+      <SideButton
+        label="Redeem"
+        selected={side === 'sell'}
+        onSelect={() => onSelect('sell')}
+      />
+    </div>
+  );
+}
+
+function SideButton({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`flex-1 cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${
+        selected
+          ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-900'
+          : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
