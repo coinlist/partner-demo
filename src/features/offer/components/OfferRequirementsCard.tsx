@@ -81,20 +81,16 @@ export function OfferRequirementsCard({
 
         {showRequirements && selectedOptionId ? (
           // The header owns sign-in, so a logged-out visitor gets no gate:
-          // the SDK draws its Buy/Sell tabs even when logged out, over an
-          // empty panel. While auth is unknown the gate mounts and shows its
-          // own loading state.
-          authState.type === 'logged-out' ? null : (
-            <CheckoutRequirementsContainer
-              offer={offer}
-              optionId={selectedOptionId}
-              defaultSide={defaultSide}
-              onContinue={onContinue}
-              wallet={connectWallet}
-              onRequestConnect={connect}
-              loggedOut={null}
-            />
-          )
+          // with `loggedOut={null}` the SDK renders nothing while logged out.
+          <CheckoutRequirementsContainer
+            offer={offer}
+            optionId={selectedOptionId}
+            defaultSide={defaultSide}
+            onContinue={onContinue}
+            wallet={connectWallet}
+            onRequestConnect={connect}
+            loggedOut={null}
+          />
         ) : (
           <div className="flex flex-col gap-4">
             <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">
