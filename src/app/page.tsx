@@ -8,6 +8,7 @@ import { readOnlySessionStore } from '@/lib/session-store';
 /** The offer types a wallet session can trade; the rest need a CoinList user. */
 const WALLET_OFFER_TYPES: readonly OfferType[] = [
   'ondo::swap',
+  'ondo::portfolio',
   'centrifuge::vault',
 ];
 

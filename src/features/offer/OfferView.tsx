@@ -1,5 +1,6 @@
 'use client';
 
+import { PortfolioOfferDetails } from '@passage-cl/react';
 import { ArrowLeft } from 'lucide-react';
 import {
   OfferDetailsCard,
@@ -85,11 +86,13 @@ export function OfferView({ state, onEvent, isCoinListUser }: Props) {
     <div className="min-h-screen bg-white px-6 py-8 font-sans text-zinc-900 dark:bg-black dark:text-zinc-100">
       <div className="mx-auto w-full max-w-5xl">
         <div className="grid w-full items-start grid-cols-1 gap-8 md:grid-cols-[minmax(0,11fr)_minmax(0,8fr)] md:gap-x-12">
-          <OfferIdentity
-            name={state.name}
-            symbol={state.symbol}
-            logo={state.logo}
-          />
+          {state.portfolio ? null : (
+            <OfferIdentity
+              name={state.name}
+              symbol={state.symbol}
+              logo={state.logo}
+            />
+          )}
           <div className="md:col-start-2 md:row-span-2 md:row-start-1">
             <OfferRequirementsCard
               offerId={state.offerId}
@@ -97,6 +100,7 @@ export function OfferView({ state, onEvent, isCoinListUser }: Props) {
               selectedOptionId={state.selectedOptionId}
               claimableOffer={state.claimableOffer}
               isCoinListUser={isCoinListUser}
+              tradeToggle={state.portfolio !== null}
               onOptionSelect={(optionId) =>
                 onEvent({ type: 'ON_OPTION_SELECT', optionId })
               }
@@ -109,26 +113,32 @@ export function OfferView({ state, onEvent, isCoinListUser }: Props) {
             />
           </div>
           <div className="flex min-w-0 flex-col gap-8 md:col-start-1">
-            <OfferDetailsCard
-              name={state.name}
-              tagline={state.tagline}
-              about={state.about}
-              terms={state.terms}
-              links={state.links}
-              isTokenSale={state.isTokenSale}
-            />
-            {state.milestones.length > 0 ? (
+            {state.portfolio ? (
+              <PortfolioOfferDetails details={state.portfolio} />
+            ) : (
               <>
-                <SectionDivider />
-                <OfferMilestones milestones={state.milestones} />
+                <OfferDetailsCard
+                  name={state.name}
+                  tagline={state.tagline}
+                  about={state.about}
+                  terms={state.terms}
+                  links={state.links}
+                  isTokenSale={state.isTokenSale}
+                />
+                {state.milestones.length > 0 ? (
+                  <>
+                    <SectionDivider />
+                    <OfferMilestones milestones={state.milestones} />
+                  </>
+                ) : null}
+                {state.faqs.length > 0 ? (
+                  <>
+                    <SectionDivider />
+                    <OfferFaq faqs={state.faqs} />
+                  </>
+                ) : null}
               </>
-            ) : null}
-            {state.faqs.length > 0 ? (
-              <>
-                <SectionDivider />
-                <OfferFaq faqs={state.faqs} />
-              </>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
