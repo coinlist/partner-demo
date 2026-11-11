@@ -15,6 +15,7 @@
     "fix": "npm run lint:fix"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.49.2",
     "@passage-cl/react": "^0.18.0",
     "@reown/appkit": "^1.8.24",
     "@reown/appkit-adapter-wagmi": "^1.8.24",

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { HeaderAccount } from '@/features/header/HeaderAccount';
+import { DEMO_CHAIN } from '@/lib/chain';
 import { ROUTES } from '@/lib/routes';
 
 const DOCS_HREF = 'https://docs.passage.coinlist.co';
@@ -29,6 +30,17 @@ export function SiteHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-5">
+          {DEMO_CHAIN === 'ethereum_sepolia' && (
+            // A new tab, so a visitor mid-checkout keeps their place.
+            <a
+              href={ROUTES.USDZ_FAUCET}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium text-zinc-700 transition hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+            >
+              Get USDZ
+            </a>
+          )}
           <a
             href={DOCS_HREF}
             target="_blank"
