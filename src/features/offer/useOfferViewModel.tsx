@@ -13,7 +13,6 @@ import {
   type OfferDetail,
   OfferId,
   type OfferOptionId,
-  type OfferType,
   type OrderBookSide,
   type SignInMethod,
   TokenRegistrySnapshot,
@@ -59,7 +58,7 @@ export type OfferUiState =
     }
   | {
       type: 'CONTENT';
-      offerId: OfferId;
+      offerDetail: OfferDetail;
       options: OfferUiOption[];
       selectedOptionId: OfferOptionId | null;
       name: string;
@@ -78,11 +77,8 @@ export type OfferUiState =
        * every other offer type, which keeps the sale layout.
        */
       portfolio: PortfolioOfferDetailsUi | null;
-      /**
-       * Whether the offer can be sold as well as bought: a Centrifuge vault
-       * redeems, an Ondo swap sells back.
-       */
-      canSell: boolean;
+      /** The side last continued with, so Back from checkout keeps it. */
+      lastSide: OrderBookSide;
       /**
        * The offer when it settles asynchronously and so has orders to claim
        * later, `null` for one that settles in the purchase itself.
@@ -102,10 +98,8 @@ export type OfferUiEvent =
       optionId: OfferOptionId;
     }
   | {
-      type: 'ON_INVEST_CLICK';
-    }
-  | {
-      type: 'ON_SELL_CLICK';
+      type: 'ON_CONTINUE';
+      side: OrderBookSide;
     }
   | {
       type: 'ON_CHECKOUT_BACK';
@@ -148,13 +142,14 @@ export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
   const router = useRouter();
   const [selectedOptionId, setSelectedOptionId] =
     useState<OfferOptionId | null>(null);
-  const [checkoutSide, setCheckoutSide] = useState<OrderBookSide | null>(null);
+  const [lastSide, setLastSide] = useState<OrderBookSide>('buy');
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { authState } = usePassage();
   // A wallet session that ends mid-checkout leaves nothing to order with, so
   // the visitor is back on the offer, to connect and sign in again. Signed
   // out, the page opens no checkout.
   useEffect(() => {
-    if (authState.type === 'logged-out') setCheckoutSide(null);
+    if (authState.type === 'logged-out') setCheckoutOpen(false);
   }, [authState.type]);
 
   const offerId = parseRouteOfferId(params.id) ?? OfferId('');
@@ -171,6 +166,7 @@ export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
     offerId,
     offerDetailsState,
     selectedOptionId,
+    lastSide,
     registry
   );
 
@@ -188,18 +184,14 @@ export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
       case 'ON_OPTION_SELECT':
         setSelectedOptionId(event.optionId);
         break;
-      case 'ON_INVEST_CLICK':
-      case 'ON_SELL_CLICK': {
-        // Nothing to order until the detail loads, and the button is only
-        // reachable from the loaded view anyway.
-        if (!offerDetail) break;
+      case 'ON_CONTINUE':
         // The SDK's CheckoutContainer runs every offer type in-page, token
         // sales included, so it does not matter which provider this is.
-        setCheckoutSide(event.type === 'ON_SELL_CLICK' ? 'sell' : 'buy');
+        setLastSide(event.side);
+        setCheckoutOpen(true);
         break;
-      }
       case 'ON_CHECKOUT_BACK':
-        setCheckoutSide(null);
+        setCheckoutOpen(false);
         break;
     }
   };
@@ -207,7 +199,12 @@ export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
   return {
     state,
     onEvent,
-    checkout: mapCheckoutState(checkoutSide, offerDetail, selectedOptionId),
+    checkout: mapCheckoutState(
+      checkoutOpen,
+      lastSide,
+      offerDetail,
+      selectedOptionId
+    ),
   };
 }
 
@@ -216,14 +213,15 @@ export function useOfferViewModel(seededOfferDetail?: OfferDetail): {
  * with no options never opens the checkout: the SDK requires an option.
  */
 function mapCheckoutState(
-  checkoutSide: OrderBookSide | null,
+  checkoutOpen: boolean,
+  side: OrderBookSide,
   offerDetail: OfferDetail | null,
   selectedOptionId: OfferOptionId | null
 ): OfferCheckoutState {
-  if (!checkoutSide || !offerDetail) return { type: 'CLOSED' };
+  if (!checkoutOpen || !offerDetail) return { type: 'CLOSED' };
   const optionId = resolveOptionId(selectedOptionId, offerDetail.options);
   return optionId
-    ? { type: 'OPEN', offerDetail, optionId, side: checkoutSide }
+    ? { type: 'OPEN', offerDetail, optionId, side }
     : { type: 'CLOSED' };
 }
 
@@ -251,6 +249,7 @@ function mapOfferUiState(
   routeOfferId: string | null,
   offerDetailsState: LoadOfferDetailsState,
   selectedOptionId: OfferOptionId | null,
+  lastSide: OrderBookSide,
   registry: TokenRegistrySnapshot | null
 ): OfferUiState {
   if (!routeOfferId) {
@@ -294,7 +293,7 @@ function mapOfferUiState(
         : null;
       return {
         type: 'CONTENT',
-        offerId: OfferId(routeOfferId),
+        offerDetail,
         options,
         selectedOptionId: resolveOptionId(
           selectedOptionId,
@@ -331,7 +330,7 @@ function mapOfferUiState(
             answer: faq.answer ?? '',
           })),
         isTokenSale: offerDetail.type === 'coinlist::token_sale',
-        canSell: isSellable(offerDetail.type),
+        lastSide,
         claimableOffer: AsyncOfferDetail.is(offerDetail) ? offerDetail : null,
         // The demo does not set a locale; en-US is the SDK default.
         portfolio:
@@ -343,26 +342,6 @@ function mapOfferUiState(
               )
             : null,
       };
-    }
-  }
-}
-
-/**
- * The offer types the SDK's CheckoutContainer serves in the sell direction.
- * Exhaustive, so a new offer type has to decide here whether it sells.
- */
-function isSellable(type: OfferType): boolean {
-  switch (type) {
-    case 'centrifuge::vault':
-    case 'ondo::swap':
-    case 'ondo::portfolio':
-      return true;
-    case 'coinlist::token_sale':
-    case 'superstate::swap':
-      return false;
-    default: {
-      const exhaustive: never = type;
-      return exhaustive;
     }
   }
 }
