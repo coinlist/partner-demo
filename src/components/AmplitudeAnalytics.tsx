@@ -2,7 +2,11 @@
 
 import * as amplitude from '@amplitude/analytics-browser';
 import { useEffect } from 'react';
-import { amplitudeApiKey, redactionPlugin } from '@/lib/amplitude';
+import {
+  amplitudeApiKey,
+  cameFromPassage,
+  redactionPlugin,
+} from '@/lib/amplitude';
 
 /**
  * Page views, sessions, attribution and clicks for the hosted demo at
@@ -20,7 +24,7 @@ export function AmplitudeAnalytics() {
     amplitude.add(redactionPlugin);
     amplitude.init(apiKey, {
       autocapture: {
-        attribution: true,
+        attribution: !cameFromPassage(window.location.search),
         pageViews: true,
         sessions: true,
         elementInteractions: true,

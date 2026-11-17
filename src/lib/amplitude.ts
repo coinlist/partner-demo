@@ -27,6 +27,24 @@ export function amplitudeApiKey(
     : undefined;
 }
 
+const CAME_FROM_PASSAGE_KEY = 'amplitude-came-from-passage';
+
+/**
+ * Whether this visitor's Amplitude identity came from passage.coinlist.co,
+ * now or on an earlier visit (`ampDeviceId` in the landing URL). This site
+ * stores no campaign for them, so attribution would treat the visit as a new
+ * campaign and unset the UTMs Passage recorded on that same user.
+ */
+export function cameFromPassage(search: string): boolean {
+  const arrivedNow = new URLSearchParams(search).has('ampDeviceId');
+  try {
+    if (arrivedNow) localStorage.setItem(CAME_FROM_PASSAGE_KEY, 'true');
+    return arrivedNow || localStorage.getItem(CAME_FROM_PASSAGE_KEY) === 'true';
+  } catch {
+    return arrivedNow;
+  }
+}
+
 const EVM_ADDRESS = /0x[0-9a-fA-F]{4,}(?:(?:…|\.\.\.)[0-9a-fA-F]+)?/g;
 // Bounded repeats keep the scan linear: an unbounded `[^@]+@` backtracks
 // quadratically on a long string with no `@`, freezing the page.
