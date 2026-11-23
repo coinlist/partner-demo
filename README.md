@@ -25,6 +25,7 @@ npm run dev
 Your own Node and npm work fine — everything above assumes them. This section is only for
 those who prefer a reproducible toolchain: `flake.nix` pins Node 24 and TypeScript, and
 `flake.lock` freezes the exact versions, so every machine gets an identical setup.
+
 1. Install Nix with the [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer),
    which enables flakes out of the box and supports clean uninstalls:
 ```shell
