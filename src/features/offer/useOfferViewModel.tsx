@@ -276,12 +276,12 @@ function mapOfferUiState(
       };
     case 'CONTENT': {
       const offerDetail = offerDetailsState.offerDetail;
-      // Ondo swaps, Ondo portfolios and Centrifuge vaults omit OfferEditorial
-      // (no campaign copy).
+      // Ondo, Centrifuge and Maple omit OfferEditorial (no campaign copy).
       const tagline =
         offerDetail.type === 'ondo::swap' ||
         offerDetail.type === 'ondo::portfolio' ||
-        offerDetail.type === 'centrifuge::vault'
+        offerDetail.type === 'centrifuge::vault' ||
+        offerDetail.type === 'maple::swap'
           ? null
           : offerDetail.tagline;
       const options = offerDetail.options.map((opt) => ({
