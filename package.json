@@ -16,7 +16,11 @@
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.49.2",
+<<<<<<< Updated upstream
     "@passage-cl/react": "^0.19.0",
+=======
+    "@passage-cl/react": "^0.20.1-rc.ff4b66c",
+>>>>>>> Stashed changes
     "@reown/appkit": "^1.8.24",
     "@reown/appkit-adapter-wagmi": "^1.8.24",
     "@tanstack/react-query": "^5.105.0",
