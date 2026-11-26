@@ -14,6 +14,7 @@ import {
   OfferId,
   type OfferOptionId,
   type OrderBookSide,
+  offerDisplaySymbol,
   type SignInMethod,
   TokenRegistrySnapshot,
 } from '@passage-cl/react/universal';
@@ -288,9 +289,10 @@ function mapOfferUiState(
         id: opt.id,
         slug: opt.slug.toString(),
       }));
-      const tokenMetadata = registry
-        ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
-        : null;
+      const tokenMetadata =
+        registry && offerDetail.type !== 'centrifuge::whitelist'
+          ? TokenRegistrySnapshot.forOffer(registry, offerDetail)
+          : null;
       return {
         type: 'CONTENT',
         offerDetail,
@@ -300,7 +302,7 @@ function mapOfferUiState(
           offerDetail.options
         ),
         name: offerDetail.name,
-        symbol: offerDetail.asset.code.toString(),
+        symbol: offerDisplaySymbol(offerDetail)?.toString() ?? '',
         tagline,
         logo: OfferLogoUi.fromOffer(offerDetail, tokenMetadata),
         about: offerDetail.about,
